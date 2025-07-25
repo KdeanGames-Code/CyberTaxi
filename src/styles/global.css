@@ -36,7 +36,7 @@ body {
 }
 
 /* Logo Style Update (Icon with CyberGold) */
-.fa-taxi.logo {
+.fas.fa-taxi.logo {
     grid-column: 1 / 2;
     font-size: 24px; /* Larger for icon impact */
     color: #d4a017; /* CyberGold */
@@ -46,20 +46,6 @@ body {
     width: 36px;
     height: 100%;
     margin: 0; /* Centered, no offsets */
-}
-
-.logo {
-    grid-column: 1 / 2;
-    font-size: 16px;
-    color: #d4a017; /* CyberGold */
-    font-family: "Orbitron", sans-serif; /* Mockup taxi font vibe */
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 100%; /* Full height for vertical center */
-    margin: 0; /* Remove margins for true center */
 }
 
 .stats-container {
