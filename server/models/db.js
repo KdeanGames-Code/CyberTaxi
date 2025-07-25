@@ -5,9 +5,9 @@
  * @version 0.1.0
  */
 
-const mysql = require("mysql2");
+const mysql = require("mysql2/promise"); // Using promise wrapper for async/await
 
-// Placeholder for MySQL connection pool (to be configured with env vars later)
+// Placeholder for MySQL connection pool with test connection (to be uncommented with env vars)
 /*
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
@@ -19,7 +19,22 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
-module.exports = pool.promise(); // For async/await support
+// Test connection function with error handling
+async function testConnection() {
+  let connection;
+  try {
+    connection = await pool.getConnection();
+    console.log('MySQL connection established successfully');
+  } catch (error) {
+    console.error('MySQL connection failed:', error.message);
+  } finally {
+    if (connection) connection.release();
+  }
+}
+
+// Initial test (uncomment to run)
+/*
+testConnection().catch(console.error);
 */
 
-module.exports = null; // Temporary null until connection is set up
+module.exports = null; // Temporary null until connection is configured
