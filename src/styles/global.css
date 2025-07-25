@@ -23,12 +23,12 @@ body {
     grid-template-columns: 40px 2fr 200px;
     grid-template-rows: 1fr;
     gap: 2px;
-    padding: 2px 3px;
+    padding: 1px; /* Reduced from 2px to 1px to prevent right overflow */
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6),
         inset 0 2px 4px rgba(255, 255, 255, 0.1);
     align-items: center;
     position: fixed;
-    width: calc(100% - 10px);
+    width: calc(100% - 10px); /* Matches mockup width */
     top: 3px;
     left: 3px;
     z-index: 1000;
@@ -151,7 +151,7 @@ body {
     align-items: center;
     justify-content: center; /* Center content */
     font-size: 12px;
-    padding: 3px;
+    padding: 1px; /* Reduced from 3px to 1px to prevent right overflow */
     border: 2px solid #e8b923; /* Gold border */
     border-radius: 0 0 8px 8px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6),
@@ -159,6 +159,7 @@ body {
     width: calc(100% - 10px); /* Match top menu width */
     margin: 0 5px 5px 5px; /* Mockup positioning */
     overflow: visible; /* Ensure no clip */
+    box-sizing: border-box; /* Include border in width to prevent overrun */
 }
 
 .bottom-header::after {
