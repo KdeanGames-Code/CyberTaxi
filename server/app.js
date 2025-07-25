@@ -13,11 +13,19 @@ const port = 3000;
 require("./models/db");
 
 /**
+ * Middleware to parse JSON request bodies
+ * @function
+ */
+app.use(express.json());
+
+/**
  * Mount API routes from the routes directory
  * @type {express.Router}
  */
-const routes = require("./routes/index");
-app.use("/api", routes);
+const healthRouter = require("./routes/health");
+const vehiclesRouter = require("./routes/vehicles");
+app.use("/api", healthRouter);
+app.use("/api", vehiclesRouter);
 
 /**
  * Start the Express server and log the port

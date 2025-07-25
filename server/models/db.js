@@ -1,46 +1,25 @@
-/**
- * @file db.js
- * @description Database connection module for CyberTaxi backend
- * @author CyberTaxi Team
- * @version 0.1.0
- */
+// server/models/db.js - MySQL connection pool for CyberTaxi
+const mysql = require("mysql2/promise"); // npm i mysql2 if needed
 
-const mysql = require("mysql2"); // Base mysql2 for promise pool support
-require("dotenv").config(); // Load environment variables from .env file
-
-// MySQL connection pool
 const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
+    host: "localhost",
+    user: "cybertaxi_user",
+    password: "secure_password",
+    database: "cybertaxi_db",
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
 });
 
-// Promise-enabled pool for async/await
-const promisePool = pool.promise();
-
-// Error listener for pool events (e.g., fatal errors)
-pool.on("error", (err) => {
-    console.error("MySQL pool error:", err.message);
-});
-
-// Test connection function with error handling
-async function testConnection() {
-    let connection;
+// Init test log
+(async () => {
     try {
-        connection = await promisePool.getConnection();
-        console.log("MySQL connection established successfully");
-    } catch (error) {
-        console.error("MySQL connection failed:", error.message);
-    } finally {
-        if (connection) connection.release();
+        const connection = await pool.getConnection();
+        console.log("DB Pool Connected Successfully");
+        connection.release();
+    } catch (err) {
+        console.error("DB Pool Connection Failed:", err.message);
     }
-}
+})();
 
-// Initial test
-testConnection().catch(console.error);
-
-module.exports = promisePool; // Export promise pool for async/await support
+module.exports = pool;
