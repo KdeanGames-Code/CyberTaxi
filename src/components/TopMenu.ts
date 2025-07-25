@@ -6,7 +6,7 @@ export function createTopMenu(): HTMLDivElement {
     topMenu.setAttribute("aria-label", "Game status and controls");
 
     topMenu.innerHTML = `
-    <div class="logo" aria-hidden="true">CT</div>
+    <i class="fas fa-taxi logo" aria-label="CyberTaxi Logo"></i>
     <div class="stats-container" role="region" aria-label="Player statistics">
       <div class="stats">
         <div class="stat-item" aria-label="Bank balance">

@@ -3,7 +3,7 @@ html,
 body {
     font-family: "Roboto", sans-serif;
     background-color: #2f2f2f !important; /* Dark base, force override */
-    color: #f5f5f5;
+    color: #000000;
     margin: 0;
     height: 100vh;
     overflow: hidden;
@@ -33,6 +33,19 @@ body {
     left: 3px;
     z-index: 1000;
     overflow: visible;
+}
+
+/* Logo Style Update (Icon with CyberGold) */
+.fa-taxi.logo {
+    grid-column: 1 / 2;
+    font-size: 24px; /* Larger for icon impact */
+    color: #d4a017; /* CyberGold */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 100%;
+    margin: 0; /* Centered, no offsets */
 }
 
 .logo {
