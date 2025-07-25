@@ -1,0 +1,15 @@
+{
+  "name": "cybertaxi-backend",
+  "version": "0.1.0",
+  "description": "Backend for CyberTaxi game managing fleet APIs",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {},
+  "author": "CyberTaxi Team",
+  "license": "ISC"
+}
