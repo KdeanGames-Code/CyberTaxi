@@ -10,6 +10,13 @@ const app = express();
 const port = 3000;
 
 /**
+ * Mount API routes from the routes directory
+ * @type {express.Router}
+ */
+const routes = require("./routes/index");
+app.use("/api", routes);
+
+/**
  * Health check endpoint to verify server status
  * @route GET /api/health
  * @returns {Object} JSON response with status and message
