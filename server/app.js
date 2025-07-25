@@ -17,18 +17,6 @@ const routes = require("./routes/index");
 app.use("/api", routes);
 
 /**
- * Health check endpoint to verify server status
- * @route GET /api/health
- * @returns {Object} JSON response with status and message
- */
-app.get("/api/health", (req, res) => {
-    res.status(200).json({
-        status: "ok",
-        message: "CyberTaxi server is healthy",
-    });
-});
-
-/**
  * Start the Express server and log the port
  * @function
  * @listens port 3000

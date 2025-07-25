@@ -8,6 +8,16 @@
 const express = require("express");
 const router = express.Router();
 
-// Routes will be added here later (e.g., vehicle data endpoints)
+/**
+ * Health check endpoint to verify server status
+ * @route GET /api/health
+ * @returns {Object} JSON response with status and message
+ */
+router.get("/health", (req, res) => {
+    res.status(200).json({
+        status: "ok",
+        message: "CyberTaxi server is healthy",
+    });
+});
 
 module.exports = router;
