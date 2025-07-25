@@ -11,15 +11,8 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="bottom-header" aria-label="Footer">© 2025 CyberTaxi Team</div>
       </div>
     `;
-        const mainContainer = app.querySelector(".main-container");
-        if (mainContainer) {
-            mainContainer.insertBefore(
-                createTopMenu(),
-                mainContainer.firstChild
-            );
-        } else {
-            console.error("Main container not found");
-        }
+        // Append top menu to body for fixed positioning without grid conflict
+        document.body.appendChild(createTopMenu());
     } else {
         console.error("App element not found in document");
     }
