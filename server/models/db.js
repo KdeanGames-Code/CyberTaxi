@@ -5,7 +5,8 @@
  * @version 0.1.0
  */
 
-const mysql = require("mysql2/promise"); // Using promise wrapper for async/await
+const mysql = require("mysql2"); // Base mysql2 for pool.promise() support
+require("dotenv").config(); // Load environment variables from .env file
 
 // MySQL connection pool with test connection
 const pool = mysql.createPool({

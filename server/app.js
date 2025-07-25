@@ -9,6 +9,9 @@ const express = require("express");
 const app = express();
 const port = 3000;
 
+// Initialize database connection (triggers testConnection in db.js)
+require("./models/db");
+
 /**
  * Mount API routes from the routes directory
  * @type {express.Router}
