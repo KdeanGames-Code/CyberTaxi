@@ -1,24 +1,26 @@
-import './style.css'
-import typescriptLogo from './typescript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.ts'
+// src/main.ts
+import "./styles/global.css"; // Import global CSS
+import { createTopMenu } from "./components/TopMenu.ts";
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://www.typescriptlang.org/" target="_blank">
-      <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
-    </a>
-    <h1>Vite + TypeScript</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite and TypeScript logos to learn more
-    </p>
-  </div>
-`
-
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+document.addEventListener("DOMContentLoaded", () => {
+    const app = document.querySelector("#app");
+    if (app) {
+        app.innerHTML = `
+      <div class="main-container" role="main" aria-label="Main game container">
+        <div id="map-area" aria-label="Map area placeholder">Map Placeholder</div>
+        <div class="bottom-header" aria-label="Footer">© 2025 CyberTaxi Team</div>
+      </div>
+    `;
+        const mainContainer = app.querySelector(".main-container");
+        if (mainContainer) {
+            mainContainer.insertBefore(
+                createTopMenu(),
+                mainContainer.firstChild
+            );
+        } else {
+            console.error("Main container not found");
+        }
+    } else {
+        console.error("App element not found in document");
+    }
+});
