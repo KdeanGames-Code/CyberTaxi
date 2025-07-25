@@ -1,0 +1,10 @@
+// src/main.ts
+import "./styles/global.css"; // Import global CSS
+
+document.querySelector("#app").innerHTML = `
+  <div class="main-container" role="main" aria-label="Main game container">
+    <!-- Future: Top menu here or fixed outside -->
+    <div id="map-area" aria-label="Map area placeholder">Map Placeholder</div>
+    <div class="bottom-header" aria-label="Footer">© 2025 CyberTaxi Team</div>
+  </div>
+`;
