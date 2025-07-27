@@ -157,6 +157,11 @@ body {
     box-sizing: border-box;
     z-index: 900;
 }
+#map {
+    height: 100%;
+    width: 100%;
+    border-radius: 6px 6px 0 0;
+}
 
 /* Leaflet Container Styles - Ensure Full Fill */
 .leaflet-container {
@@ -167,9 +172,9 @@ body {
     left: 0;
 }
 
+/* Fix Leaflet Tile Gaps/Overlaps - Disable Antialiasing */
 .leaflet-tile {
-    image-rendering: crisp-edges; /* Disable antialiasing for sharp tile edges, fixing gaps/overlaps */
-    filter: none !important; /* Override any filters causing artifacts */
+    image-rendering: crisp-edges; /* Force sharp edges, fixing gaps/overlaps at fractional zooms */
 }
 
 /* Bottom Header Styles - Aligned Borders with No Overlap */
