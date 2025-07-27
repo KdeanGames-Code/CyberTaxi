@@ -24,8 +24,10 @@ app.use(express.json());
  */
 const healthRouter = require("./routes/health");
 const vehiclesRouter = require("./routes/vehicles");
+const tilesRouter = require("./routes/tiles");
 app.use("/api", healthRouter);
 app.use("/api", vehiclesRouter);
+app.use("/api", tilesRouter);
 
 /**
  * Start the Express server and log the port
