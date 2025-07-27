@@ -1,0 +1,67 @@
+{
+    "version": 8,
+    "name": "Dark Mode Style",
+    "metadata": {
+        "mapbox:autocomposite": true
+    },
+    "sources": {
+        "openmaptiles": {
+            "type": "vector",
+            "url": "mbtiles://austin"
+        }
+    },
+    "glyphs": "fonts/{fontstack}/{range}.pbf",
+    "layers": [
+        {
+            "id": "background",
+            "type": "background",
+            "paint": {
+                "background-color": "#111111"
+            }
+        },
+        {
+            "id": "water",
+            "type": "fill",
+            "source": "openmaptiles",
+            "source-layer": "water",
+            "paint": {
+                "fill-color": "#333333"
+            }
+        },
+        {
+            "id": "landuse-urban",
+            "type": "fill",
+            "source": "openmaptiles",
+            "source-layer": "landuse",
+            "filter": ["==", "class", "residential"],
+            "paint": {
+                "fill-color": "#222222"
+            }
+        },
+        {
+            "id": "road-primary",
+            "type": "line",
+            "source": "openmaptiles",
+            "source-layer": "transportation",
+            "filter": ["==", "class", "primary"],
+            "paint": {
+                "line-color": "#444444",
+                "line-width": 2
+            }
+        },
+        {
+            "id": "place-labels",
+            "type": "symbol",
+            "source": "openmaptiles",
+            "source-layer": "place",
+            "layout": {
+                "text-field": "{name}",
+                "text-font": ["Open Sans Regular"],
+                "text-size": 12
+            },
+            "paint": {
+                "text-color": "#eeeeee"
+            }
+        }
+    ]
+}
