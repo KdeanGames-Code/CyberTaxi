@@ -11,21 +11,17 @@ const { createProxyMiddleware } = require("http-proxy-middleware");
 
 /**
  * Proxy map tile requests to TileServer GL subprocess
- * @route GET /api/tiles/*
+ * @route GET /api/tiles/:style/:z/:x/:y.:format
  * @returns {Buffer} Tile image or error response
  */
-router.use(
-    "/tiles/*",
+router.get(
+    "/tiles/:style/:z/:x/:y.:format",
     createProxyMiddleware({
         target: "http://localhost:8080",
         pathRewrite: (path, req) => {
             console.log("Path received in pathRewrite: " + path);
-            const parts = path.split("/");
-            const style = parts[1];
-            const z = parts[2];
-            const x = parts[3];
-            const y = parts[4].split(".")[0];
-            const newPath = `/styles/${style}/512/${z}/${x}/${y}.png`;
+            const { style, z, x, y, format } = req.params;
+            const newPath = `/styles/${style}/512/${z}/${x}/${y}.${format}`;
             console.log("Reconstructed path: " + newPath);
             return newPath;
         },

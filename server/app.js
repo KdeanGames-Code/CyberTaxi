@@ -14,17 +14,23 @@ const { spawn } = require("child_process");
 require("./models/db");
 
 // Start TileServer GL as subprocess on port 8080
-const tileServer = spawn(
+const tileServer = spawn("cmd", [
+    "/c",
+    "npx",
     "tileserver-gl",
-    ["--config", "config.json", "--port", "8080", "--no-cors"],
-    { shell: true }
-);
+    "--config",
+    "config.json",
+    "--port",
+    "8080",
+    "--no-cors",
+]);
 tileServer.on("error", (err) =>
     console.error("TileServer GL failed to start:", err.message)
 );
 tileServer.on("close", (code) =>
     console.log(`TileServer GL exited with code ${code}`)
 );
+tileServer.stdout.on("data", (data) => console.log(`TileServer GL: ${data}`));
 console.log("Started TileServer GL on port 8080");
 
 /**
