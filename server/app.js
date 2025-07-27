@@ -8,9 +8,24 @@
 const express = require("express");
 const app = express();
 const port = 3000;
+const { spawn } = require("child_process");
 
 // Initialize database connection (triggers testConnection in db.js)
 require("./models/db");
+
+// Start TileServer GL as subprocess on port 8080
+const tileServer = spawn(
+    "tileserver-gl",
+    ["--config", "config.json", "--port", "8080", "--no-cors"],
+    { shell: true }
+);
+tileServer.on("error", (err) =>
+    console.error("TileServer GL failed to start:", err.message)
+);
+tileServer.on("close", (code) =>
+    console.log(`TileServer GL exited with code ${code}`)
+);
+console.log("Started TileServer GL on port 8080");
 
 /**
  * Middleware to parse JSON request bodies

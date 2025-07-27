@@ -7,52 +7,48 @@
 
 const express = require("express");
 const router = express.Router();
-const tileserver = require("tileserver-gl");
+const { createProxyMiddleware } = require("http-proxy-middleware");
 
 /**
- * Serve map tiles for Leaflet integration
- * @route GET /api/tiles/:style/:z/:x/:y.:format
- * @param {string} req.params.style - Map style (e.g., 'basic', 'dark')
- * @param {number} req.params.z - Zoom level
- * @param {number} req.params.x - X coordinate
- * @param {number} req.params.y - Y coordinate
- * @param {string} req.params.format - Tile format (e.g., 'png')
+ * Proxy map tile requests to TileServer GL subprocess
+ * @route GET /api/tiles/*
  * @returns {Buffer} Tile image or error response
  */
-router.get("/tiles/:style/:z/:x/:y.:format", async (req, res) => {
-    try {
-        const { style, z, x, y, format } = req.params;
-        // Initialize TileServer GL with config
-        const server = tileserver({
-            config: require("../../config.json"),
-        });
-        // Mock request for TileServer GL
-        const mockReq = {
-            method: "GET",
-            url: `/${style}/${z}/${x}/${y}.${format}`,
-            headers: {},
-        };
-        // Mock response to capture tile data
-        const mockRes = {
-            status: (code) => {
-                res.status(code);
-                return mockRes;
-            },
-            set: (headers) => {
-                res.set(headers);
-                return mockRes;
-            },
-            send: (data) => res.send(data),
-            end: () => res.end(),
-        };
-        await server(mockReq, mockRes);
-    } catch (error) {
-        console.error("Tile serving failed:", error.message);
-        res.status(500).json({
-            status: "Error",
-            message: "Failed to serve tile",
-        });
-    }
-});
+router.use(
+    "/tiles/*",
+    createProxyMiddleware({
+        target: "http://localhost:8080",
+        pathRewrite: (path, req) => {
+            console.log("Path received in pathRewrite: " + path);
+            const parts = path.split("/");
+            const style = parts[1];
+            const z = parts[2];
+            const x = parts[3];
+            const y = parts[4].split(".")[0];
+            const newPath = `/styles/${style}/512/${z}/${x}/${y}.png`;
+            console.log("Reconstructed path: " + newPath);
+            return newPath;
+        },
+        onProxyReq: (proxyReq, req) => {
+            console.log(
+                `Proxying request: ${req.method} ${req.url} to ${proxyReq.path}`
+            );
+        },
+        onProxyRes: (proxyRes, req, res) => {
+            console.log(
+                `Proxy response: ${proxyRes.statusCode} for ${req.url}`
+            );
+        },
+        onError: (err, req, res) => {
+            console.error("Tile proxy error:", err.message);
+            res.status(500).json({
+                status: "Error",
+                message: "Failed to proxy tile request",
+                details: err.message,
+            });
+        },
+        changeOrigin: true,
+    })
+);
 
 module.exports = router;
