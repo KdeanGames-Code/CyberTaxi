@@ -1,0 +1,39 @@
+{
+    "options": {
+        "paths": {
+            "root": "./",
+            "fonts": "fonts",
+            "sprites": "sprites",
+            "styles": "styles",
+            "mbtiles": "tiles"
+        },
+        "domains": ["localhost:3000"],
+        "formatQuality": {
+            "jpeg": 80,
+            "webp": 90
+        },
+        "maxSize": 2048,
+        "pbfAlias": "pbf",
+        "serveAllFonts": true,
+        "serveAllStyles": true
+    },
+    "styles": {
+        "basic": {
+            "style": "basic.json",
+            "tilejson": {
+                "bounds": [-97.9401, 30.0987, -97.5615, 30.5165]
+            }
+        },
+        "dark": {
+            "style": "dark.json",
+            "tilejson": {
+                "bounds": [-97.9401, 30.0987, -97.5615, 30.5165]
+            }
+        }
+    },
+    "data": {
+        "austin": {
+            "mbtiles": "osm-2020-02-10-v3.11_texas_austin.mbtiles"
+        }
+    }
+}
