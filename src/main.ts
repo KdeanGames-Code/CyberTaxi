@@ -8,9 +8,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (app) {
         app.innerHTML = `
       <div class="main-container" role="main" aria-label="Main game container">
-        <div id="top-menu-container" aria-hidden="true"></div> /* Row 1 for top menu */
-        <div id="map-area" aria-label="Map area placeholder"></div> /* Row 2 for map */
-        <div class="bottom-header" aria-label="Footer">© 2025 CyberTaxi Team</div> /* Row 3 for footer */
+        <div id="top-menu-container" aria-hidden="true"></div> <!-- Row 1 for Top Menu -->
+        <div id="map-area" aria-label="Map area placeholder"></div> <!-- Row 2 for Map -->
+        <div class="bottom-header" aria-label="Footer">© 2025 CyberTaxi Team</div> <!-- Row 3 for footer -->
       </div>
     `;
         const topMenuContainer = app.querySelector("#top-menu-container");

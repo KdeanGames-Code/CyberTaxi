@@ -167,10 +167,9 @@ body {
     left: 0;
 }
 
-/* Fix Leaflet Tile Gaps/Overlaps - Disable Antialiasing */
 .leaflet-tile {
-    filter: blur(0px); /* Force sharp edges */
-    image-rendering: pixelated; /* Pixelated for no smoothing gaps */
+    image-rendering: crisp-edges; /* Disable antialiasing for sharp tile edges, fixing gaps/overlaps */
+    filter: none !important; /* Override any filters causing artifacts */
 }
 
 /* Bottom Header Styles - Aligned Borders with No Overlap */
