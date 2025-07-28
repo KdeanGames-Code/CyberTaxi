@@ -21,12 +21,6 @@ export function createTileLayer(style = "dark"): L.TileLayer {
                 '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
         });
 
-        tileLayer.on("load", () => {
-            console.log(
-                `Tile layer loaded for style ${style}, URL: ${customUrl}`
-            ); // Debug tile response
-        });
-
         return tileLayer;
     } catch (error) {
         console.error("Tile layer creation error:", error);
