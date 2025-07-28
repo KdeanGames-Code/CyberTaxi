@@ -8,9 +8,13 @@
             "mbtiles": "tiles"
         },
         "domains": ["localhost:3000"],
-        "formatQuality": {
-            "jpeg": 80,
-            "webp": 90
+        "formatOptions": {
+            "png": {
+                "quality": 80
+            },
+            "webp": {
+                "quality": 90
+            }
         },
         "maxSize": 2048,
         "pbfAlias": "pbf",

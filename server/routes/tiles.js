@@ -12,6 +12,11 @@ const { createProxyMiddleware } = require("http-proxy-middleware");
 /**
  * Proxy map tile requests to TileServer GL subprocess
  * @route GET /api/tiles/:style/:z/:x/:y.:format
+ * @param {string} req.params.style - Map style (e.g., 'basic', 'dark')
+ * @param {number} req.params.z - Zoom level
+ * @param {number} req.params.x - X coordinate
+ * @param {number} req.params.y - Y coordinate
+ * @param {string} req.params.format - Tile format (e.g., 'png')
  * @returns {Buffer} Tile image or error response
  */
 router.get(
@@ -21,7 +26,7 @@ router.get(
         pathRewrite: (path, req) => {
             console.log("Path received in pathRewrite: " + path);
             const { style, z, x, y, format } = req.params;
-            const newPath = `/styles/${style}/512/${z}/${x}/${y}.${format}`;
+            const newPath = `/styles/${style}/${z}/${x}/${y}.${format}`;
             console.log("Reconstructed path: " + newPath);
             return newPath;
         },
