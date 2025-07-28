@@ -37,3 +37,28 @@ BEGIN
     END IF;
 END //
 DELIMITER ;
+
+-- Finalize Vehicles Table Schema Additions (as of July 28, 2025)
+ALTER TABLE vehicles
+    -- Add coords for current location (precision ~1cm, null for non-positioned like garage/ordered)
+    ADD COLUMN lat DECIMAL(10,7) DEFAULT NULL,
+    ADD COLUMN lng DECIMAL(10,7) DEFAULT NULL,
+    -- Add dest for destination during active rides (null if not en route)
+    ADD COLUMN dest_lat DECIMAL(10,7) DEFAULT NULL,
+    ADD COLUMN dest_lng DECIMAL(10,7) DEFAULT NULL,
+    -- Rename delivery_date to delivery_timestamp (preserves data, for 2-3 day delays)
+    CHANGE COLUMN delivery_date delivery_timestamp DATETIME DEFAULT NULL,
+    -- Confirm purchase_date (already exists, ensure default for age-based degradation)
+    MODIFY COLUMN purchase_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+-- Add composite index on coords for geospatial queries (e.g., nearest vehicle)
+ALTER TABLE vehicles
+    ADD INDEX idx_coords (lat, lng);
+    -- Vehicles Table Schema Finalized (as of July 28, 2025)
+-- Added: lat/lng/dest_lat/dest_lng DECIMAL(10,7) NULL for coords/dest precision
+-- Renamed: delivery_date to delivery_timestamp DATETIME NULL for 2-3 day delays
+-- Confirmed: purchase_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP for age degradation
+-- Index: idx_coords (lat, lng) for geospatial queries
+-- No changes to wear DECIMAL(5,2) CHECK 0-100 (0.1% per mile base +10% weather/+20% traffic/protests)
+-- No changes to battery DECIMAL(5,2) CHECK 0-100 (20-30% degradation triggers)
+-- No changes to mileage/tire_mileage DECIMAL(10,2) (30,000-50,000 tire lifespan with rotations)

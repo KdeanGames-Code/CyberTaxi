@@ -6,11 +6,12 @@ import "leaflet/dist/leaflet.css"; // Leaflet CSS
 import { createTileLayer } from "./components/map/map-tiles.ts"; // Custom tile layer
 import {
     createVehicleMarker,
-    mockVehicles,
-} from "./components/map/vehicle-markers.ts"; // Markers and mock data
+    fallbackVehicles,
+} from "./components/map/vehicle-markers.ts"; // Markers and fallback data
+import type { Vehicle } from "./components/map/vehicle-markers.ts"; // Type-only import for Vehicle
 import "leaflet.markercluster/dist/MarkerCluster.css"; // Cluster CSS
 import "leaflet.markercluster/dist/MarkerCluster.Default.css"; // Default cluster style
-import * as markerCluster from "leaflet.markercluster"; // Import cluster plugin
+import "leaflet.markercluster"; // Side-effect import for cluster plugin
 
 document.addEventListener("DOMContentLoaded", () => {
     const app = document.querySelector("#app");
@@ -50,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 maxClusterRadius: 50,
             });
 
-            mockVehicles.forEach((vehicle) => {
+            fallbackVehicles.forEach((vehicle: Vehicle) => {
                 try {
                     const marker = createVehicleMarker(vehicle);
                     markerClusterGroup.addLayer(marker);

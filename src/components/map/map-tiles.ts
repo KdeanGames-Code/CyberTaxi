@@ -7,7 +7,7 @@ export function createTileLayer(style = "dark"): L.TileLayer {
     const sampleTileUrl = "http://localhost:3000/api/tiles/dark/10/233/421.png"; // Sample tile for testing
 
     try {
-        // Attempt custom tile layer
+        // Use custom tile layer with updated endpoint
         const tileLayer = L.tileLayer(customUrl, {
             attribution: "Custom Tiles © CyberTaxi Team",
             maxZoom: 18,
@@ -24,24 +24,8 @@ export function createTileLayer(style = "dark"): L.TileLayer {
 
         tileLayer.on("load", () => {
             console.log(
-                `Dark tiles loaded with full road detail for style ${style}`
+                `Dark tiles loaded with full road detail and labels for style ${style}`
             );
-            // Test specific sample tile
-            fetch(sampleTileUrl)
-                .then((response) => {
-                    if (response.ok) {
-                        console.log(
-                            `Sample tile /api/tiles/dark/10/233/421.png loaded successfully`
-                        );
-                    } else {
-                        console.warn(
-                            `Sample tile failed with status ${response.status}`
-                        );
-                    }
-                })
-                .catch((error) =>
-                    console.error("Sample tile fetch error:", error)
-                );
         });
 
         return tileLayer;
