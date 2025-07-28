@@ -1,4 +1,4 @@
-// src/components/map/vehicle-markers.ts - Modular Vehicle Markers with Status Colors and Popups
+// src/components/map/vehicle-markers.ts - Modular Vehicle Markers with CSS Classes
 import L from "leaflet";
 
 interface Vehicle {
@@ -10,7 +10,7 @@ interface Vehicle {
     battery: number;
 }
 
-// Mock data for testing (from mockup RouteMapping.js; replace with API fetch later)
+// Mock data for testing (from mockup RouteMapping.js)
 const mockVehicles: Vehicle[] = [
     {
         id: "CT-001",
@@ -83,24 +83,9 @@ const mockVehicles: Vehicle[] = [
 ];
 
 export function createVehicleMarker(vehicle: Vehicle): L.Marker {
-    const colorMap = {
-        active: "#D4A017", // Gold for active from mockup
-        parked: "#FF0000", // Red for parked
-        garage: "#FF0000", // Red for garage
-        new: "#FFFFFF", // White for new
-    };
-    const borderMap = {
-        active: "",
-        parked: "border: 2px solid #8B0000;", // Dark red for parked/garage
-        garage: "border: 2px solid #8B0000;",
-        new: "border: 2px solid #808080;", // Gray for new
-    };
+    const statusClass = `${vehicle.status}-marker`; // Dynamic class based on status
 
-    const iconHtml = `<div style="background-color: ${
-        colorMap[vehicle.status]
-    }; width: 15px; height: 15px; border-radius: 50%; ${
-        borderMap[vehicle.status]
-    } box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2); display: block; position: relative;"></div>`;
+    const iconHtml = `<div class="custom-marker ${statusClass}"></div>`;
 
     const marker = L.marker(vehicle.coords, {
         icon: L.divIcon({
@@ -117,5 +102,5 @@ export function createVehicleMarker(vehicle: Vehicle): L.Marker {
     return marker;
 }
 
-// Export mock data for testing (will remove when switching to API)
+// Export mock data for testing
 export { mockVehicles };
