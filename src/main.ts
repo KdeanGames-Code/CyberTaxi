@@ -9,9 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
         app.innerHTML = `
       <div class="main-container" role="main" aria-label="Main game container">
         <div id="top-menu-container" aria-hidden="true"></div> <!-- Row 1 for Top Menu -->
-        <div id="map-area" aria-label="Map area placeholder">
-        <div id="map"></div>
-        </div> <!-- Row 2 for Map -->
+        <div id="map-area" aria-label="Map area placeholder"></div> <!-- Row 2 for Map -->
         <div class="bottom-header" aria-label="Footer">© 2025 CyberTaxi Team</div> <!-- Row 3 for footer -->
       </div>
     `;
@@ -20,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
             topMenuContainer.appendChild(createTopMenu());
         }
         // Initialize Leaflet map
-        const map = L.map("map", {
+        const map = L.map("map-area", {
             zoomControl: false,
         }).setView([30.2672, -97.7431], 12); // Austin, TX
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
