@@ -4,7 +4,6 @@ import { createTopMenu } from "./components/TopMenu.ts";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { createTileLayer } from "./components/map/map-tiles.ts"; // Import custom tile layer module
-
 document.addEventListener("DOMContentLoaded", () => {
     const app = document.querySelector("#app");
     if (app) {
