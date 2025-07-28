@@ -4,6 +4,7 @@ import L from "leaflet";
 export function createTileLayer(style = "dark"): L.TileLayer {
     const customUrl = `http://localhost:3000/api/tiles/${style}/{z}/{x}/{y}.png`; // Updated backend endpoint
     const fallbackUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"; // Fallback if custom fails
+    const sampleTileUrl = "http://localhost:3000/api/tiles/dark/10/233/421.png"; // Sample tile for testing
 
     try {
         // Attempt custom tile layer
@@ -24,7 +25,23 @@ export function createTileLayer(style = "dark"): L.TileLayer {
         tileLayer.on("load", () => {
             console.log(
                 `Dark tiles loaded with full road detail for style ${style}`
-            ); // Test log for road rendering
+            );
+            // Test specific sample tile
+            fetch(sampleTileUrl)
+                .then((response) => {
+                    if (response.ok) {
+                        console.log(
+                            `Sample tile /api/tiles/dark/10/233/421.png loaded successfully`
+                        );
+                    } else {
+                        console.warn(
+                            `Sample tile failed with status ${response.status}`
+                        );
+                    }
+                })
+                .catch((error) =>
+                    console.error("Sample tile fetch error:", error)
+                );
         });
 
         return tileLayer;
