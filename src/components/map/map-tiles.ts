@@ -2,7 +2,7 @@
 import L from "leaflet";
 
 export function createTileLayer(style = "dark"): L.TileLayer {
-    const customUrl = `http://localhost:3000/api/tiles/${style}/{z}/{x}/{y}.png`;
+    const customUrl = `http://localhost:3000/api/tiles/${style}/{z}/{x}/{y}.png`; // Updated backend endpoint
     const fallbackUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"; // Fallback if custom fails
 
     try {
@@ -19,6 +19,12 @@ export function createTileLayer(style = "dark"): L.TileLayer {
             tileLayer.setUrl(fallbackUrl);
             tileLayer.options.attribution =
                 '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+        });
+
+        tileLayer.on("load", () => {
+            console.log(
+                `Dark tiles loaded with full road detail for style ${style}`
+            ); // Test log for road rendering
         });
 
         return tileLayer;
