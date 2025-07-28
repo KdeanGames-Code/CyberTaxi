@@ -1,0 +1,52 @@
+/* Map Area Styles - Full Expand in Row 2 */
+#map-area {
+    grid-row: 2 / 3;
+    position: relative;
+    width: calc(100% - 6px); /* Full width matching bottom-header */
+    height: 100%; /* Full row height */
+    background: linear-gradient(to bottom right, #2f2f2f, #1a1a1a);
+    border: 2px solid #e8b923;
+    border-radius: 8px 8px 0 0;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6),
+        inset 0 2px 4px rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    margin: 0 5px 0 5px; /* Align with bottom-header */
+    padding: 0;
+    box-sizing: border-box;
+    z-index: 900;
+}
+
+/* Leaflet Container Styles - Ensure Full Fill */
+.leaflet-container {
+    width: 100% !important; /* Override Leaflet default */
+    height: 100% !important; /* Ensure full height */
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* Fix Leaflet Tile Gaps/Overlaps - Cross-Browser Support */
+.leaflet-tile {
+    image-rendering: -webkit-optimize-contrast; /* Edge 79+, Safari (partial) */
+    image-rendering: crisp-edges; /* Chrome 54+, Firefox 50+, Safari 6+ */
+}
+
+/* Fix Leaflet Overlay Pane Selection - Cross-Browser Support */
+.leaflet-overlay-pane svg {
+    -webkit-user-select: none; /* Safari 3+ */
+    -moz-user-select: none; /* Firefox (legacy) */
+    -ms-user-select: none; /* IE/Edge (legacy) */
+    user-select: none; /* Chrome 54+, Edge 79+, Safari 10.1+ */
+}
+
+/* Suppress -ms-zoom (IE-specific, not needed in Firefox) */
+.leaflet-oldie .leaflet-popup-content-wrapper {
+    zoom: 1; /* Standard fallback for -ms-zoom */
+}
+
+/* Suppress -webkit-user-drag (WebKit-specific, not needed in Firefox) */
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+    -webkit-user-drag: none; /* Keep for WebKit */
+}
