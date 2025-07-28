@@ -50,6 +50,28 @@
             }
         },
         {
+            "id": "road-secondary",
+            "type": "line",
+            "source": "openmaptiles",
+            "source-layer": "transportation",
+            "filter": ["==", "class", "secondary"],
+            "paint": {
+                "line-color": "#444444",
+                "line-width": 1.5
+            }
+        },
+        {
+            "id": "road-tertiary",
+            "type": "line",
+            "source": "openmaptiles",
+            "source-layer": "transportation",
+            "filter": ["==", "class", "tertiary"],
+            "paint": {
+                "line-color": "#444444",
+                "line-width": 1
+            }
+        },
+        {
             "id": "place-labels",
             "type": "symbol",
             "source": "openmaptiles",
