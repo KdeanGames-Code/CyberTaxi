@@ -26,10 +26,14 @@ const authenticateJWT = (req, res, next) => {
             .json({ status: "Error", message: "No token provided" });
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET); // Use .env for secret
+        const decoded = jwt.verify(
+            token,
+            process.env.JWT_SECRET || "your_jwt_secret"
+        ); // Use same fallback as auth.js
         req.user = decoded; // Attach user ID for filtering
         next();
     } catch (error) {
+        console.error("JWT verification failed:", error.message);
         res.status(403).json({
             status: "Error",
             message: "Invalid token",
@@ -41,20 +45,24 @@ const authenticateJWT = (req, res, next) => {
 /**
  * Create a new vehicle for a player
  * @route POST /api/vehicles
- * @param {Object} req.body - Vehicle data (player_id, type, status, cost)
+ * @param {Object} req.body - Vehicle data (player_id, type, status, cost, lat, lng, dest_lat, dest_lng)
  * @returns {Object} JSON response with inserted vehicle ID or error
  */
 router.post("/vehicles", authenticateJWT, async (req, res) => {
     try {
-        const { player_id, type, status, cost } = req.body;
+        const { player_id, type, status, cost, lat, lng, dest_lat, dest_lng } =
+            req.body;
         if (!player_id || !type || !status || !cost) {
             return res
                 .status(400)
                 .json({ status: "Error", message: "Missing required fields" });
         }
+        const coords = lat && lng ? JSON.stringify([lat, lng]) : null;
+        const dest =
+            dest_lat && dest_lng ? JSON.stringify([dest_lat, dest_lng]) : null;
         const [result] = await pool.execute(
-            "INSERT INTO vehicles (player_id, type, status, cost) VALUES (?, ?, ?, ?)",
-            [player_id, type, status, cost]
+            "INSERT INTO vehicles (player_id, type, status, cost, coords, dest) VALUES (?, ?, ?, ?, ?, ?)",
+            [player_id, type, status, cost, coords, dest]
         );
         res.status(201).json({
             status: "Success",
@@ -91,7 +99,7 @@ router.get("/vehicles/:player_id", authenticateJWT, async (req, res) => {
 
         const [rows] = await pool.execute(query, params);
 
-        // Serialize coords and dest as arrays (assume stored as JSON string, e.g., '[30.2672, -97.7431]')
+        // Serialize coords and dest as arrays
         const serializedRows = rows.map((row) => ({
             ...row,
             coords: row.coords ? JSON.parse(row.coords) : null,

@@ -5,12 +5,13 @@
  * @version 0.1.0
  */
 
+require("dotenv").config(); // Load .env file
 const express = require("express");
 const app = express();
 const port = 3000;
 const { spawn } = require("child_process");
 
-// Initialize database connection (triggers testConnection in db.js)
+// Initialize database connection
 require("./models/db");
 
 // Start TileServer GL as subprocess on port 8080
@@ -43,12 +44,32 @@ app.use(express.json());
  * Mount API routes from the routes directory
  * @type {express.Router}
  */
-const healthRouter = require("./routes/health");
-const vehiclesRouter = require("./routes/vehicles");
-const tilesRouter = require("./routes/tiles");
-app.use("/api", healthRouter);
-app.use("/api", vehiclesRouter);
-app.use("/api", tilesRouter);
+try {
+    const authRouter = require("./routes/auth");
+    app.use("/api/auth", authRouter);
+    console.log("Auth route mounted at /api/auth");
+    const healthRouter = require("./routes/health");
+    app.use("/api", healthRouter);
+    const vehiclesRouter = require("./routes/vehicles");
+    app.use("/api", vehiclesRouter);
+    const tilesRouter = require("./routes/tiles");
+    app.use("/api", tilesRouter);
+    console.log("API routes mounted successfully");
+} catch (error) {
+    console.error("Failed to mount API routes:", error.message);
+}
+
+/**
+ * Fallback route for debugging
+ * @route ALL /api/*
+ */
+app.all("/api/*", (req, res) => {
+    console.log(`Fallback route hit: ${req.method} ${req.originalUrl}`);
+    res.status(404).json({
+        status: "Error",
+        message: `Route not found: ${req.method} ${req.originalUrl}`,
+    });
+});
 
 /**
  * Start the Express server and log the port
@@ -60,4 +81,4 @@ app.listen(port, () => {
     console.log(`CyberTaxi server running on port ${port}`);
 });
 
-module.exports = app; // For potential testing
+module.exports = app;

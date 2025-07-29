@@ -4,10 +4,9 @@ import L from "leaflet";
 export function createTileLayer(style = "dark"): L.TileLayer {
     const customUrl = `http://localhost:3000/api/tiles/${style}/{z}/{x}/{y}.png`; // Updated backend endpoint
     const fallbackUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"; // Fallback if custom fails
-    const sampleTileUrl = "http://localhost:3000/api/tiles/dark/10/233/421.png"; // Sample tile for testing
 
     try {
-        // Use custom tile layer with updated endpoint
+        // Use custom tile layer
         const tileLayer = L.tileLayer(customUrl, {
             attribution: "Custom Tiles © CyberTaxi Team",
             maxZoom: 18,
