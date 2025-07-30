@@ -1,4 +1,4 @@
-// src/components/map/vehicle-markers.ts - Modular Vehicle Markers with API Fetch
+// src/components/map/vehicle-markers.ts - Modular Vehicle Markers with API Fetch and JWT Auth
 import L from "leaflet";
 
 export interface Vehicle {
@@ -19,7 +19,7 @@ export interface Vehicle {
     updated_at?: string;
 }
 
-// Fallback data for testing (renamed from mockVehicles)
+// Fallback data for testing
 const fallbackVehicles: Vehicle[] = [
     {
         id: "CT-001",
@@ -134,24 +134,48 @@ export function createVehicleMarker(vehicle: Vehicle): L.Marker {
     return marker;
 }
 
+async function getJwtToken(): Promise<string> {
+    try {
+        const response = await fetch("http://localhost:3000/api/auth/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ player_id: 1, password: "test123" }),
+        });
+        if (!response.ok) {
+            throw new Error(`Auth error: ${response.status}`);
+        }
+        const data = await response.json();
+        return data.token; // JWT token from response
+    } catch (error) {
+        console.error("JWT token fetch failed:", error);
+        throw error;
+    }
+}
+
 export async function fetchVehicles(
     playerId: number,
     status?: string
 ): Promise<Vehicle[]> {
     try {
-        const url = `/api/vehicles/${playerId}${
+        const token = await getJwtToken();
+        const url = `http://localhost:3000/api/vehicles/${playerId}${
             status ? `?status=${status}` : ""
         }`;
         const response = await fetch(url, {
             headers: {
-                Authorization: `Bearer your-jwt-token-here`, // Replace with actual token
+                Authorization: `Bearer ${token}`,
             },
         });
         if (!response.ok) {
             throw new Error(`API error: ${response.status}`);
         }
         const data = await response.json();
-        return data.map((item: any) => ({
+        if (data.status !== "Success") {
+            throw new Error(`API response error: ${data.status}`);
+        }
+        return data.vehicles.map((item: any) => ({
             id: item.id.toString(),
             player_id: item.player_id,
             type: item.type,
@@ -177,4 +201,16 @@ export async function fetchVehicles(
     }
 }
 
+// Test with sample data
+(async () => {
+    try {
+        const vehicles = await fetchVehicles(1, "active");
+        if (vehicles.length > 0) {
+            const marker = createVehicleMarker(vehicles[0]);
+            console.log("Test marker created:", marker);
+        }
+    } catch (error) {
+        console.error("Test fetch failed:", error);
+    }
+})();
 export { fallbackVehicles };

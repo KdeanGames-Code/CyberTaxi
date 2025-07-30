@@ -10,13 +10,31 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 
 /**
+ * Handle CORS preflight OPTIONS request for /api/auth/login
+ * @route OPTIONS /api/auth/login
+ */
+router.options("/login", (req, res) => {
+    res.set({
+        "Access-Control-Allow-Origin": "http://localhost:5173",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+    });
+    res.status(204).send();
+});
+
+/**
  * Generate JWT token for a player
  * @route POST /api/auth/login
  * @param {Object} req.body - Player credentials (player_id, password)
  * @returns {Object} JSON response with JWT token or error
  */
-router.post("/login", async (req, res) => {
+router.post("/login", (req, res) => {
     try {
+        res.set({
+            "Access-Control-Allow-Origin": "http://localhost:5173",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+        });
         const { player_id, password } = req.body;
         console.log(`Received login request for player_id: ${player_id}`); // Debug log
         if (!player_id || !password) {

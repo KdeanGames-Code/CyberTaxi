@@ -5,8 +5,9 @@
  * @version 0.1.0
  */
 
-require("dotenv").config(); // Load .env file
+require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
 const app = express();
 const port = 3000;
 const { spawn } = require("child_process");
@@ -35,10 +36,22 @@ tileServer.stdout.on("data", (data) => console.log(`TileServer GL: ${data}`));
 console.log("Started TileServer GL on port 8080");
 
 /**
- * Middleware to parse JSON request bodies
+ * Middleware to parse JSON request bodies and handle CORS
  * @function
  */
 app.use(express.json());
+app.use(
+    cors({
+        origin: "http://localhost:5173",
+        methods: ["GET", "POST", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization"],
+        credentials: false,
+    })
+);
+app.use((req, res, next) => {
+    console.log(`Request received: ${req.method} ${req.originalUrl}`); // Debug log
+    next();
+});
 
 /**
  * Mount API routes from the routes directory

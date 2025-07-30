@@ -19,26 +19,30 @@ const jwt = require("jsonwebtoken");
  * @returns {void}
  */
 const authenticateJWT = (req, res, next) => {
+    console.log(`Authenticating request: ${req.method} ${req.originalUrl}`); // Debug log
     const token = req.header("Authorization")?.replace("Bearer ", "");
-    if (!token)
+    if (!token) {
         return res
             .status(401)
             .json({ status: "Error", message: "No token provided" });
+    }
 
     try {
         const decoded = jwt.verify(
             token,
             process.env.JWT_SECRET || "your_jwt_secret"
-        ); // Use same fallback as auth.js
+        );
         req.user = decoded; // Attach user ID for filtering
         next();
     } catch (error) {
         console.error("JWT verification failed:", error.message);
-        res.status(403).json({
-            status: "Error",
-            message: "Invalid token",
-            details: error.message,
-        });
+        return res
+            .status(403)
+            .json({
+                status: "Error",
+                message: "Invalid token",
+                details: error.message,
+            });
     }
 };
 
@@ -61,7 +65,7 @@ router.post("/vehicles", authenticateJWT, async (req, res) => {
         const dest =
             dest_lat && dest_lng ? JSON.stringify([dest_lat, dest_lng]) : null;
         const [result] = await pool.execute(
-            "INSERT INTO vehicles (player_id, type, status, cost, coords, dest) VALUES (?, ?, ?, ?, ?, ?)",
+            "INSERT INTO vehicles (player_id, type, status, cost, coords, dest, purchase_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW(), NOW())",
             [player_id, type, status, cost, coords, dest]
         );
         res.status(201).json({
@@ -101,7 +105,19 @@ router.get("/vehicles/:player_id", authenticateJWT, async (req, res) => {
 
         // Serialize coords and dest as arrays
         const serializedRows = rows.map((row) => ({
-            ...row,
+            id: row.id,
+            player_id: row.player_id,
+            type: row.type,
+            status: row.status,
+            wear: row.wear,
+            battery: row.battery,
+            mileage: row.mileage,
+            tire_mileage: row.tire_mileage,
+            purchase_date: row.purchase_date,
+            delivery_timestamp: row.delivery_timestamp,
+            cost: row.cost,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
             coords: row.coords ? JSON.parse(row.coords) : null,
             dest: row.dest ? JSON.parse(row.dest) : null,
         }));
@@ -112,6 +128,7 @@ router.get("/vehicles/:player_id", authenticateJWT, async (req, res) => {
         res.status(500).json({
             status: "Error",
             message: "Failed to fetch vehicles",
+            details: error.message,
         });
     }
 });
