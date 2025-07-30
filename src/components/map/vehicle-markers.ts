@@ -19,7 +19,7 @@ export interface Vehicle {
     updated_at?: string;
 }
 
-// Fallback data for testing
+// Fallback data for testing (only used if API fails)
 const fallbackVehicles: Vehicle[] = [
     {
         id: "CT-001",
