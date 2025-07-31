@@ -11,6 +11,7 @@ const cors = require("cors");
 const app = express();
 const port = 3000;
 const { spawn } = require("child_process");
+const errorHandler = require("./utils/error-utils");
 
 // Initialize database connection
 require("./models/db");
@@ -85,6 +86,11 @@ app.all("/api/*", (req, res) => {
         message: `Route not found: ${req.method} ${req.originalUrl}`,
     });
 });
+
+/**
+ * Error handling middleware
+ */
+app.use(errorHandler);
 
 /**
  * Start the Express server and log the port
