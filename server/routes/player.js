@@ -8,6 +8,7 @@
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
+const pool = require("../models/db");
 const { getUserBalance } = require("../shared/utils/query-utils");
 
 /**
@@ -47,6 +48,54 @@ const authenticateJWT = (req, res, next) => {
 };
 
 /**
+ * Fetch a player's details
+ * @route GET /api/player/:player_id
+ * @param {number} req.params.player_id - The player's ID
+ * @returns {Object} JSON response with player details or error
+ */
+router.get("/player/:player_id", authenticateJWT, async (req, res) => {
+    try {
+        const { player_id } = req.params;
+        console.log(`Fetching player details for player_id: ${player_id}`); // Debug log
+        if (req.user.player_id !== parseInt(player_id)) {
+            return res
+                .status(403)
+                .json({
+                    status: "Error",
+                    message: "Unauthorized access to player data",
+                });
+        }
+
+        const [rows] = await pool.execute(
+            "SELECT username, email, bank_balance, score FROM players WHERE player_id = ?",
+            [player_id]
+        );
+        if (rows.length === 0) {
+            return res
+                .status(404)
+                .json({ status: "Error", message: "Player not found" });
+        }
+
+        const player = {
+            username: rows[0].username,
+            email: rows[0].email,
+            bank_balance: parseFloat(rows[0].bank_balance),
+            score: parseFloat(rows[0].score),
+        };
+
+        console.log("Player details fetched successfully:", player_id); // Success log
+        res.status(200).json({ status: "Success", player });
+    } catch (error) {
+        console.error("Player fetch failed:", error.message);
+        res.status(500).json({
+            status: "Error",
+            message: "Failed to fetch player details",
+            details: error.message,
+        });
+    }
+});
+
+/**
  * Fetch a player's bank balance
  * @route GET /api/player/:player_id/balance
  * @param {number} req.params.player_id - The player's ID
@@ -66,6 +115,7 @@ router.get("/player/:player_id/balance", authenticateJWT, async (req, res) => {
         }
 
         const balance = await getUserBalance(player_id);
+        console.log(`Balance fetch successful: ${balance}`); // Success log
         res.status(200).json({ status: "Success", bank_balance: balance });
     } catch (error) {
         console.error("Balance fetch failed:", error.message);

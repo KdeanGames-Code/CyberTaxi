@@ -9,6 +9,7 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../models/db");
 const jwt = require("jsonwebtoken");
+const { getUserBalance } = require("../shared/utils/query-utils");
 
 /**
  * JWT auth middleware for protected routes
@@ -45,6 +46,111 @@ const authenticateJWT = (req, res, next) => {
             });
     }
 };
+
+/**
+ * Purchase a new vehicle for a player
+ * @route POST /api/vehicles/purchase
+ * @param {Object} req.body - Vehicle data (player_id, type, cost, status, coords, wear, battery, mileage)
+ * @returns {Object} JSON response with vehicle ID or error
+ */
+router.post("/vehicles/purchase", authenticateJWT, async (req, res) => {
+    try {
+        const {
+            player_id,
+            type,
+            cost,
+            status,
+            coords,
+            wear = 0,
+            battery = 100,
+            mileage = 0,
+        } = req.body;
+        console.log(`Received purchase request for player_id: ${player_id}`); // Debug log
+        if (!player_id || !type || !cost || !status || !coords) {
+            return res
+                .status(400)
+                .json({ status: "Error", message: "Missing required fields" });
+        }
+
+        // Validate coords format
+        if (
+            !Array.isArray(coords) ||
+            coords.length !== 2 ||
+            typeof coords[0] !== "number" ||
+            typeof coords[1] !== "number"
+        ) {
+            return res
+                .status(400)
+                .json({
+                    status: "Error",
+                    message: "Invalid coords format, must be [lat, lng]",
+                });
+        }
+
+        // Verify player exists
+        const [playerRows] = await pool.execute(
+            "SELECT id FROM players WHERE player_id = ?",
+            [player_id]
+        );
+        if (playerRows.length === 0) {
+            return res
+                .status(404)
+                .json({ status: "Error", message: "Player not found" });
+        }
+
+        // Check sufficient funds
+        const balance = await getUserBalance(player_id);
+        if (balance < parseFloat(cost)) {
+            return res
+                .status(400)
+                .json({ status: "Error", message: "Insufficient funds" });
+        }
+
+        // Generate vehicle_id
+        const [maxId] = await pool.execute(
+            "SELECT COALESCE(MAX(id), 0) + 1 AS new_id FROM vehicles"
+        );
+        const vehicle_id = `CT-${String(maxId[0].new_id).padStart(3, "0")}`;
+
+        // Insert new vehicle
+        const [result] = await pool
+            .execute(
+                "INSERT INTO vehicles (id, player_id, type, status, wear, battery, mileage, cost, lat, lng, purchase_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), NOW())",
+                [
+                    vehicle_id,
+                    player_id,
+                    type,
+                    status,
+                    wear,
+                    battery,
+                    mileage,
+                    parseFloat(cost),
+                    coords[0],
+                    coords[1],
+                ]
+            )
+            .catch((err) => {
+                console.error("Insert failed:", err.message);
+                throw err;
+            });
+
+        // Update player balance
+        await pool.execute(
+            "UPDATE players SET bank_balance = bank_balance - ? WHERE player_id = ?",
+            [parseFloat(cost), player_id]
+        );
+
+        console.log("Vehicle purchased:", vehicle_id); // Success log
+        res.status(201).json({ success: true, vehicle_id });
+    } catch (error) {
+        console.error("Vehicle purchase failed:", error.message);
+        res.status(500).json({
+            status: "Error",
+            message: "Failed to purchase vehicle",
+            details: error.message,
+        });
+    }
+});
 
 /**
  * Create a new vehicle for a player
@@ -104,14 +210,12 @@ router.get("/vehicles/:player_id", authenticateJWT, async (req, res) => {
         const { status } = req.query;
 
         // Verify player exists to respect FOREIGN KEY
-        const startPlayerCheck = Date.now();
         const [playerRows] = await pool
             .execute("SELECT id FROM players WHERE player_id = ?", [player_id])
             .catch((err) => {
                 console.error("Player check failed:", err.message);
                 throw err;
             });
-        console.log(`Player check took ${Date.now() - startPlayerCheck}ms`); // Timing log
         if (playerRows.length === 0) {
             return res
                 .status(404)
@@ -120,7 +224,6 @@ router.get("/vehicles/:player_id", authenticateJWT, async (req, res) => {
 
         // Update delivery_timestamp to NULL for active vehicles
         console.log("Updating delivery_timestamp for active vehicles"); // Debug log
-        const startUpdate = Date.now();
         await pool
             .execute(
                 "UPDATE vehicles SET delivery_timestamp = NULL WHERE player_id = ? AND status = ?",
@@ -130,7 +233,6 @@ router.get("/vehicles/:player_id", authenticateJWT, async (req, res) => {
                 console.error("Update delivery_timestamp failed:", err.message);
                 throw err;
             });
-        console.log(`Update query took ${Date.now() - startUpdate}ms`); // Timing log
 
         let query =
             "SELECT id, player_id, type, status, wear, battery, mileage, tire_mileage, purchase_date, delivery_timestamp, cost, created_at, updated_at, lat, lng, dest_lat, dest_lng FROM vehicles WHERE player_id = ?";
@@ -142,12 +244,10 @@ router.get("/vehicles/:player_id", authenticateJWT, async (req, res) => {
         }
 
         console.log("Executing query:", query, "with params:", params); // Debug log
-        const startQuery = Date.now();
         const [rows] = await pool.execute(query, params).catch((err) => {
             console.error("Query execution failed:", err.message);
             throw err;
         });
-        console.log(`Vehicle query took ${Date.now() - startQuery}ms`); // Timing log
 
         // Serialize coords and dest as arrays, convert DECIMAL fields to numbers
         const serializedRows = rows.map((row) => ({
