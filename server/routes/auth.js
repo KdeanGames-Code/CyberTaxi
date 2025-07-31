@@ -106,8 +106,13 @@ router.post("/signup", async (req, res) => {
 router.post("/login", async (req, res) => {
     try {
         const { player_id, password } = req.body;
-        console.log(`Received login request for player_id: ${player_id}`); // Debug log
+        console.log(
+            `Received login request for player_id: ${player_id}, password: ${
+                password ? "provided" : "missing"
+            }`
+        ); // Debug log
         if (!player_id || !password) {
+            console.log("Login failed: Missing player_id or password");
             return res
                 .status(400)
                 .json({
@@ -122,14 +127,31 @@ router.post("/login", async (req, res) => {
             [player_id]
         );
         if (rows.length === 0) {
+            console.log(
+                `Login failed: No player found for player_id: ${player_id}`
+            );
             return res
                 .status(401)
                 .json({ status: "Error", message: "Invalid credentials" });
         }
 
         const player = rows[0];
-        const isMatch = await bcrypt.compare(password, player.password_hash);
+        console.log(
+            `Comparing password for player_id: ${player_id}, stored hash: ${player.password_hash}`
+        ); // Debug log
+        const isMatch = await bcrypt
+            .compare(password, player.password_hash)
+            .catch((err) => {
+                console.error(
+                    `Bcrypt compare failed for player_id: ${player_id}:`,
+                    err.message
+                );
+                throw err;
+            });
         if (!isMatch) {
+            console.log(
+                `Login failed: Password mismatch for player_id: ${player_id}`
+            );
             return res
                 .status(401)
                 .json({ status: "Error", message: "Invalid credentials" });
