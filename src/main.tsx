@@ -1,16 +1,127 @@
 // src/main.tsx
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import ReactDOM from "react-dom/client";
 import { RegisterForm } from "./components/onboarding/register-form";
+import { createTopMenu } from "./components/TopMenu";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { createTileLayer } from "./components/map/map-tiles";
+import {
+    createVehicleMarker,
+    fetchVehicles,
+} from "./components/map/vehicle-markers";
+import type { Vehicle } from "./components/map/vehicle-markers";
+import {
+    createGarageMarker,
+    mockGarages,
+} from "./components/map/garage-markers";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+import "leaflet.markercluster";
 import "./styles/global.css";
 
 const App: React.FC = () => {
+    const topMenuRef = useRef<HTMLDivElement>(null);
     const handleClose = () => {
         console.log("Registration window closed");
     };
 
+    useEffect(() => {
+        if (topMenuRef.current) {
+            topMenuRef.current.appendChild(createTopMenu());
+        }
+
+        const map = L.map("map-area", {
+            zoomControl: false,
+        }).setView([30.2672, -97.7431], 12); // Austin, TX
+        createTileLayer("dark").addTo(map); // Custom dark tiles
+        map.invalidateSize(); // Size fix
+        console.log("Map initialized successfully");
+
+        // Add vehicle markers with clustering
+        const vehicleClusterGroup = L.markerClusterGroup({
+            iconCreateFunction: (cluster) => {
+                const childCount = cluster.getChildCount();
+                console.log(
+                    "Creating vehicle cluster icon for",
+                    childCount,
+                    "vehicles"
+                );
+                return L.divIcon({
+                    html: `<div style="background: #D4A017; color: #F5F5F5; border: 2px solid #E8B923; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);">${childCount}</div>`,
+                    className: "vehicle-cluster-custom",
+                    iconSize: [30, 30],
+                });
+            },
+            maxClusterRadius: 50,
+        });
+
+        // Fetch and render vehicle markers
+        fetchVehicles(1, "active")
+            .then((vehicles) => {
+                console.log("Fetched vehicles:", vehicles);
+                if (vehicles.length === 0) {
+                    console.warn("No vehicles returned from API or fallback.");
+                }
+                vehicles.forEach((vehicle: Vehicle) => {
+                    try {
+                        const marker = createVehicleMarker(vehicle);
+                        console.log(
+                            `Adding vehicle marker for ${vehicle.id} at ${vehicle.coords} with type ${vehicle.type}`
+                        );
+                        vehicleClusterGroup.addLayer(marker);
+                    } catch (error) {
+                        console.error(
+                            `Failed to create vehicle marker for ${vehicle.id}:`,
+                            error
+                        );
+                    }
+                });
+                map.addLayer(vehicleClusterGroup);
+                console.log("Vehicle cluster group added to map");
+            })
+            .catch((error) => {
+                console.error("Failed to fetch vehicles:", error);
+                console.log("No vehicle markers added due to fetch failure.");
+            });
+
+        // Add garage/lot markers (no clustering)
+        console.log("Processing", mockGarages.length, "garage markers");
+        mockGarages.forEach((garage) => {
+            try {
+                const marker = createGarageMarker(garage);
+                console.log(
+                    `Adding garage marker for ${garage.id} at ${garage.coords}`
+                );
+                marker.addTo(map);
+            } catch (error) {
+                console.error(
+                    `Failed to create garage marker for ${garage.id}:`,
+                    error
+                );
+            }
+        });
+
+        return () => {
+            map.remove();
+        };
+    }, []);
+
     return (
-        <div>
+        <div
+            className="main-container"
+            role="main"
+            aria-label="Main game container"
+        >
+            <div
+                id="top-menu-container"
+                ref={topMenuRef}
+                aria-hidden="true"
+            ></div>
+            <div id="map-area" aria-label="Map area"></div>
+            <div className="bottom-header" aria-label="Footer">
+                © 2025 CyberTaxi Team
+            </div>
             <RegisterForm onClose={handleClose} />
         </div>
     );

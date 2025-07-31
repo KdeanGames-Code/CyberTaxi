@@ -67,6 +67,8 @@ try {
     app.use("/api", vehiclesRouter);
     const tilesRouter = require("./routes/tiles");
     app.use("/api", tilesRouter);
+    const garagesRouter = require("./routes/garages");
+    app.use("/api", garagesRouter);
     console.log("API routes mounted successfully");
 } catch (error) {
     console.error("Failed to mount API routes:", error.message);

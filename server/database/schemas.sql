@@ -97,3 +97,13 @@ CREATE TABLE IF NOT EXISTS garages (
 -- Add FOREIGN KEY to link to players table
 ALTER TABLE garages
     ADD FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE;
+
+    -- Add score field to players table (Phase 2, as of July 31, 2025)
+ALTER TABLE players
+    ADD COLUMN score DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    ADD INDEX idx_score (score);
+    -- Fix player_id NOT NULL and clarify score index (Phase 2, as of July 31, 2025)
+ALTER TABLE players
+    MODIFY COLUMN player_id BIGINT UNSIGNED NOT NULL,
+    DROP INDEX idx_score,
+    ADD INDEX idx_score (score);

@@ -1,4 +1,4 @@
-/* src/styles/windows.css - Styles for Draggable Windows */
+/* src/styles/windows.css - Styles for Draggable Windows and Forms */
 .draggable-window {
     position: absolute;
     background: linear-gradient(to bottom right, #2f2f2f, #1a1a1a);
@@ -11,6 +11,8 @@
     min-width: 200px;
     max-width: 400px;
     z-index: 1000;
+    user-select: none;
+    pointer-events: auto;
 }
 
 .window-header {
@@ -20,7 +22,11 @@
     padding: 5px 10px;
     background: #1a1a1a;
     border-bottom: 1px solid #e8b923;
-    cursor: move;
+    cursor: grab; /* Visual cue for drag */
+}
+
+.window-header:active {
+    cursor: grabbing; /* Visual feedback during drag */
 }
 
 .window-header h3 {
@@ -33,13 +39,13 @@
     font-size: 16px;
     color: #d4a017;
     cursor: pointer;
+    pointer-events: auto;
 }
 
 .window-content {
     padding: 10px;
 }
 
-/* src/styles/windows.css - Styles for Draggable Windows and Forms */
 .register-form {
     display: flex;
     flex-direction: column;
@@ -79,6 +85,9 @@
 
 @media (max-width: 768px) {
     .draggable-window {
+        max-width: 300px;
+    }
+    .register-form {
         max-width: 300px;
     }
 }
