@@ -19,7 +19,7 @@ export interface Vehicle {
     updated_at?: string;
 }
 
-// Fallback data for testing (only used if API fails)
+// Fallback data for testing
 const fallbackVehicles: Vehicle[] = [
     {
         id: "CT-001",
@@ -147,6 +147,7 @@ async function getJwtToken(): Promise<string> {
             throw new Error(`Auth error: ${response.status}`);
         }
         const data = await response.json();
+        console.log("JWT token response:", data); // Debug token response
         return data.token; // JWT token from response
     } catch (error) {
         console.error("JWT token fetch failed:", error);
@@ -172,45 +173,60 @@ export async function fetchVehicles(
             throw new Error(`API error: ${response.status}`);
         }
         const data = await response.json();
-        if (data.status !== "Success") {
-            throw new Error(`API response error: ${data.status}`);
+        console.log("Vehicles API raw response:", data); // Debug full response
+        if (
+            data.status !== "Success" ||
+            !data.vehicles ||
+            !Array.isArray(data.vehicles)
+        ) {
+            console.warn("No vehicles returned in response:", data);
+            return fallbackVehicles; // Use fallback if empty or invalid
         }
-        return data.vehicles.map((item: any) => ({
-            id: item.id.toString(),
-            player_id: item.player_id,
-            type: item.type,
-            status: item.status as "active" | "parked" | "garage" | "new",
-            coords: [item.coords[0], item.coords[1]] as [number, number],
-            dest: item.dest
-                ? ([item.dest[0], item.dest[1]] as [number, number])
-                : null,
-            wear: item.wear,
-            battery: item.battery,
-            mileage: item.mileage,
-            tire_mileage: item.tire_mileage,
-            purchase_date: item.purchase_date,
-            delivery_timestamp: item.delivery_timestamp,
-            cost: item.cost,
-            created_at: item.created_at,
-            updated_at: item.updated_at,
-        }));
+        const validVehicles = data.vehicles
+            .filter((item: any) => {
+                if (
+                    !item.coords ||
+                    !Array.isArray(item.coords) ||
+                    item.coords.length !== 2 ||
+                    typeof item.coords[0] !== "number" ||
+                    typeof item.coords[1] !== "number"
+                ) {
+                    console.warn(
+                        `Skipping vehicle ${item.id} due to invalid coords:`,
+                        item.coords
+                    );
+                    return false;
+                }
+                return true;
+            })
+            .map((item: any) => ({
+                id: item.id.toString(),
+                player_id: item.player_id,
+                type: item.type,
+                status: item.status as "active" | "parked" | "garage" | "new",
+                coords: [item.coords[0], item.coords[1]] as [number, number],
+                dest: item.dest
+                    ? ([item.dest[0], item.dest[1]] as [number, number])
+                    : null,
+                wear: item.wear,
+                battery: item.battery,
+                mileage: item.mileage,
+                tire_mileage: item.tire_mileage,
+                purchase_date: item.purchase_date,
+                delivery_timestamp: item.delivery_timestamp,
+                cost: item.cost,
+                created_at: item.created_at,
+                updated_at: item.updated_at,
+            }));
+        if (validVehicles.length === 0) {
+            console.warn("No valid vehicles after filtering:", data);
+            return fallbackVehicles; // Use fallback if no valid vehicles
+        }
+        console.log("Valid vehicles fetched:", validVehicles); // Debug valid vehicles
+        return validVehicles;
     } catch (error) {
         console.error("Fetch /api/vehicles failed:", error);
         console.log("Using fallback data.");
         return fallbackVehicles;
     }
 }
-
-// Test with sample data
-(async () => {
-    try {
-        const vehicles = await fetchVehicles(1, "active");
-        if (vehicles.length > 0) {
-            const marker = createVehicleMarker(vehicles[0]);
-            console.log("Test marker created:", marker);
-        }
-    } catch (error) {
-        console.error("Test fetch failed:", error);
-    }
-})();
-export { fallbackVehicles };

@@ -1,25 +1,27 @@
-// server/models/db.js - MySQL connection pool for CyberTaxi
-const mysql = require("mysql2/promise"); // npm i mysql2 if needed
+/**
+ * @file db.js
+ * @description Database connection pool for CyberTaxi
+ * @author CyberTaxi Team
+ * @version 0.1.0
+ */
+
+const mysql = require("mysql2/promise");
 
 const pool = mysql.createPool({
     host: "localhost",
-    user: "cybertaxi_user",
-    password: "secure_password",
+    user: "root",
+    password: "",
     database: "cybertaxi_db",
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
+    connectTimeout: 10000, // 10 seconds timeout
+    acquireTimeout: 10000, // 10 seconds to acquire connection
+    idleTimeout: 60000, // 60 seconds before releasing idle connections
 });
 
-// Init test log
-(async () => {
-    try {
-        const connection = await pool.getConnection();
-        console.log("DB Pool Connected Successfully");
-        connection.release();
-    } catch (err) {
-        console.error("DB Pool Connection Failed:", err.message);
-    }
-})();
+pool.getConnection()
+    .then(() => console.log("DB Pool Connected Successfully"))
+    .catch((err) => console.error("DB Pool Connection Failed:", err.message));
 
 module.exports = pool;

@@ -1,0 +1,46 @@
+/* src/styles/windows.css - Styles for Draggable Windows */
+.draggable-window {
+    position: absolute;
+    background: linear-gradient(to bottom right, #2f2f2f, #1a1a1a);
+    border: 2px solid #e8b923;
+    border-radius: 6px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5),
+        inset 0 2px 4px rgba(255, 255, 255, 0.1);
+    font-family: "Orbitron", sans-serif;
+    color: #f5f5f5;
+    min-width: 200px;
+    max-width: 400px;
+    z-index: 1000;
+}
+
+.window-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 10px;
+    background: #1a1a1a;
+    border-bottom: 1px solid #e8b923;
+    cursor: move;
+}
+
+.window-header h3 {
+    margin: 0;
+    font-size: 14px;
+    color: #d4a017;
+}
+
+.close-btn {
+    font-size: 16px;
+    color: #d4a017;
+    cursor: pointer;
+}
+
+.window-content {
+    padding: 10px;
+}
+
+@media (max-width: 768px) {
+    .draggable-window {
+        max-width: 300px;
+    }
+}

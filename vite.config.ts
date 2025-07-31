@@ -1,12 +1,19 @@
+// vite.config.ts
 import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
     base: "/CyberTaxi/Game/", // Matches web root for asset paths
     plugins: [
+        react(), // Enable React support
         VitePWA({
             registerType: "autoUpdate", // Auto-register service worker
             includeAssets: [
+                "font-awesome/**",
+                "img/**",
+                "*.png",
+                "*.jpg",
                 "favicon.ico",
                 "apple-touch-icon.png",
                 "masked-icon.svg",
@@ -40,5 +47,23 @@ export default defineConfig({
     },
     server: {
         port: 5173, // Consistent with your setup
+        proxy: {
+            "/api": {
+                target: "http://localhost:3000",
+                changeOrigin: true,
+                rewrite: (path) => path.replace(/^\/api/, "/api"),
+                configure: (proxy) => {
+                    proxy.on("proxyRes", (proxyRes) => {
+                        console.log(
+                            "Proxy response headers:",
+                            proxyRes.headers
+                        );
+                    });
+                    proxy.on("error", (err) => {
+                        console.error("Proxy error:", err);
+                    });
+                },
+            },
+        },
     },
 });

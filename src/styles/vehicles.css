@@ -16,8 +16,7 @@
     background-color: #d4a017; /* Gold for active */
 }
 
-.parked-marker,
-.garage-marker {
+.parked-marker {
     background-color: #ff0000; /* Red for parked/garage */
     border: 2px solid #8b0000; /* Dark red border */
 }
@@ -52,6 +51,15 @@
 
 .custom-popup .leaflet-popup-content-wrapper a {
     color: #d4a017; /* Gold links for cyberpunk vibe */
+}
+
+/* Garage/Lot Marker Styles */
+.garage-marker div {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #005566;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    background: #00a3e0 !important; /* Blue for garage/lot, force override */
 }
 
 @media (max-width: 768px) {

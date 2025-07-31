@@ -62,3 +62,38 @@ ALTER TABLE vehicles
 -- No changes to wear DECIMAL(5,2) CHECK 0-100 (0.1% per mile base +10% weather/+20% traffic/protests)
 -- No changes to battery DECIMAL(5,2) CHECK 0-100 (20-30% degradation triggers)
 -- No changes to mileage/tire_mileage DECIMAL(10,2) (30,000-50,000 tire lifespan with rotations)
+
+-- Players Table Schema (Phase 1 sub-chunk 3, as of July 30, 2025)
+CREATE TABLE IF NOT EXISTS players (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    player_id BIGINT UNSIGNED UNIQUE,  -- Unique player identifier for external use
+    username VARCHAR(50) NOT NULL UNIQUE,  -- Unique username for login/leaderboards
+    email VARCHAR(255) NOT NULL UNIQUE,  -- Email for account recovery
+    password_hash VARCHAR(255) NOT NULL,  -- Hashed password for security
+    bank_balance DECIMAL(10,2) NOT NULL DEFAULT 60000.00,  -- Initial balance per Project Plan
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_player_id (player_id)  -- Index for fast lookups
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Add FOREIGN KEY to vehicles table referencing players.id
+ALTER TABLE vehicles
+    ADD FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE;
+
+    -- Garages Table Schema (Phase 2, as of July 30, 2025)
+CREATE TABLE IF NOT EXISTS garages (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    player_id BIGINT UNSIGNED,  -- FK to players(id) for ownership
+    name VARCHAR(50) NOT NULL,  -- Garage name (e.g., 'Kevin-Dean Garage')
+    coords VARCHAR(50) AS (JSON_ARRAY(lat, lng)) STORED GENERATED ALWAYS,  -- JSON [lat,lng] for location
+    capacity INT UNSIGNED NOT NULL DEFAULT 5,  -- Default capacity (e.g., 5 vehicles)
+    type ENUM('garage', 'lot') NOT NULL DEFAULT 'garage',  -- Type per GDD
+    cost_monthly DECIMAL(10,2) NOT NULL,  -- Monthly lease cost (e.g., $1,500)
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_player_id (player_id)  -- Index for player-specific garage queries
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Add FOREIGN KEY to link to players table
+ALTER TABLE garages
+    ADD FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE;

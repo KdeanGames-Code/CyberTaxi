@@ -61,12 +61,18 @@ router.post("/vehicles", authenticateJWT, async (req, res) => {
                 .status(400)
                 .json({ status: "Error", message: "Missing required fields" });
         }
-        const coords = lat && lng ? JSON.stringify([lat, lng]) : null;
-        const dest =
-            dest_lat && dest_lng ? JSON.stringify([dest_lat, dest_lng]) : null;
         const [result] = await pool.execute(
-            "INSERT INTO vehicles (player_id, type, status, cost, coords, dest, purchase_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW(), NOW())",
-            [player_id, type, status, cost, coords, dest]
+            "INSERT INTO vehicles (player_id, type, status, cost, lat, lng, dest_lat, dest_lng, purchase_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), NOW())",
+            [
+                player_id,
+                type,
+                status,
+                cost,
+                lat || null,
+                lng || null,
+                dest_lat || null,
+                dest_lng || null,
+            ]
         );
         res.status(201).json({
             status: "Success",
@@ -90,38 +96,85 @@ router.post("/vehicles", authenticateJWT, async (req, res) => {
  */
 router.get("/vehicles/:player_id", authenticateJWT, async (req, res) => {
     try {
+        console.log(
+            "Starting vehicle fetch for player_id:",
+            req.params.player_id
+        ); // Debug log
         const { player_id } = req.params;
         const { status } = req.query;
 
-        let query = "SELECT * FROM vehicles WHERE player_id = ?";
-        const params = [player_id];
+        // Verify player exists to respect FOREIGN KEY
+        const startPlayerCheck = Date.now();
+        const [playerRows] = await pool
+            .execute("SELECT id FROM players WHERE player_id = ?", [player_id])
+            .catch((err) => {
+                console.error("Player check failed:", err.message);
+                throw err;
+            });
+        console.log(`Player check took ${Date.now() - startPlayerCheck}ms`); // Timing log
+        if (playerRows.length === 0) {
+            return res
+                .status(404)
+                .json({ status: "Error", message: "Player not found" });
+        }
+
+        // Update delivery_timestamp to NULL for active vehicles
+        console.log("Updating delivery_timestamp for active vehicles"); // Debug log
+        const startUpdate = Date.now();
+        await pool
+            .execute(
+                "UPDATE vehicles SET delivery_timestamp = NULL WHERE player_id = ? AND status = ?",
+                [playerRows[0].id, "active"]
+            )
+            .catch((err) => {
+                console.error("Update delivery_timestamp failed:", err.message);
+                throw err;
+            });
+        console.log(`Update query took ${Date.now() - startUpdate}ms`); // Timing log
+
+        let query =
+            "SELECT id, player_id, type, status, wear, battery, mileage, tire_mileage, purchase_date, delivery_timestamp, cost, created_at, updated_at, lat, lng, dest_lat, dest_lng FROM vehicles WHERE player_id = ?";
+        const params = [playerRows[0].id];
 
         if (status) {
             query += " AND status = ?";
             params.push(status);
         }
 
-        const [rows] = await pool.execute(query, params);
+        console.log("Executing query:", query, "with params:", params); // Debug log
+        const startQuery = Date.now();
+        const [rows] = await pool.execute(query, params).catch((err) => {
+            console.error("Query execution failed:", err.message);
+            throw err;
+        });
+        console.log(`Vehicle query took ${Date.now() - startQuery}ms`); // Timing log
 
-        // Serialize coords and dest as arrays
+        // Serialize coords and dest as arrays, convert DECIMAL fields to numbers
         const serializedRows = rows.map((row) => ({
             id: row.id,
             player_id: row.player_id,
             type: row.type,
             status: row.status,
-            wear: row.wear,
-            battery: row.battery,
-            mileage: row.mileage,
-            tire_mileage: row.tire_mileage,
+            wear: parseFloat(row.wear) || 0.0,
+            battery: parseFloat(row.battery) || 100.0,
+            mileage: parseFloat(row.mileage) || 0.0,
+            tire_mileage: parseFloat(row.tire_mileage) || 0.0,
             purchase_date: row.purchase_date,
             delivery_timestamp: row.delivery_timestamp,
-            cost: row.cost,
+            cost: parseFloat(row.cost) || 0.0,
             created_at: row.created_at,
             updated_at: row.updated_at,
-            coords: row.coords ? JSON.parse(row.coords) : null,
-            dest: row.dest ? JSON.parse(row.dest) : null,
+            coords:
+                row.lat && row.lng
+                    ? [parseFloat(row.lat), parseFloat(row.lng)]
+                    : null,
+            dest:
+                row.dest_lat && row.dest_lng
+                    ? [parseFloat(row.dest_lat), parseFloat(row.dest_lng)]
+                    : null,
         }));
 
+        console.log("Vehicle fetch successful, rows:", serializedRows.length); // Debug log
         res.status(200).json({ status: "Success", vehicles: serializedRows });
     } catch (error) {
         console.error("Vehicle fetch failed:", error.message);

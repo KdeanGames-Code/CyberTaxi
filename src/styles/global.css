@@ -1,6 +1,7 @@
 /* Global Styles - Base Layout and Import Modules */
 @import url("./map.css");
 @import url("./vehicles.css");
+@import url("./windows.css");
 
 /* Global and Body Styles - Fix White Background */
 html,
