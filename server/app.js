@@ -62,6 +62,8 @@ try {
     const authRouter = require("./routes/auth");
     app.use("/api/auth", authRouter);
     console.log("Auth route mounted at /api/auth");
+    const playerRouter = require("./routes/player");
+    app.use("/api", playerRouter);
     const healthRouter = require("./routes/health");
     app.use("/api", healthRouter);
     const vehiclesRouter = require("./routes/vehicles");
