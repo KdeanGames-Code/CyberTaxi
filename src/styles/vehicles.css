@@ -1,4 +1,4 @@
-/* Vehicles Styles - Markers and Popups for Fleet Visualization */
+/* src/styles/vehicles.css - Markers and Popups for Fleet Visualization */
 
 /* Custom Marker Styles - Status Colors and Borders from Mockup */
 .custom-marker div {
@@ -11,13 +11,18 @@
     position: relative;
 }
 
-/* Status-Specific Styles */
+/* Status-Specific Styles for Vehicles */
 .active-marker {
     background-color: #d4a017; /* Gold for active */
 }
 
 .parked-marker {
-    background-color: #ff0000; /* Red for parked/garage */
+    background-color: #ff0000; /* Red for parked */
+    border: 2px solid #8b0000; /* Dark red border */
+}
+
+.vehicle-garage-marker {
+    background-color: #ff0000; /* Red for garage vehicles */
     border: 2px solid #8b0000; /* Dark red border */
 }
 
@@ -54,12 +59,13 @@
 }
 
 /* Garage/Lot Marker Styles */
-.garage-marker div {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #005566;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    background: #00a3e0 !important; /* Blue for garage/lot, force override */
+.garage-marker {
+    z-index: 1000 !important; /* Prioritize over vehicle cluster */
+}
+
+/* Vehicle Cluster Styles */
+.vehicle-cluster-custom {
+    z-index: 500 !important; /* Below garage marker */
 }
 
 @media (max-width: 768px) {

@@ -13,10 +13,10 @@ const mockGarages: Garage[] = [
     {
         id: "G-001",
         name: "Kevin-Dean Garage",
-        coords: [30.2672, -97.7431],
+        coords: [30.2673, -97.7431],
         capacity: 5,
         type: "garage",
-    },
+    }, // Offset lat by 0.0001
 ];
 
 export function createGarageMarker(garage: Garage): L.Marker {
@@ -27,15 +27,23 @@ export function createGarageMarker(garage: Garage): L.Marker {
             html: iconHtml,
             iconSize: [20, 20],
             iconAnchor: [10, 10],
-            popupAnchor: [0, -10],
+            popupAnchor: [0, -15],
             className: "garage-marker",
         }),
+        zIndexOffset: 1000, // Higher z-index to prioritize clicks
     }).bindPopup(
         `${garage.type === "garage" ? "Garage" : "Lot"}: ${
             garage.name
         }<br>Capacity: ${garage.capacity}`,
-        { className: "custom-popup" }
+        { className: "custom-popup", offset: [0, -15], autoPan: true }
     );
+
+    // Prioritize garage marker click
+    marker.on("click", (e) => {
+        L.DomEvent.stopPropagation(e); // Prevent cluster click
+        marker.openPopup();
+        console.log(`Garage marker ${garage.id} clicked, opening popup`);
+    });
 
     return marker;
 }

@@ -15,7 +15,7 @@ import {
     createGarageMarker,
     mockGarages,
 } from "./components/map/garage-markers";
-import { purchaseVehicle } from "./utils/purchase-utils"; // Fixed import path
+import { purchaseVehicle } from "./utils/purchase-utils";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "leaflet.markercluster";
