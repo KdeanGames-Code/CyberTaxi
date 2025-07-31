@@ -15,6 +15,7 @@ import {
     createGarageMarker,
     mockGarages,
 } from "./components/map/garage-markers";
+import { purchaseVehicle } from "./utils/purchase-utils"; // Fixed import path
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "leaflet.markercluster";
@@ -33,12 +34,11 @@ const App: React.FC = () => {
 
         const map = L.map("map-area", {
             zoomControl: false,
-        }).setView([30.2672, -97.7431], 12); // Austin, TX
-        createTileLayer("dark").addTo(map); // Custom dark tiles
-        map.invalidateSize(); // Size fix
+        }).setView([30.2672, -97.7431], 12);
+        createTileLayer("dark").addTo(map);
+        map.invalidateSize();
         console.log("Map initialized successfully");
 
-        // Add vehicle markers with clustering
         const vehicleClusterGroup = L.markerClusterGroup({
             iconCreateFunction: (cluster) => {
                 const childCount = cluster.getChildCount();
@@ -56,7 +56,6 @@ const App: React.FC = () => {
             maxClusterRadius: 50,
         });
 
-        // Fetch and render vehicle markers
         fetchVehicles(1, "active")
             .then((vehicles) => {
                 console.log("Fetched vehicles:", vehicles);
@@ -85,7 +84,6 @@ const App: React.FC = () => {
                 console.log("No vehicle markers added due to fetch failure.");
             });
 
-        // Add garage/lot markers (no clustering)
         console.log("Processing", mockGarages.length, "garage markers");
         mockGarages.forEach((garage) => {
             try {
@@ -101,6 +99,21 @@ const App: React.FC = () => {
                 );
             }
         });
+
+        // Test purchase
+        const testVehicleData = {
+            player_id: 1,
+            type: "Model Y",
+            cost: 50000,
+            status: "new",
+            coords: [30.2672, -97.7431],
+            wear: 0,
+            battery: 100,
+            mileage: 0,
+        };
+        purchaseVehicle(1, testVehicleData)
+            .then((result) => console.log("Purchase result:", result))
+            .catch((error) => console.error("Purchase test failed:", error));
 
         return () => {
             map.remove();

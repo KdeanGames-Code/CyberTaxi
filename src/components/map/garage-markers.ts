@@ -1,4 +1,4 @@
-// src/components/map/garage-markers.ts - Modular Garage/Lot Markers
+// src/components/map/garage-markers.ts
 import L from "leaflet";
 
 export interface Garage {
@@ -12,17 +12,10 @@ export interface Garage {
 const mockGarages: Garage[] = [
     {
         id: "G-001",
-        name: "Downtown Garage",
+        name: "Kevin-Dean Garage",
         coords: [30.2672, -97.7431],
-        capacity: 10,
+        capacity: 5,
         type: "garage",
-    },
-    {
-        id: "L-001",
-        name: "South Lot",
-        coords: [30.26, -97.739],
-        capacity: 20,
-        type: "lot",
     },
 ];
 
