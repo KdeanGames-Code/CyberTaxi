@@ -39,6 +39,44 @@
     padding: 10px;
 }
 
+/* src/styles/windows.css - Styles for Draggable Windows and Forms */
+.register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 12px;
+    color: #d4a017;
+}
+
+.form-group input {
+    padding: 5px;
+    border: 1px solid #e8b923;
+    border-radius: 4px;
+    background: #1a1a1a;
+    color: #f5f5f5;
+    font-family: "Orbitron", sans-serif;
+}
+
+.submit-btn {
+    padding: 8px;
+    background: #d4a017;
+    border: none;
+    border-radius: 4px;
+    color: #1a1a1a;
+    font-family: "Orbitron", sans-serif;
+    font-weight: bold;
+    cursor: pointer;
+}
+
 @media (max-width: 768px) {
     .draggable-window {
         max-width: 300px;
