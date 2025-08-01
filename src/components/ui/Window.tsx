@@ -29,7 +29,7 @@ interface WindowProps {
 
 /**
  * Window component renders a draggable, optionally resizable modal with cyberpunk styling.
- * Handles single-click dragging and resizability via CSS.
+ * Handles single-click dragging and resizability via CSS, prioritizing passed style props.
  * @param {WindowProps} props - Component props.
  * @returns {JSX.Element} Draggable window with content.
  */
@@ -41,8 +41,8 @@ export const Window: React.FC<WindowProps> = ({
     isResizable = true,
     style,
 }) => {
-    // State for window position and dragging
-    const [position, setPosition] = useState({ top: 100, left: 100 }); // Default position
+    // State for window position, used only if style prop doesn't override
+    const [position, setPosition] = useState({ top: 100, left: 100 });
     const [isDragging, setIsDragging] = useState(false);
     const dragRef = useRef({ posX: 0, posY: 0 });
     const windowRef = useRef<HTMLDivElement>(null);
@@ -107,14 +107,18 @@ export const Window: React.FC<WindowProps> = ({
         };
     }, [isDragging]);
 
+    // Prioritize style prop over internal position state
+    const mergedStyle: React.CSSProperties = {
+        ...style,
+        top: style?.top ?? `${position.top}px`,
+        left: style?.left ?? `${position.left}px`,
+        zIndex: style?.zIndex ?? 1000,
+    };
+
     return (
         <div
             className={`draggable-window ${isResizable ? "resizable" : ""}`}
-            style={{
-                ...style,
-                top: `${position.top}px`,
-                left: `${position.left}px`,
-            }}
+            style={mergedStyle}
             role="dialog"
             aria-label={`${title} window`}
             id={id}

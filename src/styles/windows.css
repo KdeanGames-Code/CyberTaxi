@@ -52,6 +52,10 @@
     pointer-events: auto;
 }
 
+.close-btn:hover {
+    color: #00a3e0; /* Blue hover effect per Mockup */
+}
+
 /* Window content container */
 .window-content {
     padding: 10px;
