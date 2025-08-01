@@ -96,17 +96,39 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
     font-family: "Orbitron", sans-serif;
     color: #d4a017;
-    z-index: 2000;
+    z-index: 3000;
 }
 
 .menu-item {
     padding: 8px;
     cursor: pointer;
+    font-size: 12px; /* Halfway between 16px and 8px */
 }
 
 .menu-item:hover {
     background: #d4a017;
     color: #1a1a1a;
+}
+
+.footer-icon {
+    position: relative;
+}
+
+.footer-icon:hover::after {
+    content: "CyberBrowser V1";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2f2f2f;
+    border: 1px solid #e8b923;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-family: "Orbitron", sans-serif;
+    font-size: 10px;
+    color: #d4a017;
+    z-index: 3100;
+    white-space: nowrap;
 }
 
 @media (max-width: 768px) {

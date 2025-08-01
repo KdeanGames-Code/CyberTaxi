@@ -137,7 +137,7 @@ body {
 .main-container {
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: 40px 1fr 40px; /* Adjusted for bottom-menu */
+    grid-template-rows: 40px 1fr 40px;
     height: 100vh;
     position: relative;
     z-index: 1;
@@ -150,7 +150,7 @@ body {
 .bottom-menu {
     grid-row: 3 / 4;
     display: flex;
-    justify-content: space-between;
+    justify-content: center; /* Center globe */
     align-items: center;
     padding: 10px;
     background: linear-gradient(to bottom right, #2f2f2f, #1a1a1a);
@@ -169,15 +169,32 @@ body {
         inset 0 2px 4px rgba(255, 255, 255, 0.1);
 }
 
-.footer-logo {
-    font-size: 20px;
-    color: #d4a017;
-}
-
 .footer-icon {
     font-size: 16px;
     cursor: pointer;
     color: #d4a017;
+}
+
+/* Context Menu Styles */
+.context-menu {
+    position: fixed;
+    background: #2f2f2f;
+    border: 2px solid #e8b923;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    font-family: "Orbitron", sans-serif;
+    color: #d4a017;
+    z-index: 3000;
+}
+
+.menu-item {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.menu-item:hover {
+    background: #d4a017;
+    color: #1a1a1a;
 }
 
 /* Responsive Design */
