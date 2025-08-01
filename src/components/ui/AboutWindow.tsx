@@ -1,6 +1,6 @@
 /**
  * AboutWindow.tsx - Displays CyberTaxi game credits in a non-resizable, draggable window.
- * Renders near the TopMenu "?" icon with a taxi icon, placeholder image, and team credits.
+ * Renders below top menu with a taxi icon, placeholder image, and team credits.
  * @module AboutWindow
  */
 
@@ -12,10 +12,12 @@ import { Window } from "./Window";
  * @interface AboutWindowProps
  * @property {() => void} onClose - Callback to close the About window.
  * @property {React.CSSProperties} [style] - Optional CSS styles for positioning.
+ * @property {{ top: number; left: number }} [initialPosition] - Initial position for dragging.
  */
 interface AboutWindowProps {
     onClose: () => void;
     style?: React.CSSProperties;
+    initialPosition?: { top: number; left: number };
 }
 
 /**
@@ -24,14 +26,19 @@ interface AboutWindowProps {
  * @param {AboutWindowProps} props - Component props.
  * @returns {JSX.Element} Draggable window with About content.
  */
-export const AboutWindow: React.FC<AboutWindowProps> = ({ onClose, style }) => {
+export const AboutWindow: React.FC<AboutWindowProps> = ({
+    onClose,
+    style,
+    initialPosition,
+}) => {
     return (
         <Window
             id="about-window"
             title="About CyberTaxi V 1.0"
             onClose={onClose}
             isResizable={false}
-            style={style} // Apply dynamic positioning from AboutPortal
+            style={style}
+            initialPosition={initialPosition}
         >
             <div className="about-content">
                 {/* Taxi icon and game title */}

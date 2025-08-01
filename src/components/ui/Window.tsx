@@ -17,6 +17,7 @@ import type { ReactNode } from "react";
  * @property {() => void} onClose - Callback to close the window.
  * @property {boolean} [isResizable=true] - Whether the window is resizable.
  * @property {React.CSSProperties} [style] - Optional CSS styles for positioning.
+ * @property {{ top: number; left: number }} [initialPosition] - Initial position for dragging.
  */
 interface WindowProps {
     id: string;
@@ -25,6 +26,7 @@ interface WindowProps {
     onClose: () => void;
     isResizable?: boolean;
     style?: React.CSSProperties;
+    initialPosition?: { top: number; left: number };
 }
 
 /**
@@ -40,9 +42,10 @@ export const Window: React.FC<WindowProps> = ({
     onClose,
     isResizable = true,
     style,
+    initialPosition = { top: 100, left: 100 },
 }) => {
-    // State for window position, used only if style prop doesn't override
-    const [position, setPosition] = useState({ top: 100, left: 100 });
+    // State for window position, initialized with prop or default
+    const [position, setPosition] = useState(initialPosition);
     const [isDragging, setIsDragging] = useState(false);
     const dragRef = useRef({ posX: 0, posY: 0 });
     const windowRef = useRef<HTMLDivElement>(null);

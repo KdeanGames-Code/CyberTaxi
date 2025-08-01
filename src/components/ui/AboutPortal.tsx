@@ -1,6 +1,6 @@
 /**
  * AboutPortal.tsx - Manages React portal for rendering AboutWindow below top menu.
- * Toggles visibility and positions window dynamically in the map area.
+ * Toggles visibility and positions window with draggable support.
  * @module AboutPortal
  */
 
@@ -15,14 +15,14 @@ import { AboutWindow } from "./AboutWindow";
 interface AboutPortalProps {}
 
 /**
- * AboutPortal component renders AboutWindow in a portal, positioned below top menu and left-shifted.
+ * AboutPortal component renders AboutWindow in a portal, positioned below top menu.
  * Exposes toggle function globally for TopMenu.ts to control visibility.
  * @returns {JSX.Element | null} Portal with AboutWindow or null if closed.
  */
 export const AboutPortal: React.FC<AboutPortalProps> = () => {
     const [isOpen, setIsOpen] = useState(false);
 
-    // Toggle About window and position below top menu
+    // Toggle About window
     const handleToggle = () => {
         setIsOpen(!isOpen);
         console.log("About window toggled:", !isOpen);
@@ -43,7 +43,8 @@ export const AboutPortal: React.FC<AboutPortalProps> = () => {
                       setIsOpen(false);
                       console.log("About window toggled: false");
                   }}
-                  style={{ top: "50px", left: "360px", zIndex: 2000 }}
+                  style={{ zIndex: 2000 }}
+                  initialPosition={{ top: 75, left: 1000 }}
               />,
               document.getElementById("about-portal")!
           )
