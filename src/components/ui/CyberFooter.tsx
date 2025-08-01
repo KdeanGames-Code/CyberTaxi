@@ -1,16 +1,35 @@
-// src/components/ui/CyberFooter.tsx
+/**
+ * CyberFooter.tsx - Renders bottom menu with globe icon for CyberBrowser access.
+ * Supports left-click and right-click context menu to open CyberBrowser.
+ * @module CyberFooter
+ */
+
 import React, { useState, useEffect, useRef } from "react";
 
-export const CyberFooter: React.FC = () => {
+/**
+ * Props for the CyberFooter component (none required).
+ * @interface CyberFooterProps
+ */
+interface CyberFooterProps {}
+
+/**
+ * CyberFooter component renders a bottom menu with a centered globe icon.
+ * Left-click or right-click "Tesla" option opens CyberBrowser, per GDD v1.1.
+ * @returns {JSX.Element} Bottom menu with globe icon and context menu.
+ */
+export const CyberFooter: React.FC<CyberFooterProps> = () => {
     const [showContextMenu, setShowContextMenu] = useState(false);
     const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
     const menuRef = useRef<HTMLDivElement>(null);
 
+    // Toggle CyberBrowser on globe click or Tesla selection
     const handleGlobeClick = () => {
+        (window as any).toggleCyberBrowser?.();
         console.log("Globe clicked: Open CyberBrowser");
-        setShowContextMenu(false); // Close menu on click
+        setShowContextMenu(false); // Close context menu
     };
 
+    // Open context menu on right-click
     const handleContextMenu = (e: React.MouseEvent) => {
         e.preventDefault();
         const windowHeight = window.innerHeight;
@@ -24,11 +43,13 @@ export const CyberFooter: React.FC = () => {
         console.log("Right-click menu opened at", { x: e.clientX, y });
     };
 
+    // Close context menu
     const handleMenuClose = () => {
         setShowContextMenu(false);
         console.log("Context menu closed");
     };
 
+    // Close context menu on outside click
     useEffect(() => {
         const handleOutsideClick = (e: MouseEvent) => {
             if (

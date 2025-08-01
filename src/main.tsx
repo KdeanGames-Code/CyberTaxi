@@ -1,9 +1,15 @@
-// src/main.tsx
-import React, { useEffect, useRef } from "react";
+/**
+ * main.tsx - Main entry point for CyberTaxi game.
+ * Renders map, top menu, registration form, footer, and browser windows.
+ * @module main
+ */
+
+import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { RegisterForm } from "./components/onboarding/register-form";
 import { CyberFooter } from "./components/ui/CyberFooter";
 import { AboutPortal } from "./components/ui/AboutPortal";
+import { CyberBrowser } from "./components/ui/CyberBrowser";
 import { createTopMenu } from "./components/TopMenu";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -23,7 +29,9 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "leaflet.markercluster";
 import "./styles/global.css";
 
-// Error Boundary Component
+/**
+ * Error Boundary Component to catch and display runtime errors.
+ */
 class ErrorBoundary extends React.Component<React.PropsWithChildren<{}>> {
     state = { hasError: false };
 
@@ -41,12 +49,35 @@ class ErrorBoundary extends React.Component<React.PropsWithChildren<{}>> {
     }
 }
 
+/**
+ * Main App component for CyberTaxi game.
+ * Initializes map, top menu, and modals, with purchase test.
+ * @returns {JSX.Element} Main game interface.
+ */
 const App: React.FC = () => {
     const topMenuRef = useRef<HTMLDivElement>(null);
+    const [isBrowserOpen, setIsBrowserOpen] = useState(false);
+
+    // Handle registration window close
     const handleClose = () => {
         console.log("Registration window closed");
     };
 
+    // Toggle CyberBrowser
+    const handleToggleBrowser = () => {
+        setIsBrowserOpen(!isBrowserOpen);
+        console.log("CyberBrowser toggled:", !isBrowserOpen);
+    };
+
+    // Expose toggle function for CyberFooter
+    useEffect(() => {
+        (window as any).toggleCyberBrowser = handleToggleBrowser;
+        return () => {
+            delete (window as any).toggleCyberBrowser;
+        };
+    }, []);
+
+    // Initialize map and test purchase
     useEffect(() => {
         if (topMenuRef.current) {
             topMenuRef.current.appendChild(createTopMenu());
@@ -162,7 +193,15 @@ const App: React.FC = () => {
                 <div id="about-portal"></div>
                 <CyberFooter />
                 <RegisterForm onClose={handleClose} />
-                <AboutPortal />
+                {isBrowserOpen && (
+                    <CyberBrowser
+                        onClose={() => {
+                            setIsBrowserOpen(false);
+                            console.log("Browser closed");
+                        }}
+                        playerId="1"
+                    />
+                )}
             </div>
         </ErrorBoundary>
     );
