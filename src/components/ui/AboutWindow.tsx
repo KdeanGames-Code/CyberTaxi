@@ -11,9 +11,11 @@ import { Window } from "./Window";
  * Props for the AboutWindow component.
  * @interface AboutWindowProps
  * @property {() => void} onClose - Callback to close the About window.
+ * @property {React.CSSProperties} [style] - Optional CSS styles for positioning.
  */
 interface AboutWindowProps {
     onClose: () => void;
+    style?: React.CSSProperties;
 }
 
 /**
@@ -22,15 +24,14 @@ interface AboutWindowProps {
  * @param {AboutWindowProps} props - Component props.
  * @returns {JSX.Element} Draggable window with About content.
  */
-export const AboutWindow: React.FC<AboutWindowProps> = ({ onClose }) => {
+export const AboutWindow: React.FC<AboutWindowProps> = ({ onClose, style }) => {
     return (
         <Window
             id="about-window"
             title="About CyberTaxi V 1.0"
             onClose={onClose}
             isResizable={false}
-            // Position near TopMenu "?" icon (top-right)
-            style={{ top: "50px", left: "calc(100% - 340px)" }}
+            style={style} // Apply dynamic positioning from AboutPortal
         >
             <div className="about-content">
                 {/* Taxi icon and game title */}
@@ -47,7 +48,6 @@ export const AboutWindow: React.FC<AboutWindowProps> = ({ onClose }) => {
                 {/* Developer credits */}
                 <p>Kevin-Dean Livingstone - Game Developer</p>
                 <p>Crafted with wisdom by Grok, created by xAI.</p>
-
                 {/* Copyright notice */}
                 <p>
                     CyberTaxi: Own the Roads.
