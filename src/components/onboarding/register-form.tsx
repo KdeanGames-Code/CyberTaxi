@@ -21,7 +21,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onClose }) => {
         e.preventDefault();
         try {
             localStorage.setItem("registerData", JSON.stringify(formData));
-            console.log("Form saved to localStorage:", formData); // Debug form save
+            console.log("Form saved to localStorage:", formData);
             onClose();
         } catch (error) {
             console.error("Failed to save form data:", error);
@@ -33,6 +33,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onClose }) => {
             id="register-window"
             title="Register for CyberTaxi"
             onClose={onClose}
+            isResizable={false}
         >
             <form
                 className="register-form"

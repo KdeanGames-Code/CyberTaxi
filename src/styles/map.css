@@ -31,6 +31,13 @@
     image-rendering: crisp-edges; /* Chrome 54+, Firefox 50+, Safari 6+ */
 }
 
+/* src/styles/map.css - Styles for Map Tiles and Road Sizes */
+
+/* Fallback for raster tiles: Increase brightness for whiter roads */
+.leaflet-tile-container img {
+    filter: brightness(80%); /* Slightly whiter roads */
+}
+
 /* Fix Leaflet Overlay Pane Selection - Cross-Browser Support */
 .leaflet-overlay-pane svg {
     -webkit-user-select: none; /* Safari 3+ */

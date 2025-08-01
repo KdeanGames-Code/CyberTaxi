@@ -15,11 +15,29 @@ import {
     createGarageMarker,
     mockGarages,
 } from "./components/map/garage-markers";
-import { purchaseVehicle } from "./utils/purchase-utils";
+import { purchaseVehicle } from "./utils/purchase-utils"; // Ensure this import is correct
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "leaflet.markercluster";
 import "./styles/global.css";
+
+// Error Boundary Component with proper typing
+class ErrorBoundary extends React.Component<React.PropsWithChildren<{}>> {
+    state = { hasError: false };
+
+    static getDerivedStateFromError(error: Error) {
+        return { hasError: true };
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return (
+                <h1>Something went wrong. Check the console for details.</h1>
+            );
+        }
+        return this.props.children;
+    }
+}
 
 const App: React.FC = () => {
     const topMenuRef = useRef<HTMLDivElement>(null);
@@ -100,9 +118,13 @@ const App: React.FC = () => {
             }
         });
 
-        // Test purchase
+        // Test purchase (synchronous call, corrected playerId type)
+        localStorage.setItem(
+            "player_1",
+            JSON.stringify({ bank_balance: 60000.0, fleet: [] })
+        );
         const testVehicleData = {
-            player_id: 1,
+            player_id: "1",
             type: "Model Y",
             cost: 50000,
             status: "new",
@@ -111,9 +133,15 @@ const App: React.FC = () => {
             battery: 100,
             mileage: 0,
         };
-        purchaseVehicle(1, testVehicleData)
-            .then((result) => console.log("Purchase result:", result))
-            .catch((error) => console.error("Purchase test failed:", error));
+        try {
+            const result = purchaseVehicle(
+                testVehicleData.player_id,
+                testVehicleData.type
+            );
+            console.log("Purchase result:", result);
+        } catch (error) {
+            console.error("Purchase test failed:", error);
+        }
 
         return () => {
             map.remove();
@@ -121,22 +149,24 @@ const App: React.FC = () => {
     }, []);
 
     return (
-        <div
-            className="main-container"
-            role="main"
-            aria-label="Main game container"
-        >
+        <ErrorBoundary>
             <div
-                id="top-menu-container"
-                ref={topMenuRef}
-                aria-hidden="true"
-            ></div>
-            <div id="map-area" aria-label="Map area"></div>
-            <div className="bottom-header" aria-label="Footer">
-                © 2025 CyberTaxi Team
+                className="main-container"
+                role="main"
+                aria-label="Main game container"
+            >
+                <div
+                    id="top-menu-container"
+                    ref={topMenuRef}
+                    aria-hidden="true"
+                ></div>
+                <div id="map-area" aria-label="Map area"></div>
+                <div className="bottom-header" aria-label="Footer">
+                    © 2025 CyberTaxi Team
+                </div>
+                <RegisterForm onClose={handleClose} />
             </div>
-            <RegisterForm onClose={handleClose} />
-        </div>
+        </ErrorBoundary>
     );
 };
 

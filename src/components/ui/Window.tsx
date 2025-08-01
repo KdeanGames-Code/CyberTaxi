@@ -1,4 +1,4 @@
-// src/components/ui/Window.tsx - Reusable Draggable Window Component
+// src/components/ui/Window.tsx - Reusable Draggable and Resizable Window Component
 import React, { useState, useRef } from "react";
 import type { ReactNode } from "react";
 
@@ -7,6 +7,7 @@ interface WindowProps {
     title: string;
     children: ReactNode;
     onClose: () => void;
+    isResizable?: boolean; // Optional prop for resizability
 }
 
 export const Window: React.FC<WindowProps> = ({
@@ -14,6 +15,7 @@ export const Window: React.FC<WindowProps> = ({
     title,
     children,
     onClose,
+    isResizable = true,
 }) => {
     const [position, setPosition] = useState({ top: 100, left: 100 }); // Default position
     const [isDragging, setIsDragging] = useState(false);
@@ -78,7 +80,7 @@ export const Window: React.FC<WindowProps> = ({
 
     return (
         <div
-            className="draggable-window"
+            className={`draggable-window ${isResizable ? "resizable" : ""}`}
             style={{ top: `${position.top}px`, left: `${position.left}px` }}
             role="dialog"
             aria-label={`${title} window`}

@@ -15,6 +15,11 @@
     pointer-events: auto;
 }
 
+.draggable-window.resizable {
+    resize: both;
+    overflow: auto;
+}
+
 .window-header {
     display: flex;
     justify-content: space-between;
@@ -22,11 +27,11 @@
     padding: 5px 10px;
     background: #1a1a1a;
     border-bottom: 1px solid #e8b923;
-    cursor: grab; /* Visual cue for drag */
+    cursor: grab;
 }
 
 .window-header:active {
-    cursor: grabbing; /* Visual feedback during drag */
+    cursor: grabbing;
 }
 
 .window-header h3 {
