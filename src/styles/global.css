@@ -1,13 +1,14 @@
-/* Global Styles - Base Layout and Import Modules */
+/* src/styles/global.css */
+@import url("/font-awesome/css/all.min.css");
 @import url("./map.css");
 @import url("./vehicles.css");
 @import url("./windows.css");
 
-/* Global and Body Styles - Fix White Background */
+/* Global and Body Styles */
 html,
 body {
     font-family: "Roboto", sans-serif;
-    background-color: #2f2f2f !important; /* Dark base, force override */
+    background-color: #2f2f2f !important;
     color: #000000;
     margin: 0;
     height: 100vh;
@@ -18,7 +19,7 @@ body {
     user-select: none;
 }
 
-/* Top Menu Styles - Centered Alignments for Mockup Match */
+/* Top Menu Styles */
 .top-menu {
     height: 40px;
     background: linear-gradient(to bottom right, #2f2f2f, #1a1a1a);
@@ -28,7 +29,7 @@ body {
     grid-template-columns: 40px 2fr 200px;
     grid-template-rows: 1fr;
     gap: 2px;
-    padding: 1px; /* Reduced from 2px to 1px to prevent right overflow */
+    padding: 1px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6),
         inset 0 2px 4px rgba(255, 255, 255, 0.1);
     align-items: center;
@@ -40,17 +41,17 @@ body {
     overflow: visible;
 }
 
-/* Logo Style Update (Icon with CyberGold) */
+/* Logo Style */
 .fas.fa-taxi.logo {
     grid-column: 1 / 2;
-    font-size: 24px; /* Larger for icon impact */
-    color: #d4a017; /* CyberGold */
+    font-size: 24px;
+    color: #d4a017;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 36px;
     height: 100%;
-    margin: 0; /* Centered, no offsets */
+    margin: 0;
 }
 
 .stats-container {
@@ -83,11 +84,11 @@ body {
     grid-column: 3 / 4;
     display: flex;
     justify-content: flex-end;
-    align-items: center; /* Vertical center for ? */
+    align-items: center;
     gap: 2px;
     width: 200px;
     padding-right: 20px;
-    margin: 0; /* Remove top margin for center */
+    margin: 0;
 }
 
 .energy {
@@ -98,7 +99,7 @@ body {
     font-family: "Orbitron", sans-serif;
     font-weight: 700;
     font-size: 10px;
-    margin: 0 20px 0 0; /* Mockup offset, no top/bottom */
+    margin: 0 20px 0 0;
 }
 
 .energy-bar {
@@ -126,59 +127,63 @@ body {
     justify-content: center;
     width: 36px;
     height: 36px;
-    margin: 0; /* No margins for vertical center */
+    margin: 0;
     cursor: pointer;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1); /* Subtle glow */
+    background: rgba(255, 255, 255, 0.1);
 }
 
-/* Main Container Styles - Single Column Grid with Nested Rows */
+/* Main Container Styles */
 .main-container {
     display: grid;
-    grid-template-columns: 1fr; /* Single column */
-    grid-template-rows: 40px 1fr 36px; /* Top menu, map (expand), bottom header */
-    height: 100vh; /* Full viewport */
+    grid-template-columns: 1fr;
+    grid-template-rows: 40px 1fr 40px; /* Adjusted for bottom-menu */
+    height: 100vh;
     position: relative;
     z-index: 1;
     padding: 0;
     margin: 0;
-    overflow: hidden; /* Prevent scroll overflow */
+    overflow: hidden;
 }
 
-/* Bottom Header Styles - Aligned Borders with No Overlap */
-.bottom-header {
+/* Bottom Menu Styles */
+.bottom-menu {
     grid-row: 3 / 4;
-    background: linear-gradient(to bottom right, #2f2f2f, #1a1a1a);
-    color: #d4a017;
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    padding: 3px;
-    border: 2px solid #e8b923; /* CyberGold, consistent */
+    padding: 10px;
+    background: linear-gradient(to bottom right, #2f2f2f, #1a1a1a);
+    border: 2px solid #e8b923;
     border-radius: 0 0 8px 8px;
+    font-family: "Orbitron", sans-serif;
+    color: #d4a017;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: calc(100% - 10px);
+    height: 40px;
+    z-index: 2000;
+    box-sizing: border-box;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6),
         inset 0 2px 4px rgba(255, 255, 255, 0.1);
-    width: calc(100% - 6px);
-    margin: 0 5px 5px 5px; /* Align with map-area's left: 5px */
-    overflow: visible;
-    box-sizing: border-box; /* Borders in width */
-    position: relative;
-    z-index: 900; /* Align with map */
 }
 
-.bottom-header::after {
-    content: " © 2025 CyberTaxi Team. All rights reserved."; /* Full mockup text */
-    display: block;
-    font-size: 10px;
-    color: #cfd8d3; /* Soft highlight for rights */
-    text-align: center;
+.footer-logo {
+    font-size: 20px;
+    color: #d4a017;
+}
+
+.footer-icon {
+    font-size: 16px;
+    cursor: pointer;
+    color: #d4a017;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
     .main-container {
-        grid-template-rows: auto 1fr auto; /* Auto size top/bottom */
+        grid-template-rows: auto 1fr auto;
     }
     .top-menu {
         grid-template-columns: 1fr;

@@ -2,6 +2,7 @@
 import React, { useEffect, useRef } from "react";
 import ReactDOM from "react-dom/client";
 import { RegisterForm } from "./components/onboarding/register-form";
+import { CyberFooter } from "./components/ui/CyberFooter";
 import { createTopMenu } from "./components/TopMenu";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -15,13 +16,13 @@ import {
     createGarageMarker,
     mockGarages,
 } from "./components/map/garage-markers";
-import { purchaseVehicle } from "./utils/purchase-utils"; // Ensure this import is correct
+import { purchaseVehicle } from "./utils/purchase-utils";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "leaflet.markercluster";
 import "./styles/global.css";
 
-// Error Boundary Component with proper typing
+// Error Boundary Component
 class ErrorBoundary extends React.Component<React.PropsWithChildren<{}>> {
     state = { hasError: false };
 
@@ -118,7 +119,7 @@ const App: React.FC = () => {
             }
         });
 
-        // Test purchase (synchronous call, corrected playerId type)
+        // Test purchase
         localStorage.setItem(
             "player_1",
             JSON.stringify({ bank_balance: 60000.0, fleet: [] })
@@ -133,15 +134,11 @@ const App: React.FC = () => {
             battery: 100,
             mileage: 0,
         };
-        try {
-            const result = purchaseVehicle(
-                testVehicleData.player_id,
-                testVehicleData.type
-            );
-            console.log("Purchase result:", result);
-        } catch (error) {
-            console.error("Purchase test failed:", error);
-        }
+        const result = purchaseVehicle(
+            testVehicleData.player_id,
+            testVehicleData.type
+        );
+        console.log("Purchase result:", result);
 
         return () => {
             map.remove();
@@ -161,9 +158,7 @@ const App: React.FC = () => {
                     aria-hidden="true"
                 ></div>
                 <div id="map-area" aria-label="Map area"></div>
-                <div className="bottom-header" aria-label="Footer">
-                    © 2025 CyberTaxi Team
-                </div>
+                <CyberFooter />
                 <RegisterForm onClose={handleClose} />
             </div>
         </ErrorBoundary>
