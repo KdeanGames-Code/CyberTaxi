@@ -1,27 +1,53 @@
-// src/components/ui/Window.tsx - Reusable Draggable and Resizable Window Component
+/**
+ * Window.tsx - Reusable draggable and optionally resizable window component.
+ * Used for modals like registration, About, and future CyberBrowser windows.
+ * Supports single-click dragging, resizability, and custom styling.
+ * @module Window
+ */
+
 import React, { useState, useRef } from "react";
 import type { ReactNode } from "react";
 
+/**
+ * Props for the Window component.
+ * @interface WindowProps
+ * @property {string} id - Unique identifier for the window.
+ * @property {string} title - Window title displayed in the header.
+ * @property {ReactNode} children - Content to render inside the window.
+ * @property {() => void} onClose - Callback to close the window.
+ * @property {boolean} [isResizable=true] - Whether the window is resizable.
+ * @property {React.CSSProperties} [style] - Optional CSS styles for positioning.
+ */
 interface WindowProps {
     id: string;
     title: string;
     children: ReactNode;
     onClose: () => void;
-    isResizable?: boolean; // Optional prop for resizability
+    isResizable?: boolean;
+    style?: React.CSSProperties;
 }
 
+/**
+ * Window component renders a draggable, optionally resizable modal with cyberpunk styling.
+ * Handles single-click dragging and resizability via CSS.
+ * @param {WindowProps} props - Component props.
+ * @returns {JSX.Element} Draggable window with content.
+ */
 export const Window: React.FC<WindowProps> = ({
     id,
     title,
     children,
     onClose,
     isResizable = true,
+    style,
 }) => {
+    // State for window position and dragging
     const [position, setPosition] = useState({ top: 100, left: 100 }); // Default position
     const [isDragging, setIsDragging] = useState(false);
     const dragRef = useRef({ posX: 0, posY: 0 });
     const windowRef = useRef<HTMLDivElement>(null);
 
+    // Handle drag start on window header
     const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.stopPropagation();
@@ -43,6 +69,7 @@ export const Window: React.FC<WindowProps> = ({
         });
     };
 
+    // Update position during drag
     const handleMouseMove = (e: MouseEvent) => {
         e.preventDefault();
         if (isDragging && windowRef.current) {
@@ -58,11 +85,13 @@ export const Window: React.FC<WindowProps> = ({
         }
     };
 
+    // Stop dragging
     const handleMouseUp = () => {
         setIsDragging(false);
         console.log("Drag stopped");
     };
 
+    // Register/unregister drag listeners
     React.useEffect(() => {
         if (isDragging) {
             document.addEventListener("mousemove", handleMouseMove, {
@@ -81,7 +110,11 @@ export const Window: React.FC<WindowProps> = ({
     return (
         <div
             className={`draggable-window ${isResizable ? "resizable" : ""}`}
-            style={{ top: `${position.top}px`, left: `${position.left}px` }}
+            style={{
+                ...style,
+                top: `${position.top}px`,
+                left: `${position.left}px`,
+            }}
             role="dialog"
             aria-label={`${title} window`}
             id={id}

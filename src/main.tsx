@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from "react";
 import ReactDOM from "react-dom/client";
 import { RegisterForm } from "./components/onboarding/register-form";
 import { CyberFooter } from "./components/ui/CyberFooter";
+import { AboutPortal } from "./components/ui/AboutPortal";
 import { createTopMenu } from "./components/TopMenu";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -158,8 +159,10 @@ const App: React.FC = () => {
                     aria-hidden="true"
                 ></div>
                 <div id="map-area" aria-label="Map area"></div>
+                <div id="about-portal"></div>
                 <CyberFooter />
                 <RegisterForm onClose={handleClose} />
+                <AboutPortal />
             </div>
         </ErrorBoundary>
     );

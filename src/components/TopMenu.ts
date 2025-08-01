@@ -28,5 +28,17 @@ export function createTopMenu(): HTMLDivElement {
     </div>
   `;
 
+    const helpButton = topMenu.querySelector(".help");
+    if (helpButton) {
+        helpButton.addEventListener("click", () => {
+            if ((window as any).toggleAboutWindow) {
+                (window as any).toggleAboutWindow();
+                console.log("Help button clicked to toggle About window");
+            } else {
+                console.error("toggleAboutWindow not defined");
+            }
+        });
+    }
+
     return topMenu;
 }

@@ -1,4 +1,6 @@
 /* src/styles/windows.css - Styles for Draggable Windows and Forms */
+
+/* Draggable window base styles */
 .draggable-window {
     position: absolute;
     background: linear-gradient(to bottom right, #2f2f2f, #1a1a1a);
@@ -15,11 +17,13 @@
     pointer-events: auto;
 }
 
+/* Resizable window styles */
 .draggable-window.resizable {
     resize: both;
     overflow: auto;
 }
 
+/* Window header styles */
 .window-header {
     display: flex;
     justify-content: space-between;
@@ -40,6 +44,7 @@
     color: #d4a017;
 }
 
+/* Close button styles */
 .close-btn {
     font-size: 16px;
     color: #d4a017;
@@ -47,10 +52,12 @@
     pointer-events: auto;
 }
 
+/* Window content container */
 .window-content {
     padding: 10px;
 }
 
+/* Registration form styles */
 .register-form {
     display: flex;
     flex-direction: column;
@@ -88,6 +95,7 @@
     cursor: pointer;
 }
 
+/* Context menu styles for CyberFooter */
 .context-menu {
     position: fixed;
     background: #2f2f2f;
@@ -110,6 +118,7 @@
     color: #1a1a1a;
 }
 
+/* Globe icon tooltip styles */
 .footer-icon {
     position: relative;
 }
@@ -131,6 +140,7 @@
     white-space: nowrap;
 }
 
+/* About window content styles */
 .about-content {
     display: flex;
     flex-direction: column;
@@ -141,6 +151,33 @@
     text-align: center;
 }
 
+.about-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+}
+
+.about-header .fa-taxi {
+    font-size: 20px;
+    color: #d4a017;
+}
+
+.about-header h2 {
+    font-size: 16px;
+    color: #d4a017;
+    margin: 0;
+}
+
+.about-vehicle {
+    width: 100%;
+    max-width: 200px;
+    margin: 10px auto;
+    border: 1px solid #e8b923;
+    border-radius: 4px;
+}
+
+/* Responsive design */
 @media (max-width: 768px) {
     .draggable-window {
         max-width: 300px;
@@ -150,5 +187,11 @@
     }
     .about-content {
         font-size: 10px;
+    }
+    .about-header h2 {
+        font-size: 14px;
+    }
+    .about-vehicle {
+        max-width: 150px;
     }
 }
