@@ -1,0 +1,95 @@
+/**
+ * CyberBrowser.tsx - Renders a resizable, draggable browser window for vehicle purchases.
+ * Displays a Tesla-inspired UI with a URL bar and purchase options for Model Y and RoboCab.
+ * @module CyberBrowser
+ */
+
+import React, { useState } from "react";
+import { Window } from "./Window";
+import { purchaseVehicle } from "../../utils/purchase-utils";
+
+/**
+ * Props for the CyberBrowser component.
+ * @interface CyberBrowserProps
+ * @property {() => void} onClose - Callback to close the browser window.
+ * @property {string} playerId - Player ID for purchase operations.
+ */
+interface CyberBrowserProps {
+    onClose: () => void;
+    playerId: string;
+}
+
+/**
+ * CyberBrowser component renders a cyberpunk-styled browser window with purchase UI.
+ * Integrates with purchaseVehicle for buying Model Y or RoboCab, per GDD v1.1.
+ * @param {CyberBrowserProps} props - Component props.
+ * @returns {JSX.Element} Resizable, draggable window with purchase UI.
+ */
+export const CyberBrowser: React.FC<CyberBrowserProps> = ({
+    onClose,
+    playerId,
+}) => {
+    const [url] = useState("cttps://CyberTaxi.Tesla.com");
+    const [purchaseStatus, setPurchaseStatus] = useState<string | null>(null);
+
+    // Handle vehicle purchase
+    const handlePurchase = (vehicleType: string) => {
+        const result = purchaseVehicle(playerId, vehicleType);
+        setPurchaseStatus(result.message);
+        console.log(`Purchase attempted for ${vehicleType}:`, result);
+        setTimeout(() => setPurchaseStatus(null), 3000); // Clear status after 3s
+    };
+
+    return (
+        <Window
+            id="cyber-browser"
+            title="CyberBrowser V1"
+            onClose={onClose}
+            isResizable={true}
+            initialPosition={{ top: 100, left: 100 }}
+        >
+            <div className="browser-content">
+                {/* URL bar */}
+                <div className="url-bar">
+                    <input
+                        type="text"
+                        value={url}
+                        readOnly
+                        aria-label="Browser URL"
+                    />
+                </div>
+                {/* Purchase section */}
+                <div className="purchase-section">
+                    <h3>Purchase Vehicles</h3>
+                    <div className="vehicle-options">
+                        <div className="vehicle-card">
+                            <h4>Model Y</h4>
+                            <p>Cost: $50,000</p>
+                            <button
+                                className="purchase-btn"
+                                onClick={() => handlePurchase("Model Y")}
+                                aria-label="Purchase Model Y"
+                            >
+                                Buy Now
+                            </button>
+                        </div>
+                        <div className="vehicle-card">
+                            <h4>RoboCab</h4>
+                            <p>Cost: $75,000</p>
+                            <button
+                                className="purchase-btn"
+                                onClick={() => handlePurchase("RoboCab")}
+                                aria-label="Purchase RoboCab"
+                            >
+                                Buy Now
+                            </button>
+                        </div>
+                    </div>
+                    {purchaseStatus && (
+                        <p className="purchase-status">{purchaseStatus}</p>
+                    )}
+                </div>
+            </div>
+        </Window>
+    );
+};

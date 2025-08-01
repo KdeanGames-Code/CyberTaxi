@@ -53,7 +53,7 @@
 }
 
 .close-btn:hover {
-    color: #00a3e0; /* Blue hover effect per Mockup */
+    color: #00a3e0;
 }
 
 /* Window content container */
@@ -181,6 +181,83 @@
     border-radius: 4px;
 }
 
+/* CyberBrowser styles */
+.browser-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+}
+
+.url-bar {
+    display: flex;
+    align-items: center;
+}
+
+.url-bar input {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #e8b923;
+    border-radius: 4px;
+    background: #1a1a1a;
+    color: #f5f5f5;
+    font-family: "Orbitron", sans-serif;
+    font-size: 12px;
+}
+
+.purchase-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.vehicle-options {
+    display: flex;
+    gap: 10px;
+    justify-content: space-around;
+}
+
+.vehicle-card {
+    flex: 1;
+    padding: 10px;
+    background: #1a1a1a;
+    border: 1px solid #e8b923;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.vehicle-card h4 {
+    margin: 0;
+    font-size: 14px;
+    color: #d4a017;
+}
+
+.vehicle-card p {
+    margin: 5px 0;
+    font-size: 12px;
+}
+
+.purchase-btn {
+    padding: 8px;
+    background: #d4a017;
+    border: none;
+    border-radius: 4px;
+    color: #1a1a1a;
+    font-family: "Orbitron", sans-serif;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.purchase-btn:hover {
+    background: #00a3e0; /* Tesla-inspired blue */
+}
+
+.purchase-status {
+    font-size: 12px;
+    color: #d4a017;
+    text-align: center;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
     .draggable-window {
@@ -197,5 +274,8 @@
     }
     .about-vehicle {
         max-width: 150px;
+    }
+    .vehicle-options {
+        flex-direction: column;
     }
 }
