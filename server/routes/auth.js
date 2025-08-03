@@ -122,10 +122,12 @@ router.post("/login", async (req, res) => {
         }
 
         // Verify credentials against players table
+        const startQuery = Date.now();
         const [rows] = await pool.execute(
             "SELECT player_id, password_hash FROM players WHERE player_id = ?",
             [player_id]
         );
+        console.log(`Player query took ${Date.now() - startQuery}ms`); // Timing log
         if (rows.length === 0) {
             console.log(
                 `Login failed: No player found for player_id: ${player_id}`
@@ -139,6 +141,7 @@ router.post("/login", async (req, res) => {
         console.log(
             `Comparing password for player_id: ${player_id}, stored hash: ${player.password_hash}`
         ); // Debug log
+        const startBcrypt = Date.now();
         const isMatch = await bcrypt
             .compare(password, player.password_hash)
             .catch((err) => {
@@ -148,6 +151,7 @@ router.post("/login", async (req, res) => {
                 );
                 throw err;
             });
+        console.log(`Bcrypt compare took ${Date.now() - startBcrypt}ms`); // Timing log
         if (!isMatch) {
             console.log(
                 `Login failed: Password mismatch for player_id: ${player_id}`

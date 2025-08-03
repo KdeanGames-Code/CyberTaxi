@@ -129,6 +129,13 @@
     cursor: pointer;
 }
 
+.form-status {
+    font-size: 12px;
+    color: #d4a017;
+    text-align: center;
+    margin-top: 10px;
+}
+
 /* Context menu styles for CyberFooter */
 .context-menu {
     position: fixed;
