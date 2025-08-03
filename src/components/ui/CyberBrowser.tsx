@@ -1,6 +1,6 @@
 /**
  * CyberBrowser.tsx - Renders a resizable, draggable browser window for vehicle purchases.
- * Displays a Tesla-inspired UI with a URL bar and purchase options for Model Y and RoboCab.
+ * Displays Tesla-inspired UI with vehicle images, purchase options, and updated URL, per GDD v1.1.
  * @module CyberBrowser
  */
 
@@ -21,7 +21,7 @@ interface CyberBrowserProps {
 
 /**
  * CyberBrowser component renders a cyberpunk-styled browser window with purchase UI.
- * Integrates with purchaseVehicle for buying Model Y or RoboCab, per GDD v1.1.
+ * Integrates vehicle images and purchase functionality for Model Y and RoboCab.
  * @param {CyberBrowserProps} props - Component props.
  * @returns {JSX.Element} Resizable, draggable window with purchase UI.
  */
@@ -29,7 +29,7 @@ export const CyberBrowser: React.FC<CyberBrowserProps> = ({
     onClose,
     playerId,
 }) => {
-    const [url] = useState("cttps://CyberTaxi.Tesla.com");
+    const [url] = useState("https://Tesla.ct");
     const [purchaseStatus, setPurchaseStatus] = useState<string | null>(null);
 
     // Handle vehicle purchase
@@ -63,6 +63,11 @@ export const CyberBrowser: React.FC<CyberBrowserProps> = ({
                     <h3>Purchase Vehicles</h3>
                     <div className="vehicle-options">
                         <div className="vehicle-card">
+                            <img
+                                src="src/assets/showroom/ModelY-Showroom.png"
+                                alt="Model Y vehicle"
+                                className="vehicle-image"
+                            />
                             <h4>Model Y</h4>
                             <p>Cost: $50,000</p>
                             <button
@@ -74,8 +79,13 @@ export const CyberBrowser: React.FC<CyberBrowserProps> = ({
                             </button>
                         </div>
                         <div className="vehicle-card">
+                            <img
+                                src="src/assets/showroom/RoboCab-Showroom.jpg"
+                                alt="RoboCab vehicle"
+                                className="vehicle-image"
+                            />
                             <h4>RoboCab</h4>
-                            <p>Cost: $75,000</p>
+                            <p>Cost: $35,000</p>
                             <button
                                 className="purchase-btn"
                                 onClick={() => handlePurchase("RoboCab")}

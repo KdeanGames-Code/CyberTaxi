@@ -129,13 +129,6 @@
     cursor: pointer;
 }
 
-.form-status {
-    font-size: 12px;
-    color: #d4a017;
-    text-align: center;
-    margin-top: 10px;
-}
-
 /* Context menu styles for CyberFooter */
 .context-menu {
     position: fixed;
@@ -295,6 +288,14 @@
     text-align: center;
 }
 
+.vehicle-image {
+    width: 100%;
+    max-width: 200px;
+    margin: 10px auto;
+    border: 1px solid #e8b923;
+    border-radius: 4px;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
     .draggable-window {
@@ -314,5 +315,8 @@
     }
     .vehicle-options {
         flex-direction: column;
+    }
+    .vehicle-image {
+        max-width: 150px;
     }
 }

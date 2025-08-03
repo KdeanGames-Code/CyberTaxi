@@ -9,6 +9,7 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../models/db");
 const jwt = require("jsonwebtoken");
+const { getUserBalance } = require("../shared/utils/query-utils");
 
 /**
  * JWT auth middleware for protected routes
@@ -45,6 +46,117 @@ const authenticateJWT = (req, res, next) => {
             });
     }
 };
+
+/**
+ * Create a new garage or lot for a player
+ * @route POST /api/garages
+ * @param {Object} req.body - Garage data (player_id, name, coords, capacity, type, cost_monthly)
+ * @returns {Object} JSON response with inserted garage ID or error
+ */
+router.post("/garages", authenticateJWT, async (req, res) => {
+    try {
+        const { player_id, name, coords, capacity, type, cost_monthly } =
+            req.body;
+        console.log(
+            `Received create garage request for player_id: ${player_id}`
+        ); // Debug log
+        if (
+            !player_id ||
+            !name ||
+            !coords ||
+            !capacity ||
+            !type ||
+            !cost_monthly
+        ) {
+            return res
+                .status(400)
+                .json({ status: "Error", message: "Missing required fields" });
+        }
+
+        // Validate coords format
+        if (
+            !Array.isArray(coords) ||
+            coords.length !== 2 ||
+            typeof coords[0] !== "number" ||
+            typeof coords[1] !== "number"
+        ) {
+            return res
+                .status(400)
+                .json({
+                    status: "Error",
+                    message: "Invalid coords format, must be [lat, lng]",
+                });
+        }
+
+        // Validate type
+        const validTypes = ["garage", "lot"];
+        if (!validTypes.includes(type)) {
+            return res
+                .status(400)
+                .json({
+                    status: "Error",
+                    message: "Invalid type, must be garage or lot",
+                });
+        }
+
+        // Verify player exists and get players.id
+        const [playerRows] = await pool.execute(
+            "SELECT id FROM players WHERE player_id = ?",
+            [player_id]
+        );
+        if (playerRows.length === 0) {
+            return res
+                .status(404)
+                .json({ status: "Error", message: "Player not found" });
+        }
+        const playerTableId = playerRows[0].id;
+
+        // Check sufficient funds
+        const balance = await getUserBalance(player_id);
+        if (balance < parseFloat(cost_monthly)) {
+            return res
+                .status(400)
+                .json({
+                    status: "Error",
+                    message: "Insufficient funds for monthly cost",
+                });
+        }
+
+        // Insert new garage
+        const [result] = await pool
+            .execute(
+                "INSERT INTO garages (player_id, name, coords, capacity, type, cost_monthly) VALUES (?, ?, ?, ?, ?, ?)",
+                [
+                    playerTableId,
+                    name,
+                    JSON.stringify(coords),
+                    capacity,
+                    type,
+                    parseFloat(cost_monthly),
+                ]
+            )
+            .catch((err) => {
+                console.error("Insert failed:", err.message);
+                throw err;
+            });
+
+        // Update player balance
+        await pool.execute(
+            "UPDATE players SET bank_balance = bank_balance - ? WHERE player_id = ?",
+            [parseFloat(cost_monthly), player_id]
+        );
+
+        console.log("Garage created:", name); // Success log
+        res.status(201).json({ status: "Success", garage_id: result.insertId });
+    } catch (error) {
+        console.error("Garage creation failed:", error.message);
+        res.status(500).json({
+            status: "Error",
+            message: "Failed to create garage",
+            details: error.message,
+        });
+    }
+});
 
 /**
  * Fetch garages for a specific player

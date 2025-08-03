@@ -4,7 +4,6 @@
  * @author CyberTaxi Team
  * @version 0.1.0
  */
-
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
@@ -27,7 +26,6 @@ const authenticateJWT = (req, res, next) => {
             .status(401)
             .json({ status: "Error", message: "No token provided" });
     }
-
     try {
         const decoded = jwt.verify(
             token,
@@ -37,13 +35,11 @@ const authenticateJWT = (req, res, next) => {
         next();
     } catch (error) {
         console.error("JWT verification failed:", error.message);
-        return res
-            .status(403)
-            .json({
-                status: "Error",
-                message: "Invalid token",
-                details: error.message,
-            });
+        return res.status(403).json({
+            status: "Error",
+            message: "Invalid token",
+            details: error.message,
+        });
     }
 };
 
@@ -58,14 +54,11 @@ router.get("/player/:player_id", authenticateJWT, async (req, res) => {
         const { player_id } = req.params;
         console.log(`Fetching player details for player_id: ${player_id}`); // Debug log
         if (req.user.player_id !== parseInt(player_id)) {
-            return res
-                .status(403)
-                .json({
-                    status: "Error",
-                    message: "Unauthorized access to player data",
-                });
+            return res.status(403).json({
+                status: "Error",
+                message: "Unauthorized access to player data",
+            });
         }
-
         const [rows] = await pool.execute(
             "SELECT username, email, bank_balance, score FROM players WHERE player_id = ?",
             [player_id]
@@ -75,14 +68,12 @@ router.get("/player/:player_id", authenticateJWT, async (req, res) => {
                 .status(404)
                 .json({ status: "Error", message: "Player not found" });
         }
-
         const player = {
             username: rows[0].username,
             email: rows[0].email,
             bank_balance: parseFloat(rows[0].bank_balance),
             score: parseFloat(rows[0].score),
         };
-
         console.log("Player details fetched successfully:", player_id); // Success log
         res.status(200).json({ status: "Success", player });
     } catch (error) {
@@ -106,14 +97,11 @@ router.get("/player/:player_id/balance", authenticateJWT, async (req, res) => {
         const { player_id } = req.params;
         console.log(`Fetching balance for player_id: ${player_id}`); // Debug log
         if (req.user.player_id !== parseInt(player_id)) {
-            return res
-                .status(403)
-                .json({
-                    status: "Error",
-                    message: "Unauthorized access to player data",
-                });
+            return res.status(403).json({
+                status: "Error",
+                message: "Unauthorized access to player data",
+            });
         }
-
         const balance = await getUserBalance(player_id);
         console.log(`Balance fetch successful: ${balance}`); // Success log
         res.status(200).json({ status: "Success", bank_balance: balance });
@@ -122,6 +110,76 @@ router.get("/player/:player_id/balance", authenticateJWT, async (req, res) => {
         res.status(500).json({
             status: "Error",
             message: "Failed to fetch balance",
+            details: error.message,
+        });
+    }
+});
+
+/**
+ * Fetch a player's available parking slots
+ * @route GET /api/player/:player_id/slots
+ * @param {number} req.params.player_id - The player's ID
+ * @returns {Object} JSON response with total, used, and available slots or error
+ */
+router.get("/player/:player_id/slots", authenticateJWT, async (req, res) => {
+    try {
+        const { player_id } = req.params;
+        console.log(`Fetching slots for player_id: ${player_id}`); // Debug log
+        if (req.user.player_id !== parseInt(player_id)) {
+            return res
+                .status(403)
+                .json({
+                    status: "Error",
+                    message: "Unauthorized access to player data",
+                });
+        }
+
+        // Verify player exists
+        const [playerRows] = await pool.execute(
+            "SELECT id FROM players WHERE player_id = ?",
+            [player_id]
+        );
+        console.log(`Player query result: ${JSON.stringify(playerRows)}`); // Debug log
+        if (playerRows.length === 0) {
+            return res
+                .status(404)
+                .json({ status: "Error", message: "Player not found" });
+        }
+        const playerTableId = playerRows[0].id;
+        console.log(`Using playerTableId: ${playerTableId}`); // Debug log
+
+        // Get total slots from garages (includes lots)
+        const [garageRows] = await pool.execute(
+            "SELECT SUM(capacity) AS total_slots FROM garages WHERE player_id = ?",
+            [playerTableId]
+        );
+        console.log(`Garage query result: ${JSON.stringify(garageRows)}`); // Debug log
+        const total_slots = parseInt(garageRows[0].total_slots) || 0;
+
+        // Count used slots (vehicles)
+        const [vehicleRows] = await pool.execute(
+            "SELECT COUNT(*) AS used_slots FROM vehicles WHERE player_id = ?",
+            [playerTableId]
+        );
+        console.log(`Vehicle query result: ${JSON.stringify(vehicleRows)}`); // Debug log
+        const used_slots = parseInt(vehicleRows[0].used_slots) || 0;
+
+        const available_slots = total_slots - used_slots;
+
+        console.log(
+            `Slots fetch successful: total_slots=${total_slots}, used_slots=${used_slots}, available_slots=${available_slots}`
+        ); // Success log
+        res.status(200).json({
+            status: "Success",
+            total_slots,
+            used_slots,
+            available_slots,
+        });
+    } catch (error) {
+        console.error("Slots fetch failed:", error.message);
+        res.status(500).json({
+            status: "Error",
+            message: "Failed to fetch slots",
             details: error.message,
         });
     }
