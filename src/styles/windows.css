@@ -1,6 +1,11 @@
-/* src/styles/windows.css - Styles for Draggable Windows and Forms */
+/**
+ * windows.css - Styles for draggable and resizable windows in CyberTaxi.
+ * Defines cyberpunk-themed styles for windows, forms, context menus, and browser UI.
+ * Used by Window.tsx, RegisterForm.tsx, AboutWindow.tsx, and CyberBrowser.tsx.
+ * @fileoverview Provides consistent styling for modals and UI elements per GDD v1.1.
+ */
 
-/* Draggable window base styles */
+/* Draggable window base styles for modals */
 .draggable-window {
     position: absolute;
     background: linear-gradient(to bottom right, #2f2f2f, #1a1a1a);
@@ -11,19 +16,44 @@
     font-family: "Orbitron", sans-serif;
     color: #f5f5f5;
     min-width: 200px;
-    max-width: 400px;
     z-index: 1000;
     user-select: none;
     pointer-events: auto;
 }
 
-/* Resizable window styles */
+/* Specific styles for CyberBrowser window */
+#cyber-browser.draggable-window {
+    width: 600px; /* Initial width for larger display */
+}
+
+/* Resizable window styles with custom scrollbars */
 .draggable-window.resizable {
     resize: both;
     overflow: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #00a3e0 #1a1a1a;
 }
 
-/* Window header styles */
+.draggable-window.resizable::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.draggable-window.resizable::-webkit-scrollbar-track {
+    background: #1a1a1a;
+    border: 1px solid #e8b923;
+}
+
+.draggable-window.resizable::-webkit-scrollbar-thumb {
+    background: #00a3e0;
+    border-radius: 4px;
+}
+
+.draggable-window.resizable::-webkit-scrollbar-thumb:hover {
+    background: #d4a017;
+}
+
+/* Window header styles for dragging */
 .window-header {
     display: flex;
     justify-content: space-between;
@@ -249,7 +279,7 @@
 }
 
 .purchase-btn:hover {
-    background: #00a3e0; /* Tesla-inspired blue */
+    background: #00a3e0;
 }
 
 .purchase-status {
@@ -261,7 +291,7 @@
 /* Responsive design */
 @media (max-width: 768px) {
     .draggable-window {
-        max-width: 300px;
+        min-width: 150px;
     }
     .register-form {
         max-width: 300px;

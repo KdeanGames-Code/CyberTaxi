@@ -43,7 +43,7 @@ export const CyberBrowser: React.FC<CyberBrowserProps> = ({
     return (
         <Window
             id="cyber-browser"
-            title="CyberBrowser V1"
+            title="CyberBrowser V1.0 - Tesla: New Vehicle's"
             onClose={onClose}
             isResizable={true}
             initialPosition={{ top: 100, left: 100 }}

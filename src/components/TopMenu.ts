@@ -1,4 +1,13 @@
-// src/components/TopMenu.ts
+/**
+ * TopMenu.ts - Creates the top menu bar for CyberTaxi game.
+ * Includes logo, stats, energy bar, and help button to toggle About window.
+ * @module TopMenu
+ */
+
+/**
+ * Creates the top menu element with logo, stats, energy bar, and help button.
+ * @returns {HTMLDivElement} The top menu container.
+ */
 export function createTopMenu(): HTMLDivElement {
     const topMenu = document.createElement("div");
     topMenu.className = "top-menu";
@@ -28,6 +37,7 @@ export function createTopMenu(): HTMLDivElement {
     </div>
   `;
 
+    // Add click handler for help button to toggle About window
     const helpButton = topMenu.querySelector(".help");
     if (helpButton) {
         helpButton.addEventListener("click", () => {

@@ -179,6 +179,7 @@ const App: React.FC = () => {
 
     return (
         <ErrorBoundary>
+            <AboutPortal />
             <div
                 className="main-container"
                 role="main"

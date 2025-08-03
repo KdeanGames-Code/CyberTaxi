@@ -30,11 +30,13 @@ export const AboutPortal: React.FC<AboutPortalProps> = () => {
 
     // Expose toggle function to global scope for TopMenu.ts
     useEffect(() => {
+        console.log("Setting toggleAboutWindow");
         (window as any).toggleAboutWindow = handleToggle;
         return () => {
+            console.log("Cleaning up toggleAboutWindow");
             delete (window as any).toggleAboutWindow;
         };
-    }, []);
+    }, []); // Empty deps to ensure single setup
 
     return isOpen
         ? createPortal(
@@ -44,7 +46,7 @@ export const AboutPortal: React.FC<AboutPortalProps> = () => {
                       console.log("About window toggled: false");
                   }}
                   style={{ zIndex: 2000 }}
-                  initialPosition={{ top: 75, left: 1000 }}
+                  initialPosition={{ top: 40, left: 400 }}
               />,
               document.getElementById("about-portal")!
           )
