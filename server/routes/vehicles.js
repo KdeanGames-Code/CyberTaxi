@@ -87,7 +87,31 @@ router.post("/vehicles/purchase", authenticateJWT, async (req, res) => {
                 });
         }
 
-        // Verify player exists
+        // Validate status
+        const validStatuses = ["active", "inactive", "maintenance"];
+        if (!validStatuses.includes(status)) {
+            return res
+                .status(400)
+                .json({
+                    status: "Error",
+                    message:
+                        "Invalid status, must be active, inactive, or maintenance",
+                });
+        }
+
+        // Validate type
+        const validTypes = ["Model Y", "Model X", "Model S", "Cybertruck"];
+        if (!validTypes.includes(type)) {
+            return res
+                .status(400)
+                .json({
+                    status: "Error",
+                    message:
+                        "Invalid vehicle type, must be Model Y, Model X, Model S, or Cybertruck",
+                });
+        }
+
+        // Verify player exists and get players.id
         const [playerRows] = await pool.execute(
             "SELECT id FROM players WHERE player_id = ?",
             [player_id]
@@ -97,6 +121,7 @@ router.post("/vehicles/purchase", authenticateJWT, async (req, res) => {
                 .status(404)
                 .json({ status: "Error", message: "Player not found" });
         }
+        const playerTableId = playerRows[0].id; // Use players.id for foreign key
 
         // Check sufficient funds
         const balance = await getUserBalance(player_id);
@@ -118,7 +143,7 @@ router.post("/vehicles/purchase", authenticateJWT, async (req, res) => {
                 "INSERT INTO vehicles (id, player_id, type, status, wear, battery, mileage, cost, lat, lng, purchase_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), NOW())",
                 [
                     vehicle_id,
-                    player_id,
+                    playerTableId,
                     type,
                     status,
                     wear,
@@ -167,10 +192,23 @@ router.post("/vehicles", authenticateJWT, async (req, res) => {
                 .status(400)
                 .json({ status: "Error", message: "Missing required fields" });
         }
+
+        // Verify player exists and get players.id
+        const [playerRows] = await pool.execute(
+            "SELECT id FROM players WHERE player_id = ?",
+            [player_id]
+        );
+        if (playerRows.length === 0) {
+            return res
+                .status(404)
+                .json({ status: "Error", message: "Player not found" });
+        }
+        const playerTableId = playerRows[0].id; // Use players.id for foreign key
+
         const [result] = await pool.execute(
             "INSERT INTO vehicles (player_id, type, status, cost, lat, lng, dest_lat, dest_lng, purchase_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), NOW())",
             [
-                player_id,
+                playerTableId,
                 type,
                 status,
                 cost,
@@ -221,13 +259,14 @@ router.get("/vehicles/:player_id", authenticateJWT, async (req, res) => {
                 .status(404)
                 .json({ status: "Error", message: "Player not found" });
         }
+        const playerTableId = playerRows[0].id;
 
         // Update delivery_timestamp to NULL for active vehicles
         console.log("Updating delivery_timestamp for active vehicles"); // Debug log
         await pool
             .execute(
                 "UPDATE vehicles SET delivery_timestamp = NULL WHERE player_id = ? AND status = ?",
-                [playerRows[0].id, "active"]
+                [playerTableId, "active"]
             )
             .catch((err) => {
                 console.error("Update delivery_timestamp failed:", err.message);
@@ -236,7 +275,7 @@ router.get("/vehicles/:player_id", authenticateJWT, async (req, res) => {
 
         let query =
             "SELECT id, player_id, type, status, wear, battery, mileage, tire_mileage, purchase_date, delivery_timestamp, cost, created_at, updated_at, lat, lng, dest_lat, dest_lng FROM vehicles WHERE player_id = ?";
-        const params = [playerRows[0].id];
+        const params = [playerTableId];
 
         if (status) {
             query += " AND status = ?";
