@@ -222,4 +222,73 @@ router.get("/garages/:player_id", authenticateJWT, async (req, res) => {
     }
 });
 
+/**
+ * Fetch garages for a specific player by username
+ * @route GET /api/player/:username/garages
+ * @param {string} req.params.username - The player's username
+ * @returns {Object} JSON response with array of garages or error
+ */
+router.get("/player/:username/garages", authenticateJWT, async (req, res) => {
+    try {
+        const { username } = req.params;
+        console.log(`Fetching garages for username: ${username}`); // Debug log
+
+        // Map username to player_id
+        const [playerRows] = await pool.execute(
+            "SELECT id, player_id FROM players WHERE username = ?",
+            [username]
+        );
+        if (playerRows.length === 0) {
+            return res
+                .status(404)
+                .json({ status: "Error", message: "Player not found" });
+        }
+        const playerTableId = playerRows[0].id;
+        const player_id = playerRows[0].player_id;
+
+        // Verify authenticated user
+        if (req.user.player_id !== player_id) {
+            return res
+                .status(403)
+                .json({
+                    status: "Error",
+                    message: "Unauthorized access to player data",
+                });
+        }
+
+        const query =
+            "SELECT id, player_id, name, coords, capacity, type, cost_monthly FROM garages WHERE player_id = ?";
+        const params = [playerTableId];
+
+        console.log("Executing query:", query, "with params:", params); // Debug log
+        const startQuery = Date.now();
+        const [rows] = await pool.execute(query, params).catch((err) => {
+            console.error("Query execution failed:", err.message);
+            throw err;
+        });
+        console.log(`Garage query took ${Date.now() - startQuery}ms`); // Timing log
+
+        // Serialize coords as array, convert DECIMAL fields to numbers
+        const serializedRows = rows.map((row) => ({
+            id: row.id,
+            player_id: row.player_id,
+            name: row.name,
+            coords: row.coords ? JSON.parse(row.coords) : null,
+            capacity: row.capacity,
+            type: row.type,
+            cost_monthly: parseFloat(row.cost_monthly) || 0.0,
+        }));
+
+        console.log("Garage fetch successful, rows:", serializedRows.length); // Debug log
+        res.status(200).json({ status: "Success", garages: serializedRows });
+    } catch (error) {
+        console.error("Garage fetch failed:", error.message);
+        res.status(500).json({
+            status: "Error",
+            message: "Failed to fetch garages",
+            details: error.message,
+        });
+    }
+});
+
 module.exports = router;

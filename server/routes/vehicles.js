@@ -325,4 +325,92 @@ router.get("/vehicles/:player_id", authenticateJWT, async (req, res) => {
     }
 });
 
+/**
+ * Fetch vehicles for a specific player by username
+ * @route GET /api/player/:username/vehicles
+ * @param {string} req.params.username - The player's username
+ * @param {string} [req.query.status] - Optional status filter (e.g., 'active')
+ * @returns {Object} JSON response with array of vehicles or error
+ */
+router.get("/player/:username/vehicles", authenticateJWT, async (req, res) => {
+    try {
+        const { username } = req.params;
+        const { status } = req.query;
+        console.log(`Fetching vehicles for username: ${username}`); // Debug log
+
+        // Map username to player_id
+        const [playerRows] = await pool.execute(
+            "SELECT id, player_id FROM players WHERE username = ?",
+            [username]
+        );
+        if (playerRows.length === 0) {
+            return res
+                .status(404)
+                .json({ status: "Error", message: "Player not found" });
+        }
+        const playerTableId = playerRows[0].id;
+        const player_id = playerRows[0].player_id;
+
+        // Verify authenticated user
+        if (req.user.player_id !== player_id) {
+            return res
+                .status(403)
+                .json({
+                    status: "Error",
+                    message: "Unauthorized access to player data",
+                });
+        }
+
+        let query =
+            "SELECT id, player_id, type, status, wear, battery, mileage, tire_mileage, purchase_date, delivery_timestamp, cost, created_at, updated_at, lat, lng, dest_lat, dest_lng FROM vehicles WHERE player_id = ?";
+        const params = [playerTableId];
+
+        if (status) {
+            query += " AND status = ?";
+            params.push(status);
+        }
+
+        console.log("Executing query:", query, "with params:", params); // Debug log
+        const [rows] = await pool.execute(query, params).catch((err) => {
+            console.error("Query execution failed:", err.message);
+            throw err;
+        });
+
+        // Serialize coords and dest as arrays, convert DECIMAL fields to numbers
+        const serializedRows = rows.map((row) => ({
+            id: row.id,
+            player_id: row.player_id,
+            type: row.type,
+            status: row.status,
+            wear: parseFloat(row.wear) || 0.0,
+            battery: parseFloat(row.battery) || 100.0,
+            mileage: parseFloat(row.mileage) || 0.0,
+            tire_mileage: parseFloat(row.tire_mileage) || 0.0,
+            purchase_date: row.purchase_date,
+            delivery_timestamp: row.delivery_timestamp,
+            cost: parseFloat(row.cost) || 0.0,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+            coords:
+                row.lat && row.lng
+                    ? [parseFloat(row.lat), parseFloat(row.lng)]
+                    : null,
+            dest:
+                row.dest_lat && row.dest_lng
+                    ? [parseFloat(row.dest_lat), parseFloat(row.dest_lng)]
+                    : null,
+        }));
+
+        console.log("Vehicle fetch successful, rows:", serializedRows.length); // Debug log
+        res.status(200).json({ status: "Success", vehicles: serializedRows });
+    } catch (error) {
+        console.error("Vehicle fetch failed:", error.message);
+        res.status(500).json({
+            status: "Error",
+            message: "Failed to fetch vehicles",
+            details: error.message,
+        });
+    }
+});
+
 module.exports = router;
