@@ -1,8 +1,8 @@
 /**
  * @file garages.js
- * @description API routes for garage management in CyberTaxi
+ * @description API routes for garage and lot management in CyberTaxi
  * @author CyberTaxi Team
- * @version 0.1.0
+ * @version 0.2.0
  */
 
 const express = require("express");

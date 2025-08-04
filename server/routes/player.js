@@ -2,7 +2,7 @@
  * @file player.js
  * @description API routes for player management in CyberTaxi
  * @author CyberTaxi Team
- * @version 0.1.0
+ * @version 0.1.1
  */
 const express = require("express");
 const router = express.Router();

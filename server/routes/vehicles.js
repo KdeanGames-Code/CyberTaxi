@@ -2,9 +2,8 @@
  * @file vehicles.js
  * @description API routes for vehicle management in CyberTaxi
  * @author CyberTaxi Team
- * @version 0.1.0
+ * @version 0.2.0
  */
-
 const express = require("express");
 const router = express.Router();
 const pool = require("../models/db");
