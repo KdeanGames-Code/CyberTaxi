@@ -1,7 +1,8 @@
 /**
  * main.tsx - Main entry point for CyberTaxi game.
  * Renders map, top menu, registration form, footer, and browser windows.
- * @module main
+ * @module Main
+ * @version 0.2.4
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -34,11 +35,9 @@ import "./styles/global.css";
  */
 class ErrorBoundary extends React.Component<React.PropsWithChildren<{}>> {
     state = { hasError: false };
-
     static getDerivedStateFromError(error: Error) {
         return { hasError: true };
     }
-
     render() {
         if (this.state.hasError) {
             return (
@@ -57,10 +56,12 @@ class ErrorBoundary extends React.Component<React.PropsWithChildren<{}>> {
 const App: React.FC = () => {
     const topMenuRef = useRef<HTMLDivElement>(null);
     const [isBrowserOpen, setIsBrowserOpen] = useState(false);
+    const [isRegisterOpen, setIsRegisterOpen] = useState(true); // Control RegisterForm visibility
 
     // Handle registration window close
     const handleClose = () => {
-        console.log("Registration window closed");
+        console.log("Registration window close triggered");
+        setIsRegisterOpen(false);
     };
 
     // Toggle CyberBrowser
@@ -82,14 +83,12 @@ const App: React.FC = () => {
         if (topMenuRef.current) {
             topMenuRef.current.appendChild(createTopMenu());
         }
-
         const map = L.map("map-area", {
             zoomControl: false,
         }).setView([30.2672, -97.7431], 12);
         createTileLayer("dark").addTo(map);
         map.invalidateSize();
         console.log("Map initialized successfully");
-
         const vehicleClusterGroup = L.markerClusterGroup({
             iconCreateFunction: (cluster) => {
                 const childCount = cluster.getChildCount();
@@ -106,7 +105,6 @@ const App: React.FC = () => {
             },
             maxClusterRadius: 50,
         });
-
         fetchVehicles(1, "active")
             .then((vehicles) => {
                 console.log("Fetched vehicles:", vehicles);
@@ -134,7 +132,6 @@ const App: React.FC = () => {
                 console.error("Failed to fetch vehicles:", error);
                 console.log("No vehicle markers added due to fetch failure.");
             });
-
         console.log("Processing", mockGarages.length, "garage markers");
         mockGarages.forEach((garage) => {
             try {
@@ -150,7 +147,6 @@ const App: React.FC = () => {
                 );
             }
         });
-
         // Test purchase
         localStorage.setItem(
             "player_1",
@@ -171,7 +167,6 @@ const App: React.FC = () => {
             testVehicleData.type
         );
         console.log("Purchase result:", result);
-
         return () => {
             map.remove();
         };
@@ -183,7 +178,7 @@ const App: React.FC = () => {
             <div
                 className="main-container"
                 role="main"
-                aria-label="Main game container"
+                aria-label="Main game interface"
             >
                 <div
                     id="top-menu-container"
@@ -193,12 +188,19 @@ const App: React.FC = () => {
                 <div id="map-area" aria-label="Map area"></div>
                 <div id="about-portal"></div>
                 <CyberFooter />
-                <RegisterForm onClose={handleClose} />
+                {isRegisterOpen && (
+                    <RegisterForm
+                        onClose={() => {
+                            console.log("RegisterForm onClose triggered");
+                            handleClose();
+                        }}
+                    />
+                )}
                 {isBrowserOpen && (
                     <CyberBrowser
                         onClose={() => {
-                            setIsBrowserOpen(false);
                             console.log("Browser closed");
+                            setIsBrowserOpen(false);
                         }}
                         playerId="1"
                     />

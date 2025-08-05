@@ -176,28 +176,6 @@ body {
     color: #d4a017;
 }
 
-/* Context Menu Styles */
-.context-menu {
-    position: fixed;
-    background: #2f2f2f;
-    border: 2px solid #e8b923;
-    border-radius: 4px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-    font-family: "Orbitron", sans-serif;
-    color: #d4a017;
-    z-index: 3000;
-}
-
-.menu-item {
-    padding: 8px;
-    cursor: pointer;
-}
-
-.menu-item:hover {
-    background: #d4a017;
-    color: #1a1a1a;
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
     .main-container {

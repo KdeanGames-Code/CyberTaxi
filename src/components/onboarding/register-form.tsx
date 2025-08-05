@@ -2,7 +2,7 @@
  * register-form.tsx - Renders a non-resizable, draggable login/registration form for CyberTaxi onboarding.
  * Handles user signup via POST /api/auth/signup and login via POST /api/auth/login, stores JWT, and saves form data to localStorage.
  * @module RegisterForm
- * @version 0.2.2
+ * @version 0.2.4
  */
 
 import React, { useState, useEffect } from "react";
@@ -34,16 +34,23 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onClose }) => {
 
     // Auto-populate username from localStorage
     useEffect(() => {
+        console.log("Checking localStorage for username pre-fill");
         const savedData = localStorage.getItem("registerData");
         const token = localStorage.getItem("jwt_token");
         if (token) {
+            console.log("Token found, setting username to Kevin-Dean");
             setFormData((prev) => ({ ...prev, username: "Kevin-Dean" }));
         } else if (savedData) {
-            const parsedData = JSON.parse(savedData);
-            setFormData((prev) => ({
-                ...prev,
-                username: parsedData.username || "",
-            }));
+            try {
+                const parsedData = JSON.parse(savedData);
+                console.log("Parsed registerData:", parsedData);
+                setFormData((prev) => ({
+                    ...prev,
+                    username: parsedData.username || "",
+                }));
+            } catch (error) {
+                console.error("Failed to parse registerData:", error);
+            }
         }
     }, []);
 
@@ -55,9 +62,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onClose }) => {
     // Handle form submission
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setStatus(null); // Clear previous status
+        console.log("Form submitted, mode:", isLoginMode ? "login" : "signup");
         try {
             if (isLoginMode) {
                 // Login mode
+                console.log("Sending POST /api/auth/login with player_id: 1");
                 const response = await fetch("/api/auth/login", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -67,14 +77,13 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onClose }) => {
                     }),
                 });
                 if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+                    const errorText = await response.text();
+                    throw new Error(
+                        `HTTP error! Status: ${response.status}, Details: ${errorText}`
+                    );
                 }
-                let result;
-                try {
-                    result = await response.json();
-                } catch (jsonError) {
-                    throw new Error("Invalid server response: Not valid JSON");
-                }
+                const result = await response.json();
+                console.log("Login response:", result);
                 if (result.status === "Success" && result.token) {
                     localStorage.setItem("jwt_token", result.token);
                     setStatus("Login successful!");
@@ -82,10 +91,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onClose }) => {
                         "Login successful, token stored:",
                         result.token
                     );
-                    setTimeout(() => {
-                        setStatus(null);
-                        onClose();
-                    }, 2000); // Close after 2s
+                    console.log("Calling onClose for login");
+                    onClose();
                 } else {
                     setStatus(
                         `Error: ${result.message || "Unknown server error"}`
@@ -97,6 +104,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onClose }) => {
                 }
             } else {
                 // Signup mode
+                console.log("Saving form data to localStorage:", formData);
                 localStorage.setItem("registerData", JSON.stringify(formData));
                 console.log("Form saved to localStorage:", formData);
                 const response = await fetch("/api/auth/signup", {
@@ -105,14 +113,13 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onClose }) => {
                     body: JSON.stringify(formData),
                 });
                 if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+                    const errorText = await response.text();
+                    throw new Error(
+                        `HTTP error! Status: ${response.status}, Details: ${errorText}`
+                    );
                 }
-                let result;
-                try {
-                    result = await response.json();
-                } catch (jsonError) {
-                    throw new Error("Invalid server response: Not valid JSON");
-                }
+                const result = await response.json();
+                console.log("Signup response:", result);
                 if (result.status === "Success" && result.token) {
                     localStorage.setItem("jwt_token", result.token);
                     setStatus("Registration successful!");
@@ -120,10 +127,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onClose }) => {
                         "Signup successful, token stored:",
                         result.token
                     );
-                    setTimeout(() => {
-                        setStatus(null);
-                        onClose();
-                    }, 2000); // Close after 2s
+                    console.log("Calling onClose for signup");
+                    onClose();
                 } else {
                     setStatus(
                         `Error: ${result.message || "Unknown server error"}`
@@ -149,6 +154,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onClose }) => {
 
     // Toggle between login and signup modes
     const toggleMode = () => {
+        console.log("Toggling to mode:", !isLoginMode ? "login" : "signup");
         setIsLoginMode(!isLoginMode);
         setStatus(null);
     };
@@ -157,7 +163,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onClose }) => {
         <Window
             id="register-window"
             title={isLoginMode ? "CyberTaxi Login" : "Register for CyberTaxi"}
-            onClose={onClose}
+            onClose={() => {
+                console.log("RegisterForm onClose triggered");
+                onClose();
+            }}
             isResizable={false}
         >
             <form
