@@ -1,5 +1,6 @@
-/* src/styles/global.css */
-@import url("/font-awesome/css/all.min.css");
+/* global.css - Global styles for CyberTaxi, including top/bottom menus and layout */
+/* Version 0.2.1 */
+
 @import url("./map.css");
 @import url("./vehicles.css");
 @import url("./windows.css");
