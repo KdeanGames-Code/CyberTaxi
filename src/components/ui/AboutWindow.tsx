@@ -1,6 +1,6 @@
 /**
- * AboutWindow.tsx - Renders a non-resizable, draggable About window for CyberTaxi.
- * Displays game credits and vehicle image, per GDD v1.1.
+ * AboutWindow.tsx - Displays CyberTaxi game credits in a non-resizable, draggable window.
+ * Renders below top menu with a taxi icon, vehicle image, and team credits.
  * @module AboutWindow
  * @version 0.2.1
  */
@@ -22,10 +22,10 @@ interface AboutWindowProps {
 }
 
 /**
- * AboutWindow component renders a cyberpunk-styled About window with game credits.
- * Displays a vehicle image and static content.
+ * AboutWindow component renders a cyberpunk-styled window with game credits.
+ * Includes taxi icon, vehicle image, and developer credits per GDD v1.1.
  * @param {AboutWindowProps} props - Component props.
- * @returns {JSX.Element} Draggable About window.
+ * @returns {JSX.Element} Draggable window with About content.
  */
 export const AboutWindow: React.FC<AboutWindowProps> = ({
     onClose,
@@ -35,24 +35,33 @@ export const AboutWindow: React.FC<AboutWindowProps> = ({
     return (
         <Window
             id="about-window"
-            title="About CyberTaxi"
+            title="About CyberTaxi V 1.0"
             onClose={onClose}
             isResizable={false}
             style={style}
             initialPosition={initialPosition}
         >
             <div className="about-content">
+                {/* Taxi icon and game title */}
                 <div className="about-header">
-                    <i className="fa-solid fa-taxi" aria-hidden="true"></i>
-                    <h2>CyberTaxi</h2>
+                    <i className="fas fa-taxi" aria-label="CyberTaxi Logo"></i>
+                    <h2>CyberTaxi: Own the Roads</h2>
                 </div>
-                <p>A game by Kevin-Dean Livingstone</p>
+                {/* Vehicle image */}
                 <img
-                    src="/vehicle-placeholder.png"
-                    alt="Vehicle placeholder"
+                    src="src/assets/showroom/RoboCab-Showroom.jpg"
+                    alt="RoboCab vehicle"
                     className="about-vehicle"
                 />
-                <p>Version 1.0 - Built with React and Leaflet</p>
+                {/* Developer credits */}
+                <p>Kevin-Dean Livingstone - Game Developer</p>
+                <p>Crafted with wisdom by Grok, created by xAI.</p>
+                {/* Copyright notice */}
+                <p>
+                    CyberTaxi: Own the Roads.
+                    <br /> Copyright 2025 All rights reserved.
+                </p>
+                <p>CyberTaxi Team</p>
             </div>
         </Window>
     );
