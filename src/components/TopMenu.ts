@@ -2,6 +2,7 @@
  * TopMenu.ts - Creates the top menu bar for CyberTaxi game.
  * Includes logo, stats, energy bar, and help button to toggle About window.
  * @module TopMenu
+ * @version 0.2.5
  */
 
 /**
@@ -13,7 +14,6 @@ export function createTopMenu(): HTMLDivElement {
     topMenu.className = "top-menu";
     topMenu.setAttribute("role", "banner");
     topMenu.setAttribute("aria-label", "Game status and controls");
-
     topMenu.innerHTML = `
     <i class="fas fa-taxi logo" role="img" aria-label="CyberTaxi Logo"></i>
     <div class="stats-container" role="region" aria-label="Player statistics">
@@ -36,6 +36,23 @@ export function createTopMenu(): HTMLDivElement {
       <div class="help" role="button" aria-label="Help menu">?</div>
     </div>
   `;
+
+    // Add right-click handler for Taxi logo
+    const logo = topMenu.querySelector(".fa-taxi.logo") as HTMLElement;
+    if (logo) {
+        logo.addEventListener("contextmenu", (e: MouseEvent) => {
+            e.preventDefault();
+            console.log(
+                `Right-click on Taxi icon at x:${e.clientX}, y:${e.clientY}`
+            );
+            const event = new CustomEvent("contextmenu-taxi", {
+                detail: { x: e.clientX, y: e.clientY },
+                bubbles: true,
+            });
+            topMenu.dispatchEvent(event);
+            console.log("contextmenu-taxi dispatched");
+        });
+    }
 
     // Add click handler for help button to toggle About window
     const helpButton = topMenu.querySelector(".help");

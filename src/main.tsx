@@ -1,8 +1,8 @@
 /**
  * main.tsx - Main entry point for CyberTaxi game.
- * Renders map, top menu, registration form, footer, and browser windows.
+ * Renders map, top menu, registration form, footer, browser, and context menu.
  * @module Main
- * @version 0.2.4
+ * @version 0.2.5
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -11,6 +11,7 @@ import { RegisterForm } from "./components/onboarding/register-form";
 import { CyberFooter } from "./components/ui/CyberFooter";
 import { AboutPortal } from "./components/ui/AboutPortal";
 import { CyberBrowser } from "./components/ui/CyberBrowser";
+import { PopupMenu } from "./components/ui/PopupMenu";
 import { createTopMenu } from "./components/TopMenu";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -50,13 +51,15 @@ class ErrorBoundary extends React.Component<React.PropsWithChildren<{}>> {
 
 /**
  * Main App component for CyberTaxi game.
- * Initializes map, top menu, and modals, with purchase test.
+ * Initializes map, top menu, modals, and context menu, with purchase test.
  * @returns {JSX.Element} Main game interface.
  */
 const App: React.FC = () => {
     const topMenuRef = useRef<HTMLDivElement>(null);
     const [isBrowserOpen, setIsBrowserOpen] = useState(false);
-    const [isRegisterOpen, setIsRegisterOpen] = useState(true); // Control RegisterForm visibility
+    const [isRegisterOpen, setIsRegisterOpen] = useState(true);
+    const [isPopupOpen, setIsPopupOpen] = useState(false);
+    const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
 
     // Handle registration window close
     const handleClose = () => {
@@ -64,10 +67,22 @@ const App: React.FC = () => {
         setIsRegisterOpen(false);
     };
 
-    // Toggle CyberBrowser
-    const handleToggleBrowser = () => {
-        setIsBrowserOpen(!isBrowserOpen);
-        console.log("CyberBrowser toggled:", !isBrowserOpen);
+    // Toggle CyberBrowser and PopupMenu
+    const handleToggleBrowser = (e?: MouseEvent) => {
+        if (e) {
+            // Triggered by globe click
+            setPopupPosition({ x: e.clientX, y: e.clientY });
+            setIsPopupOpen(true);
+            console.log(
+                "PopupMenu triggered by globe click at x:",
+                e.clientX,
+                "y:",
+                e.clientY
+            );
+        } else {
+            setIsBrowserOpen(!isBrowserOpen);
+            console.log("CyberBrowser toggled:", !isBrowserOpen);
+        }
     };
 
     // Expose toggle function for CyberFooter
@@ -203,6 +218,28 @@ const App: React.FC = () => {
                             setIsBrowserOpen(false);
                         }}
                         playerId="1"
+                    />
+                )}
+                {isPopupOpen && (
+                    <PopupMenu
+                        position={popupPosition}
+                        items={[
+                            { label: "Tesla", action: "open-tesla" },
+                            {
+                                label: "Real Estate",
+                                action: "open-real-estate",
+                            },
+                        ]}
+                        context="footer"
+                        onClose={() => {
+                            console.log("PopupMenu closed from main.tsx");
+                            setIsPopupOpen(false);
+                        }}
+                        onOpenBrowser={() => {
+                            console.log("Opening CyberBrowser from PopupMenu");
+                            setIsBrowserOpen(true);
+                            setIsPopupOpen(false);
+                        }}
                     />
                 )}
             </div>
