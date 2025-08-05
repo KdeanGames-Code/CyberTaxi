@@ -5,7 +5,7 @@
  * @version 0.2.2
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Window } from "../ui/Window";
 
 /**
@@ -19,19 +19,33 @@ interface RegisterFormProps {
 
 /**
  * RegisterForm component renders a cyberpunk-styled form for user login or registration.
- * Toggles between login and signup modes, submits to respective APIs, and handles JWT storage, per GDD v1.1.
+ * Toggles between login and signup modes, auto-populates username, submits to respective APIs, and handles JWT storage, per GDD v1.1.
  * @param {RegisterFormProps} props - Component props.
  * @returns {JSX.Element} Draggable form window.
  */
 export const RegisterForm: React.FC<RegisterFormProps> = ({ onClose }) => {
     const [isLoginMode, setIsLoginMode] = useState(true);
     const [formData, setFormData] = useState({
-        username: "TestUser",
+        username: "",
         email: "test@example.com",
-        playerId: "1",
         password: "test123",
     });
     const [status, setStatus] = useState<string | null>(null);
+
+    // Auto-populate username from localStorage
+    useEffect(() => {
+        const savedData = localStorage.getItem("registerData");
+        const token = localStorage.getItem("jwt_token");
+        if (token) {
+            setFormData((prev) => ({ ...prev, username: "Kevin-Dean" }));
+        } else if (savedData) {
+            const parsedData = JSON.parse(savedData);
+            setFormData((prev) => ({
+                ...prev,
+                username: parsedData.username || "",
+            }));
+        }
+    }, []);
 
     // Handle input changes
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,14 +62,19 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onClose }) => {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        player_id: formData.playerId,
+                        player_id: "1", // Hardcoded for Kevin-Dean
                         password: formData.password,
                     }),
                 });
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
-                const result = await response.json();
+                let result;
+                try {
+                    result = await response.json();
+                } catch (jsonError) {
+                    throw new Error("Invalid server response: Not valid JSON");
+                }
                 if (result.status === "Success" && result.token) {
                     localStorage.setItem("jwt_token", result.token);
                     setStatus("Login successful!");
@@ -85,8 +104,16 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onClose }) => {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(formData),
                 });
-                const result = await response.json();
-                if (result.status === "Success") {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                let result;
+                try {
+                    result = await response.json();
+                } catch (jsonError) {
+                    throw new Error("Invalid server response: Not valid JSON");
+                }
+                if (result.status === "Success" && result.token) {
                     localStorage.setItem("jwt_token", result.token);
                     setStatus("Registration successful!");
                     console.log(
@@ -129,7 +156,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onClose }) => {
     return (
         <Window
             id="register-window"
-            title="CyberTaxi Login"
+            title={isLoginMode ? "CyberTaxi Login" : "Register for CyberTaxi"}
             onClose={onClose}
             isResizable={false}
         >
@@ -142,12 +169,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onClose }) => {
                 {isLoginMode ? (
                     <>
                         <div className="form-group">
-                            <label htmlFor="playerId">Player ID</label>
+                            <label htmlFor="username">Username</label>
                             <input
                                 type="text"
-                                id="playerId"
-                                name="playerId"
-                                value={formData.playerId}
+                                id="username"
+                                name="username"
+                                value={formData.username}
                                 onChange={handleInputChange}
                                 required
                                 aria-required="true"
