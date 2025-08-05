@@ -1,8 +1,17 @@
-// vite.config.ts
+/**
+ * vite.config.ts - Vite configuration for CyberTaxi frontend development.
+ * Configures development server, plugins, and API proxying for Backend integration.
+ * @fileoverview Ensures seamless dev experience with PWA and API connectivity per GDD v1.1.
+ * @version 0.2.1
+ */
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
+/**
+ * Vite configuration object.
+ */
 export default defineConfig({
     base: "/CyberTaxi/Game/", // Matches web root for asset paths
     plugins: [
@@ -10,7 +19,7 @@ export default defineConfig({
         VitePWA({
             registerType: "autoUpdate", // Auto-register service worker
             includeAssets: [
-                "font-awesome/**",
+                "font-awesome/webfonts/**", // Font Awesome assets at root path
                 "img/**",
                 "*.png",
                 "*.jpg",
@@ -37,7 +46,7 @@ export default defineConfig({
                 ],
             },
             workbox: {
-                globPatterns: ["**/*.{js,css,html,ico,png,svg}"], // Cache essentials
+                globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"], // Cache essentials, include woff2
             },
         }),
     ],
@@ -48,11 +57,22 @@ export default defineConfig({
     server: {
         port: 5173, // Consistent with your setup
         proxy: {
+            // Proxy API requests to Backend server
             "/api": {
                 target: "http://localhost:3000",
                 changeOrigin: true,
-                rewrite: (path) => path.replace(/^\/api/, "/api"),
+                rewrite: (path) => path.replace(/^\/api/, "/api"), // Kept for stability
+                secure: false, // Allow non-HTTPS in dev
                 configure: (proxy) => {
+                    proxy.on("proxyReq", (proxyReq, req) => {
+                        console.log(
+                            "Proxy request:",
+                            req.method,
+                            req.url,
+                            "to",
+                            proxyReq.getHeader("host") + proxyReq.path
+                        );
+                    });
                     proxy.on("proxyRes", (proxyRes) => {
                         console.log(
                             "Proxy response headers:",
