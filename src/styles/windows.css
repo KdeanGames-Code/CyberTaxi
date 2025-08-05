@@ -3,6 +3,7 @@
  * Defines cyberpunk-themed styles for windows, forms, context menus, and browser UI.
  * Used by Window.tsx, RegisterForm.tsx, AboutWindow.tsx, and CyberBrowser.tsx.
  * @fileoverview Provides consistent styling for modals and UI elements per GDD v1.1.
+ * @version 0.2.2
  */
 
 /* Draggable window base styles for modals */
@@ -127,6 +128,33 @@
     font-family: "Orbitron", sans-serif;
     font-weight: bold;
     cursor: pointer;
+}
+
+.toggle-btn {
+    padding: 8px;
+    background: transparent;
+    border: 1px solid #d4a017;
+    border-radius: 4px;
+    color: #d4a017;
+    font-family: "Orbitron", sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.toggle-btn:hover {
+    background: #d4a017;
+    color: #1a1a1a;
+}
+
+.form-status {
+    font-size: 12px;
+    color: #d4a017;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.form-status.error {
+    color: #ff4d4f;
 }
 
 /* Context menu styles for CyberFooter */
@@ -278,7 +306,12 @@
     cursor: pointer;
 }
 
-.purchase-btn:hover {
+.purchase-btn:disabled {
+    background: #4a4a4a;
+    cursor: not-allowed;
+}
+
+.purchase-btn:hover:not(:disabled) {
     background: #00a3e0;
 }
 
