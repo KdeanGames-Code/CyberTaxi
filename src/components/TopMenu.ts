@@ -37,20 +37,20 @@ export function createTopMenu(): HTMLDivElement {
     </div>
   `;
 
-    // Add right-click handler for Taxi logo
+    // Add left-click handler for Taxi logo
     const logo = topMenu.querySelector(".fa-taxi.logo") as HTMLElement;
     if (logo) {
-        logo.addEventListener("contextmenu", (e: MouseEvent) => {
+        logo.addEventListener("click", (e: MouseEvent) => {
             e.preventDefault();
             console.log(
-                `Right-click on Taxi icon at x:${e.clientX}, y:${e.clientY}`
+                `Left-click on Taxi icon at x:${e.clientX}, y:${e.clientY}`
             );
-            const event = new CustomEvent("contextmenu-taxi", {
+            const event = new CustomEvent("click-taxi", {
                 detail: { x: e.clientX, y: e.clientY },
                 bubbles: true,
             });
             topMenu.dispatchEvent(event);
-            console.log("contextmenu-taxi dispatched");
+            console.log("click-taxi dispatched");
         });
     }
 

@@ -1,8 +1,8 @@
 /**
  * PopupMenu.tsx - Renders a dynamic context menu for CyberTaxi UI.
- * Used by CyberFooter.tsx (globe click) and TopMenu.ts (right-click Tesla) with customizable menu items.
+ * Used by CyberFooter.tsx (globe click) and TopMenu.ts (Taxi click) with customizable menu items.
  * @module PopupMenu
- * @version 0.2.5
+ * @version 0.2.6
  */
 
 import React, { useEffect } from "react";
@@ -15,14 +15,14 @@ import "../../styles/windows.css";
  * @property {{ label: string; action: string }[]} items - Menu items with labels and actions.
  * @property {string} context - Context identifier (e.g., 'footer', 'top-menu').
  * @property {() => void} onClose - Callback to close the menu.
- * @property {() => void} onOpenBrowser - Callback to open CyberBrowser.
+ * @property {(action: string) => void} onItemSelect - Callback for item selection.
  */
 interface PopupMenuProps {
     position: { x: number; y: number };
     items: { label: string; action: string }[];
     context: string;
     onClose: () => void;
-    onOpenBrowser: () => void;
+    onItemSelect: (action: string) => void;
 }
 
 /**
@@ -36,7 +36,7 @@ export const PopupMenu: React.FC<PopupMenuProps> = ({
     items,
     context,
     onClose,
-    onOpenBrowser,
+    onItemSelect,
 }) => {
     // Handle outside click to close
     useEffect(() => {
@@ -60,11 +60,7 @@ export const PopupMenu: React.FC<PopupMenuProps> = ({
     // Handle menu item click
     const handleItemClick = (action: string) => {
         console.log(`Menu item clicked for ${context}: ${action}`);
-        if (action === "open-tesla") {
-            onOpenBrowser();
-        } else if (action === "open-real-estate") {
-            console.log("Real Estate action triggered (placeholder)");
-        }
+        onItemSelect(action);
         onClose();
     };
 

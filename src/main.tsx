@@ -2,7 +2,7 @@
  * main.tsx - Main entry point for CyberTaxi game.
  * Renders map, top menu, registration form, footer, browser, and context menu.
  * @module Main
- * @version 0.2.5
+ * @version 0.2.6
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -60,6 +60,10 @@ const App: React.FC = () => {
     const [isRegisterOpen, setIsRegisterOpen] = useState(true);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
+    const [popupContext, setPopupContext] = useState("footer");
+
+    // Check login state
+    const isLoggedIn = !!localStorage.getItem("jwt_token");
 
     // Handle registration window close
     const handleClose = () => {
@@ -70,8 +74,8 @@ const App: React.FC = () => {
     // Toggle CyberBrowser and PopupMenu
     const handleToggleBrowser = (e?: MouseEvent) => {
         if (e) {
-            // Triggered by globe click
             setPopupPosition({ x: e.clientX, y: e.clientY });
+            setPopupContext("footer");
             setIsPopupOpen(true);
             console.log(
                 "PopupMenu triggered by globe click at x:",
@@ -85,11 +89,51 @@ const App: React.FC = () => {
         }
     };
 
-    // Expose toggle function for CyberFooter
+    // Handle Taxi logo click
+    const handleTaxiClick = (e: CustomEvent) => {
+        console.log("click-taxi received at x:", e.detail.x, "y:", e.detail.y);
+        setPopupPosition({ x: e.detail.x, y: e.detail.y });
+        setPopupContext("top-menu");
+        setIsPopupOpen(true);
+    };
+
+    // Handle PopupMenu item selection
+    const handlePopupItemSelect = (action: string) => {
+        console.log(`PopupMenu action selected: ${action}`);
+        if (action === "register" || action === "login") {
+            setIsRegisterOpen(true);
+            setIsPopupOpen(false);
+        } else if (action === "logout") {
+            localStorage.removeItem("jwt_token");
+            localStorage.removeItem("registerData");
+            setIsPopupOpen(false);
+            console.log("Logged out, jwt_token and registerData cleared");
+        } else if (action === "settings") {
+            console.log("Settings action triggered (placeholder)");
+            setIsPopupOpen(false);
+        } else if (action === "open-tesla") {
+            setIsBrowserOpen(true);
+            setIsPopupOpen(false);
+            console.log("Opening CyberBrowser from PopupMenu");
+        } else if (action === "open-real-estate") {
+            console.log("Real Estate action triggered (placeholder)");
+            setIsPopupOpen(false);
+        }
+    };
+
+    // Expose toggle function and listen for click-taxi
     useEffect(() => {
         (window as any).toggleCyberBrowser = handleToggleBrowser;
+        document.addEventListener(
+            "click-taxi",
+            handleTaxiClick as EventListener
+        );
         return () => {
             delete (window as any).toggleCyberBrowser;
+            document.removeEventListener(
+                "click-taxi",
+                handleTaxiClick as EventListener
+            );
         };
     }, []);
 
@@ -223,23 +267,47 @@ const App: React.FC = () => {
                 {isPopupOpen && (
                     <PopupMenu
                         position={popupPosition}
-                        items={[
-                            { label: "Tesla", action: "open-tesla" },
-                            {
-                                label: "Real Estate",
-                                action: "open-real-estate",
-                            },
-                        ]}
-                        context="footer"
+                        items={
+                            popupContext === "top-menu"
+                                ? [
+                                      ...(isLoggedIn
+                                          ? [
+                                                {
+                                                    label: "Logout",
+                                                    action: "logout",
+                                                },
+                                            ]
+                                          : [
+                                                {
+                                                    label: "Register",
+                                                    action: "register",
+                                                },
+                                                {
+                                                    label: "Login",
+                                                    action: "login",
+                                                },
+                                            ]),
+                                      {
+                                          label: "Settings",
+                                          action: "settings",
+                                      },
+                                  ]
+                                : [
+                                      { label: "Tesla", action: "open-tesla" },
+                                      {
+                                          label: "Real Estate",
+                                          action: "open-real-estate",
+                                      },
+                                  ]
+                        }
+                        context={popupContext}
                         onClose={() => {
-                            console.log("PopupMenu closed from main.tsx");
+                            console.log(
+                                `PopupMenu closed from main.tsx for ${popupContext}`
+                            );
                             setIsPopupOpen(false);
                         }}
-                        onOpenBrowser={() => {
-                            console.log("Opening CyberBrowser from PopupMenu");
-                            setIsBrowserOpen(true);
-                            setIsPopupOpen(false);
-                        }}
+                        onItemSelect={handlePopupItemSelect}
                     />
                 )}
             </div>
