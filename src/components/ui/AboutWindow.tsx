@@ -1,7 +1,8 @@
 /**
- * AboutWindow.tsx - Displays CyberTaxi game credits in a non-resizable, draggable window.
- * Renders below top menu with a taxi icon, placeholder image, and team credits.
+ * AboutWindow.tsx - Renders a non-resizable, draggable About window for CyberTaxi.
+ * Displays game credits and vehicle image, per GDD v1.1.
  * @module AboutWindow
+ * @version 0.2.1
  */
 
 import React from "react";
@@ -21,10 +22,10 @@ interface AboutWindowProps {
 }
 
 /**
- * AboutWindow component renders a cyberpunk-styled window with game credits.
- * Includes taxi icon, vehicle image, and developer credits per GDD v1.1.
+ * AboutWindow component renders a cyberpunk-styled About window with game credits.
+ * Displays a vehicle image and static content.
  * @param {AboutWindowProps} props - Component props.
- * @returns {JSX.Element} Draggable window with About content.
+ * @returns {JSX.Element} Draggable About window.
  */
 export const AboutWindow: React.FC<AboutWindowProps> = ({
     onClose,
@@ -34,33 +35,24 @@ export const AboutWindow: React.FC<AboutWindowProps> = ({
     return (
         <Window
             id="about-window"
-            title="About CyberTaxi V 1.0"
+            title="About CyberTaxi"
             onClose={onClose}
             isResizable={false}
             style={style}
             initialPosition={initialPosition}
         >
             <div className="about-content">
-                {/* Taxi icon and game title */}
                 <div className="about-header">
-                    <i className="fas fa-taxi" aria-label="CyberTaxi Logo"></i>
-                    <h2>CyberTaxi: Own the Roads</h2>
+                    <i className="fa-solid fa-taxi" aria-hidden="true"></i>
+                    <h2>CyberTaxi</h2>
                 </div>
-                {/* Vehicle placeholder image */}
+                <p>A game by Kevin-Dean Livingstone</p>
                 <img
-                    src="public/vehicle-placeholder.png"
-                    alt="CyberTaxi vehicle"
+                    src="/vehicle-placeholder.png"
+                    alt="Vehicle placeholder"
                     className="about-vehicle"
                 />
-                {/* Developer credits */}
-                <p>Kevin-Dean Livingstone - Game Developer</p>
-                <p>Crafted with wisdom by Grok, created by xAI.</p>
-                {/* Copyright notice */}
-                <p>
-                    CyberTaxi: Own the Roads.
-                    <br /> Copyright 2025 All rights reserved.
-                </p>
-                <p>CyberTaxi Team</p>
+                <p>Version 1.0 - Built with React and Leaflet</p>
             </div>
         </Window>
     );
