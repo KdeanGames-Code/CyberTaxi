@@ -1,6 +1,17 @@
-// src/components/map/vehicle-markers.ts - Modular Vehicle Markers with API Fetch and JWT Auth
+/**
+ * vehicle-markers.ts - Creates vehicle markers for CyberTaxi map.
+ * Applies grey filter to markers until player is logged in, per GDD v1.1.
+ * Uses .custom-marker, .active-marker, .new-marker, .parked-marker, .vehicle-marker-greyed from vehicles.css.
+ * @module VehicleMarkers
+ * @version 0.2.8
+ */
+
 import L from "leaflet";
 
+/**
+ * Vehicle data structure.
+ * @interface Vehicle
+ */
 export interface Vehicle {
     id: string;
     player_id: number;
@@ -19,214 +30,42 @@ export interface Vehicle {
     updated_at?: string;
 }
 
-// Fallback data for testing
-const fallbackVehicles: Vehicle[] = [
-    {
-        id: "CT-001",
-        player_id: 1,
-        status: "active",
-        coords: [30.226232, -97.815155],
-        dest: [30.284593, -97.734812],
-        wear: 15,
-        battery: 80,
-        type: "Model Y",
-    },
-    {
-        id: "CT-002",
-        player_id: 1,
-        status: "active",
-        coords: [30.267153, -97.74306],
-        dest: [30.194528, -97.669872],
-        wear: 20,
-        battery: 60,
-        type: "Model Y",
-    },
-    {
-        id: "CT-003",
-        player_id: 1,
-        status: "garage",
-        coords: [30.2672, -97.7431],
-        wear: 30,
-        battery: 40,
-        type: "Model X",
-    },
-    {
-        id: "CT-004",
-        player_id: 1,
-        status: "new",
-        coords: [30.2673, -97.743],
-        wear: 0,
-        battery: 100,
-        type: "Model Y",
-    },
-    {
-        id: "CT-005",
-        player_id: 1,
-        status: "active",
-        coords: [30.2668, -97.7665],
-        dest: [30.2723, -97.7457],
-        wear: 10,
-        battery: 90,
-        type: "Model Y",
-    },
-    {
-        id: "CT-006",
-        player_id: 1,
-        status: "active",
-        coords: [30.2496, -97.7474],
-        dest: [30.2711, -97.7409],
-        wear: 12,
-        battery: 35,
-        type: "Model Y",
-    },
-    {
-        id: "CT-007",
-        player_id: 1,
-        status: "parked",
-        coords: [30.2478, -97.7495],
-        wear: 12,
-        battery: 85,
-        type: "Model X",
-    },
-    {
-        id: "CT-008",
-        player_id: 1,
-        status: "active",
-        coords: [30.2671, -97.7432],
-        dest: [30.2668, -97.7665],
-        wear: 47,
-        battery: 80.9,
-        type: "Model Y",
-    },
-    {
-        id: "CT-009",
-        player_id: 1,
-        status: "garage",
-        coords: [30.267, -97.7433],
-        wear: 65,
-        battery: 25,
-        type: "Model X",
-    },
-];
-
+/**
+ * Creates a vehicle marker with grey filter if not logged in.
+ * Uses .custom-marker, .active-marker (fare), .new-marker (new), .parked-marker (parked/charging), .vehicle-marker-greyed (other players) from vehicles.css.
+ * @param {Vehicle} vehicle - Vehicle data.
+ * @returns {L.Marker} Leaflet marker.
+ */
 export function createVehicleMarker(vehicle: Vehicle): L.Marker {
+    const isLoggedIn = !!localStorage.getItem("jwt_token");
+    console.log(
+        `Applying ${isLoggedIn ? "normal" : "grey"} filter to vehicle ${
+            vehicle.id
+        }`
+    );
     const statusClass = `${vehicle.status}-marker`;
-
-    const iconHtml = `<div class="custom-marker ${statusClass}"></div>`;
-
+    const greyClass = isLoggedIn ? "" : " vehicle-marker-greyed";
+    const iconHtml = `<div class="custom-marker ${statusClass}${greyClass}"></div>`;
     const marker = L.marker(vehicle.coords, {
         icon: L.divIcon({
             html: iconHtml,
             iconSize: [15, 15],
             iconAnchor: [7.5, 7.5],
             popupAnchor: [0, -7.5],
-            className: "custom-marker",
+            className: "",
         }),
+        zIndexOffset: 1000, // Ensure above tiles
+        pane: "markerPane", // Explicitly use marker pane
     }).bindPopup(
-        `CyberTaxi ${vehicle.id}<br>Status: ${
+        `CyberTaxi ${vehicle.id}<br>Type: ${vehicle.type}<br>Status: ${
             vehicle.status
         }<br>Wear: ${vehicle.wear.toFixed(
             2
         )}%<br>Battery: ${vehicle.battery.toFixed(2)}%`,
         { className: "custom-popup" }
     );
-
+    console.log(
+        `Marker created for ${vehicle.id} with classes: custom-marker ${statusClass}${greyClass}`
+    );
     return marker;
-}
-
-async function getJwtToken(): Promise<string> {
-    try {
-        const response = await fetch("http://localhost:3000/api/auth/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ player_id: 1, password: "test123" }),
-        });
-        if (!response.ok) {
-            throw new Error(`Auth error: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log("JWT token response:", data); // Debug token response
-        return data.token; // JWT token from response
-    } catch (error) {
-        console.error("JWT token fetch failed:", error);
-        throw error;
-    }
-}
-
-export async function fetchVehicles(
-    playerId: number,
-    status?: string
-): Promise<Vehicle[]> {
-    try {
-        const token = await getJwtToken();
-        const url = `http://localhost:3000/api/vehicles/${playerId}${
-            status ? `?status=${status}` : ""
-        }`;
-        const response = await fetch(url, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
-        if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log("Vehicles API raw response:", data); // Debug full response
-        if (
-            data.status !== "Success" ||
-            !data.vehicles ||
-            !Array.isArray(data.vehicles)
-        ) {
-            console.warn("No vehicles returned in response:", data);
-            return fallbackVehicles; // Use fallback if empty or invalid
-        }
-        const validVehicles = data.vehicles
-            .filter((item: any) => {
-                if (
-                    !item.coords ||
-                    !Array.isArray(item.coords) ||
-                    item.coords.length !== 2 ||
-                    typeof item.coords[0] !== "number" ||
-                    typeof item.coords[1] !== "number"
-                ) {
-                    console.warn(
-                        `Skipping vehicle ${item.id} due to invalid coords:`,
-                        item.coords
-                    );
-                    return false;
-                }
-                return true;
-            })
-            .map((item: any) => ({
-                id: item.id.toString(),
-                player_id: item.player_id,
-                type: item.type,
-                status: item.status as "active" | "parked" | "garage" | "new",
-                coords: [item.coords[0], item.coords[1]] as [number, number],
-                dest: item.dest
-                    ? ([item.dest[0], item.dest[1]] as [number, number])
-                    : null,
-                wear: item.wear,
-                battery: item.battery,
-                mileage: item.mileage,
-                tire_mileage: item.tire_mileage,
-                purchase_date: item.purchase_date,
-                delivery_timestamp: item.delivery_timestamp,
-                cost: item.cost,
-                created_at: item.created_at,
-                updated_at: item.updated_at,
-            }));
-        if (validVehicles.length === 0) {
-            console.warn("No valid vehicles after filtering:", data);
-            return fallbackVehicles; // Use fallback if no valid vehicles
-        }
-        console.log("Valid vehicles fetched:", validVehicles); // Debug valid vehicles
-        return validVehicles;
-    } catch (error) {
-        console.error("Fetch /api/vehicles failed:", error);
-        console.log("Using fallback data.");
-        return fallbackVehicles;
-    }
 }

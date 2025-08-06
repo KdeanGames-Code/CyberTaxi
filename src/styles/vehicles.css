@@ -1,37 +1,42 @@
-/* src/styles/vehicles.css - Markers and Popups for Fleet Visualization */
+/**
+ * vehicles.css - Markers and Popups for Fleet Visualization
+ * @version 0.2.9
+ */
 
-/* Custom Marker Styles - Status Colors and Borders from Mockup */
-.custom-marker div {
+/**
+ * vehicles.css - Markers and Popups for Fleet Visualization
+ * @version 0.2.9
+ */
+
+/* Custom Marker Base Styles */
+.custom-marker {
     width: 15px;
     height: 15px;
     border-radius: 50%;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3),
         inset 0 1px 1px rgba(255, 255, 255, 0.2);
-    display: block;
-    position: relative;
+    position: absolute;
+    z-index: 620; /* Above clusters and tiles */
+    visibility: visible; /* Ensure visibility */
 }
 
 /* Status-Specific Styles for Vehicles */
 .active-marker {
     background-color: #d4a017; /* Gold for active */
 }
-
 .parked-marker {
-    background-color: #ff0000; /* Red for parked */
+    background-color: #ff0000; /* Red for parked or garage */
     border: 2px solid #8b0000; /* Dark red border */
 }
-
-.vehicle-garage-marker {
-    background-color: #ff0000; /* Red for garage vehicles */
-    border: 2px solid #8b0000; /* Dark red border */
-}
-
 .new-marker {
     background-color: #ffffff; /* White for new */
     border: 2px solid #808080; /* Gray border */
 }
+.vehicle-marker-greyed {
+    background-color: #4b0082; /* Dark purple for pre-login */
+}
 
-/* Custom Popup Styles - Dark Gradient with Gold Border from Mockup */
+/* Custom Popup Styles */
 .custom-popup .leaflet-popup-content-wrapper {
     background: linear-gradient(to bottom right, #2f2f2f, #1a1a1a);
     border: 2px solid #e8b923; /* CyberGold border */
@@ -42,34 +47,27 @@
     font-family: "Orbitron", sans-serif;
     font-size: 11px;
     padding: 5px;
-    max-width: 200px; /* Responsive width for mobile */
+    max-width: 200px;
 }
-
 .custom-popup .leaflet-popup-content {
     margin: 5px;
 }
-
 .custom-popup .leaflet-popup-tip {
     background: #2f2f2f;
-    border: 1px solid #e8b923; /* Gold tip border */
+    border: 1px solid #e8b923;
 }
-
 .custom-popup .leaflet-popup-content-wrapper a {
-    color: #d4a017; /* Gold links for cyberpunk vibe */
-}
-
-/* Garage/Lot Marker Styles */
-.garage-marker {
-    z-index: 1000 !important; /* Prioritize over vehicle cluster */
+    color: #d4a017; /* Gold links */
 }
 
 /* Vehicle Cluster Styles */
 .vehicle-cluster-custom {
-    z-index: 500 !important; /* Below garage marker */
+    z-index: 600 !important; /* Above tiles, below markers */
 }
 
+/* Responsive Design */
 @media (max-width: 768px) {
     .custom-popup .leaflet-popup-content-wrapper {
-        max-width: 150px; /* Tighter for mobile */
+        max-width: 150px;
     }
 }

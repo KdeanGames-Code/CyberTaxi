@@ -30,7 +30,7 @@ body {
     grid-template-columns: 40px 2fr 200px;
     grid-template-rows: 1fr;
     gap: 2px;
-    padding: 1px;
+    padding: 0;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6),
         inset 0 2px 4px rgba(255, 255, 255, 0.1);
     align-items: center;
@@ -139,11 +139,13 @@ body {
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: 40px 1fr 40px;
-    height: 100vh;
+    height: 99.3vh;
     position: relative;
     z-index: 1;
-    padding: 0;
+    padding: 0x;
     margin: 0;
+    padding-top: 10px;
+    padding-bottom: 20px;
     overflow: hidden;
 }
 
@@ -153,7 +155,7 @@ body {
     display: flex;
     justify-content: center; /* Center globe */
     align-items: center;
-    padding: 10px;
+    padding: 0px;
     background: linear-gradient(to bottom right, #2f2f2f, #1a1a1a);
     border: 2px solid #e8b923;
     border-radius: 0 0 8px 8px;
@@ -196,4 +198,17 @@ body {
     .energy-bar {
         width: 60px;
     }
+}
+.error-message {
+    position: fixed;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2f2f2f;
+    color: #d4a017;
+    border: 2px solid #e8b923;
+    padding: 10px;
+    border-radius: 6px;
+    z-index: 1000;
+    font-family: "Orbitron", sans-serif;
 }

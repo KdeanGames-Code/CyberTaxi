@@ -1,17 +1,18 @@
 /**
  * register-form.tsx - Renders a non-resizable, draggable login/registration form for CyberTaxi onboarding.
  * Handles user signup via POST /api/auth/signup and login via POST /api/auth/login, stores JWT, and saves form data to localStorage.
+ * Uses username for UI, maps to player_id internally, per GDD v1.1.
  * @module RegisterForm
- * @version 0.2.4
+ * @version 0.2.7
  */
 
 import React, { useState, useEffect } from "react";
 import { Window } from "../ui/Window";
+import "../../styles/windows.css";
 
 /**
  * Props for the RegisterForm component.
  * @interface RegisterFormProps
- * @property {() => void} onClose - Callback to close the form.
  */
 interface RegisterFormProps {
     onClose: () => void;
@@ -19,7 +20,7 @@ interface RegisterFormProps {
 
 /**
  * RegisterForm component renders a cyberpunk-styled form for user login or registration.
- * Toggles between login and signup modes, auto-populates username, submits to respective APIs, and handles JWT storage, per GDD v1.1.
+ * Toggles between login and signup modes, auto-populates username, submits to respective APIs with internal player_id, and handles JWT storage, per GDD v1.1.
  * @param {RegisterFormProps} props - Component props.
  * @returns {JSX.Element} Draggable form window.
  */
@@ -65,79 +66,85 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onClose }) => {
         setStatus(null); // Clear previous status
         console.log("Form submitted, mode:", isLoginMode ? "login" : "signup");
         try {
-            if (isLoginMode) {
-                // Login mode
-                console.log("Sending POST /api/auth/login with player_id: 1");
-                const response = await fetch("/api/auth/login", {
+            const playerId = 1; // Default for Kevin-Dean, adjust if backend provides dynamic mapping
+            const payload = isLoginMode
+                ? { player_id: playerId, password: formData.password }
+                : {
+                      player_id: playerId,
+                      username: formData.username,
+                      email: formData.email,
+                      password: formData.password,
+                  };
+            console.log(
+                `Sending POST /api/auth/${
+                    isLoginMode ? "login" : "signup"
+                } with player_id: ${playerId}, username: ${formData.username}`
+            );
+            const response = await fetch(
+                `http://localhost:3000/api/auth/${
+                    isLoginMode ? "login" : "signup"
+                }`,
+                {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        player_id: "1", // Hardcoded for Kevin-Dean
-                        password: formData.password,
-                    }),
-                });
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(
-                        `HTTP error! Status: ${response.status}, Details: ${errorText}`
-                    );
+                    body: JSON.stringify(payload),
                 }
-                const result = await response.json();
-                console.log("Login response:", result);
-                if (result.status === "Success" && result.token) {
-                    localStorage.setItem("jwt_token", result.token);
-                    setStatus("Login successful!");
-                    console.log(
-                        "Login successful, token stored:",
-                        result.token
-                    );
-                    console.log("Calling onClose for login");
-                    onClose();
-                } else {
-                    setStatus(
-                        `Error: ${result.message || "Unknown server error"}`
-                    );
-                    console.error(
-                        "Login failed:",
-                        result.message || "No message provided"
-                    );
-                }
+            );
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(
+                    `HTTP error! Status: ${response.status}, Details: ${errorText}`
+                );
+            }
+            const result = await response.json();
+            console.log(
+                `${isLoginMode ? "Login" : "Signup"} response:`,
+                result
+            );
+            if (result.status === "Success" && result.token) {
+                localStorage.setItem("jwt_token", result.token);
+                localStorage.setItem(
+                    "username",
+                    formData.username || "Kevin-Dean"
+                );
+                localStorage.setItem("player_id", playerId.toString());
+                localStorage.setItem(
+                    "registerData",
+                    JSON.stringify({
+                        username: formData.username || "Kevin-Dean",
+                        email: formData.email,
+                    })
+                );
+                localStorage.setItem(
+                    "player_1",
+                    JSON.stringify({
+                        player_id: playerId,
+                        username: formData.username || "Kevin-Dean",
+                        fleet: [],
+                        bank_balance: 10000.0,
+                        garages: [],
+                    })
+                );
+                setStatus(
+                    `${isLoginMode ? "Login" : "Registration"} successful!`
+                );
+                console.log(
+                    `${
+                        isLoginMode ? "Login" : "Signup"
+                    } successful, token stored:`,
+                    result.token
+                );
+                console.log(
+                    "Calling onClose for",
+                    isLoginMode ? "login" : "signup"
+                );
+                onClose();
             } else {
-                // Signup mode
-                console.log("Saving form data to localStorage:", formData);
-                localStorage.setItem("registerData", JSON.stringify(formData));
-                console.log("Form saved to localStorage:", formData);
-                const response = await fetch("/api/auth/signup", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(formData),
-                });
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(
-                        `HTTP error! Status: ${response.status}, Details: ${errorText}`
-                    );
-                }
-                const result = await response.json();
-                console.log("Signup response:", result);
-                if (result.status === "Success" && result.token) {
-                    localStorage.setItem("jwt_token", result.token);
-                    setStatus("Registration successful!");
-                    console.log(
-                        "Signup successful, token stored:",
-                        result.token
-                    );
-                    console.log("Calling onClose for signup");
-                    onClose();
-                } else {
-                    setStatus(
-                        `Error: ${result.message || "Unknown server error"}`
-                    );
-                    console.error(
-                        "Signup failed:",
-                        result.message || "No message provided"
-                    );
-                }
+                setStatus(`Error: ${result.message || "Unknown server error"}`);
+                console.error(
+                    `${isLoginMode ? "Login" : "Signup"} failed:`,
+                    result.message || "No message provided"
+                );
             }
         } catch (error) {
             const errorMessage =
@@ -175,73 +182,44 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onClose }) => {
                 role="form"
                 aria-label={isLoginMode ? "Login form" : "Registration form"}
             >
-                {isLoginMode ? (
-                    <>
-                        <div className="form-group">
-                            <label htmlFor="username">Username</label>
-                            <input
-                                type="text"
-                                id="username"
-                                name="username"
-                                value={formData.username}
-                                onChange={handleInputChange}
-                                required
-                                aria-required="true"
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="password">Password</label>
-                            <input
-                                type="password"
-                                id="password"
-                                name="password"
-                                value={formData.password}
-                                onChange={handleInputChange}
-                                required
-                                aria-required="true"
-                            />
-                        </div>
-                    </>
-                ) : (
-                    <>
-                        <div className="form-group">
-                            <label htmlFor="username">Username</label>
-                            <input
-                                type="text"
-                                id="username"
-                                name="username"
-                                value={formData.username}
-                                onChange={handleInputChange}
-                                required
-                                aria-required="true"
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="email">Email</label>
-                            <input
-                                type="email"
-                                id="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleInputChange}
-                                required
-                                aria-required="true"
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="password">Password</label>
-                            <input
-                                type="password"
-                                id="password"
-                                name="password"
-                                value={formData.password}
-                                onChange={handleInputChange}
-                                required
-                                aria-required="true"
-                            />
-                        </div>
-                    </>
+                <div className="form-group">
+                    <label htmlFor="username">Username</label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        value={formData.username}
+                        onChange={handleInputChange}
+                        required
+                        aria-required="true"
+                    />
+                </div>
+                {!isLoginMode && (
+                    <div className="form-group">
+                        <label htmlFor="email">Email</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            required
+                            aria-required="true"
+                        />
+                    </div>
                 )}
+                <div className="form-group">
+                    <label htmlFor="password">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        required
+                        aria-required="true"
+                    />
+                </div>
                 <button
                     type="submit"
                     className="submit-btn"

@@ -1,8 +1,8 @@
 /**
  * Window.tsx - Renders a draggable, optionally resizable window for CyberTaxi UI.
- * Used by RegisterForm.tsx, AboutWindow.tsx, and CyberBrowser.tsx for modal dialogs.
+ * Saves position to localStorage, per GDD v1.1.
  * @module Window
- * @version 0.2.3
+ * @version 0.2.8
  */
 
 import React, { useRef, useEffect } from "react";
@@ -11,13 +11,6 @@ import "../../styles/windows.css";
 /**
  * Props for the Window component.
  * @interface WindowProps
- * @property {string} id - Unique ID for the window.
- * @property {string} title - Window title.
- * @property {() => void} onClose - Callback to close the window.
- * @property {boolean} [isResizable=false] - Whether the window is resizable.
- * @property {React.CSSProperties} [style] - Optional CSS styles.
- * @property {{ top: number; left: number }} [initialPosition] - Initial position for dragging.
- * @property {React.ReactNode} children - Window content.
  */
 interface WindowProps {
     id: string;
@@ -30,8 +23,7 @@ interface WindowProps {
 }
 
 /**
- * Window component renders a cyberpunk-styled, draggable window with optional resizing.
- * Supports close button and ARIA attributes for accessibility, per GDD v1.1.
+ * Window component renders a cyberpunk-styled, draggable window with position saving.
  * @param {WindowProps} props - Component props.
  * @returns {JSX.Element} Draggable window.
  */
@@ -46,7 +38,7 @@ export const Window: React.FC<WindowProps> = ({
 }) => {
     const windowRef = useRef<HTMLDivElement>(null);
 
-    // Handle dragging
+    // Handle dragging and save position
     useEffect(() => {
         const windowEl = windowRef.current;
         if (!windowEl) return;
@@ -57,11 +49,21 @@ export const Window: React.FC<WindowProps> = ({
         let initialX: number;
         let initialY: number;
 
+        // Load saved position
+        const savedPosition = localStorage.getItem(`window_${id}_position`);
+        if (savedPosition) {
+            const { top, left } = JSON.parse(savedPosition);
+            currentX = left;
+            currentY = top;
+            windowEl.style.left = `${currentX}px`;
+            windowEl.style.top = `${currentY}px`;
+        }
+
         const handleMouseDown = (e: MouseEvent) => {
             isDragging = true;
             initialX = e.clientX - currentX;
             initialY = e.clientY - currentY;
-            windowEl.style.zIndex = "1001"; // Bring to front
+            windowEl.style.zIndex = "1001";
             console.log(`Dragging started for window: ${id}`);
         };
 
@@ -77,6 +79,13 @@ export const Window: React.FC<WindowProps> = ({
         const handleMouseUp = () => {
             isDragging = false;
             console.log(`Dragging stopped for window: ${id}`);
+            localStorage.setItem(
+                `window_${id}_position`,
+                JSON.stringify({ top: currentY, left: currentX })
+            );
+            console.log(
+                `Saved window ${id} position: top=${currentY}, left=${currentX}`
+            );
         };
 
         const header = windowEl.querySelector(".window-header") as HTMLElement;
