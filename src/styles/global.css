@@ -1,9 +1,13 @@
-/* global.css - Global styles for CyberTaxi, including top/bottom menus and layout */
-/* Version 0.2.1 */
+/**
+ * global.css - Global styles for CyberTaxi game.
+ * Defines layout, map, and footer styling, per GDD v1.1.
+ * @version 0.2.8
+ */
 
 @import url("./map.css");
 @import url("./vehicles.css");
 @import url("./windows.css");
+@import url("./browser.css");
 
 /* Global and Body Styles */
 html,
