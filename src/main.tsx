@@ -1,8 +1,9 @@
 /**
  * main.tsx - Main entry point for CyberTaxi game.
- * Renders map, top menu, registration form, footer, browser, and context menu.
+ * Renders map, top menu, registration form, footer, browser, and context menu, per GDD v1.1.
+ * Initializes Leaflet map and fetches vehicle data for marker rendering.
  * @module Main
- * @version 0.2.7
+ * @version 0.3.0
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -13,18 +14,20 @@ import { AboutPortal } from "./components/ui/AboutPortal";
 import { CyberBrowser } from "./components/ui/CyberBrowser";
 import { PopupMenu } from "./components/ui/PopupMenu";
 import { createTopMenu } from "./components/TopMenu";
+import { MapManager } from "./components/map/MapManager";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { createTileLayer } from "./components/map/map-tiles";
-import { createVehicleMarker } from "./components/map/vehicle-markers";
-import type { Vehicle } from "./components/map/vehicle-markers";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "leaflet.markercluster";
+import { createTileLayer } from "./components/map/map-tiles";
+import type { Vehicle } from "./components/map/vehicle-markers";
 import "./styles/global.css";
 
 /**
  * Error Boundary Component to catch and display runtime errors.
+ * @class ErrorBoundary
+ * @extends React.Component
  */
 class ErrorBoundary extends React.Component<
     React.PropsWithChildren<{}>,
@@ -53,13 +56,12 @@ class ErrorBoundary extends React.Component<
 
 /**
  * Main App component for CyberTaxi game.
- * Initializes map, top menu, modals, and context menu.
+ * Manages map initialization, vehicle fetching, and UI components.
  * @returns {JSX.Element} Main game interface.
  */
 const App: React.FC = () => {
     const topMenuRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<L.Map | null>(null);
-    const markersRef = useRef<L.MarkerClusterGroup | null>(null);
     const [isBrowserOpen, setIsBrowserOpen] = useState(false);
     const [isRegisterOpen, setIsRegisterOpen] = useState(
         !localStorage.getItem("jwt_token")
@@ -71,8 +73,13 @@ const App: React.FC = () => {
         !!localStorage.getItem("jwt_token")
     );
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+    const [isLoadingVehicles, setIsLoadingVehicles] = useState(true);
 
-    // Update login state
+    /**
+     * Monitors login state and updates UI accordingly.
+     * Listens for storage events to sync login state across tabs.
+     */
     useEffect(() => {
         const checkLogin = () => {
             const loggedIn = !!localStorage.getItem("jwt_token");
@@ -85,7 +92,11 @@ const App: React.FC = () => {
         return () => window.removeEventListener("storage", checkLogin);
     }, []);
 
-    // Decode JWT token for debugging
+    /**
+     * Decodes JWT token for debugging claims.
+     * @param {string} token - JWT token to decode.
+     * @returns {object | null} Decoded token claims or null if invalid.
+     */
     const decodeToken = (token: string) => {
         try {
             const base64Url = token.split(".")[1];
@@ -108,7 +119,11 @@ const App: React.FC = () => {
         }
     };
 
-    // Refresh JWT token
+    /**
+     * Refreshes JWT token on 401/403 errors.
+     * Updates localStorage with new token and player data.
+     * @returns {Promise<string | null>} New token or null if refresh fails.
+     */
     const refreshToken = async () => {
         const playerId = localStorage.getItem("player_id") || "1";
         const username = localStorage.getItem("username") || "Kevin-Dean";
@@ -164,7 +179,13 @@ const App: React.FC = () => {
         }
     };
 
-    // Fetch vehicles from API
+    /**
+     * Fetches player vehicles from the backend API.
+     * Handles retries and token refresh on 401/403 errors.
+     * @param {number} [retries=3] - Number of retry attempts.
+     * @param {number} [delay=1000] - Delay between retries in milliseconds.
+     * @returns {Promise<Vehicle[]>} Array of validated vehicle data.
+     */
     const fetchVehicles = async (
         retries = 3,
         delay = 1000
@@ -375,119 +396,19 @@ const App: React.FC = () => {
         }
     };
 
-    // Render vehicles to map
-    const renderVehicles = (vehicles: Vehicle[]) => {
-        const markers = markersRef.current;
-        const map = mapRef.current;
-        if (!map || !markers) {
-            console.error("Map or markers not initialized");
-            setErrorMessage("Map initialization failed");
-            return;
-        }
-        markers.clearLayers();
-        if (vehicles.length === 0) {
-            console.warn("No player vehicles to render");
-            return;
-        }
-        console.log(
-            "Rendering",
-            vehicles.length,
-            "player vehicles post-login:",
-            vehicles
-        );
-        vehicles.forEach((vehicle: Vehicle) => {
-            try {
-                if (
-                    !vehicle.coords ||
-                    !Array.isArray(vehicle.coords) ||
-                    vehicle.coords.length !== 2 ||
-                    typeof vehicle.coords[0] !== "number" ||
-                    typeof vehicle.coords[1] !== "number" ||
-                    vehicle.coords[0] < -90 ||
-                    vehicle.coords[0] > 90 ||
-                    vehicle.coords[1] < -180 ||
-                    vehicle.coords[1] > 180
-                ) {
-                    console.error(
-                        `Invalid coordinates for vehicle ${vehicle.id}:`,
-                        vehicle.coords
-                    );
-                    return;
-                }
-                console.log("Creating marker for vehicle:", vehicle);
-                const marker = createVehicleMarker(vehicle);
-                console.log(
-                    `Adding vehicle marker for ${vehicle.id} at ${vehicle.coords} with type ${vehicle.type}`
-                );
-                markers.addLayer(marker);
-                // Debug: Add marker directly to map to check visibility
-                map.addLayer(marker);
-                console.log(
-                    `Marker visibility for ${vehicle.id}: added to map and cluster`
-                );
-            } catch (error) {
-                console.error(
-                    `Failed to create vehicle marker for ${vehicle.id}:`,
-                    error
-                );
-            }
-        });
-        console.log(
-            "Vehicle cluster group updated with",
-            vehicles.length,
-            "vehicles"
-        );
-        markers.on("click", (e) => {
-            console.log(
-                "Vehicle cluster clicked:",
-                e.layer.getAllChildMarkers().length,
-                "vehicles"
-            );
-        });
-        map.invalidateSize(); // Force map re-render
-        if (markers.getBounds().isValid()) {
-            map.fitBounds(markers.getBounds(), { padding: [50, 50] }); // Zoom to markers
-            console.log("Map zoomed to marker bounds:", markers.getBounds());
-        } else {
-            console.warn("Invalid marker bounds, skipping fitBounds");
-        }
-    };
-
-    // Handle registration window close and fetch vehicles
+    /**
+     * Handles registration form close and triggers vehicle fetch post-login.
+     */
     const handleClose = () => {
         console.log("Registration window close triggered");
         setIsRegisterOpen(false);
         setIsLoggedIn(!!localStorage.getItem("jwt_token"));
-        if (localStorage.getItem("jwt_token")) {
-            console.log("Triggering vehicle fetch post-login");
-            fetchVehicles().then((vehicles) => {
-                let playerData: any;
-                try {
-                    playerData = JSON.parse(
-                        localStorage.getItem("player_1") || "{}"
-                    );
-                } catch (error) {
-                    console.error("Failed to parse player_1 data:", error);
-                    setErrorMessage("Failed to load player data");
-                    playerData = {
-                        fleet: [],
-                        bank_balance: 10000.0,
-                        garages: [],
-                    };
-                }
-                playerData.fleet = vehicles;
-                localStorage.setItem("player_1", JSON.stringify(playerData));
-                console.log(
-                    "Stored",
-                    vehicles.length,
-                    "vehicles in localStorage"
-                );
-                renderVehicles(vehicles);
-            });
-        }
     };
 
-    // Toggle CyberBrowser and PopupMenu
+    /**
+     * Toggles CyberBrowser or opens PopupMenu on footer globe click.
+     * @param {MouseEvent} [e] - Optional mouse event for PopupMenu positioning.
+     */
     const handleToggleBrowser = (e?: MouseEvent) => {
         if (e) {
             setPopupPosition({ x: e.clientX, y: e.clientY });
@@ -505,7 +426,10 @@ const App: React.FC = () => {
         }
     };
 
-    // Handle Taxi logo click
+    /**
+     * Handles Taxi logo click to open PopupMenu.
+     * @param {CustomEvent} e - Custom event with click coordinates.
+     */
     const handleTaxiClick = (e: CustomEvent) => {
         console.log("click-taxi received at x:", e.detail.x, "y:", e.detail.y);
         setPopupPosition({ x: e.detail.x, y: e.detail.y });
@@ -513,7 +437,10 @@ const App: React.FC = () => {
         setIsPopupOpen(true);
     };
 
-    // Handle PopupMenu item selection
+    /**
+     * Handles PopupMenu item selection actions.
+     * @param {string} action - Selected menu action (e.g., "logout", "open-tesla").
+     */
     const handlePopupItemSelect = (action: string) => {
         console.log(`PopupMenu action selected: ${action}`);
         if (action === "register" || action === "login") {
@@ -543,7 +470,9 @@ const App: React.FC = () => {
         }
     };
 
-    // Expose toggle function and listen for click-taxi
+    /**
+     * Sets up global toggleCyberBrowser and click-taxi event listeners.
+     */
     useEffect(() => {
         (window as any).toggleCyberBrowser = handleToggleBrowser;
         document.addEventListener(
@@ -559,7 +488,9 @@ const App: React.FC = () => {
         };
     }, []);
 
-    // Initialize map and vehicles
+    /**
+     * Initializes top menu and map, fetches vehicles on login.
+     */
     useEffect(() => {
         const appElement = document.getElementById("app");
         if (!appElement) {
@@ -571,72 +502,80 @@ const App: React.FC = () => {
         if (topMenuRef.current) {
             topMenuRef.current.appendChild(createTopMenu());
         }
-        let map: L.Map;
-        try {
-            map = L.map("map-area", {
-                zoomControl: false,
-            }).setView([30.2672, -97.7431], 12);
-            mapRef.current = map;
-            createTileLayer("dark").addTo(map);
-            map.invalidateSize();
-            console.log("Map initialized successfully");
-        } catch (error) {
-            console.error("Failed to initialize Leaflet map:", error);
-            setErrorMessage("Failed to initialize map");
+
+        const mapElement = document.getElementById("map-area");
+        if (!mapElement) {
+            console.error("Map container #map-area not found");
+            setErrorMessage("Map container not found");
             return;
         }
+        console.log("Main map container verified");
 
-        const markers = L.markerClusterGroup({
-            iconCreateFunction: (cluster) => {
-                const childCount = cluster.getChildCount();
-                console.log("Cluster rendering with", childCount, "vehicles");
-                return L.divIcon({
-                    html: `<div class="custom-marker vehicle-cluster-custom" style="background: #D4A017; color: #F5F5F5; border: 2px solid #E8B923; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);">${childCount}</div>`,
-                    className: "",
-                    iconSize: [30, 30],
-                });
-            },
-            maxClusterRadius: 50,
-        });
-        markersRef.current = markers;
-        map.addLayer(markers);
-
-        // Render player vehicles post-login
-        if (isLoggedIn) {
-            console.log("Triggering vehicle fetch on initial load");
-            fetchVehicles().then((vehicles) => {
-                let playerData: any;
-                try {
-                    playerData = JSON.parse(
-                        localStorage.getItem("player_1") || "{}"
-                    );
-                } catch (error) {
-                    console.error("Failed to parse player_1 data:", error);
-                    setErrorMessage("Failed to load player data");
-                    playerData = {
-                        fleet: [],
-                        bank_balance: 10000.0,
-                        garages: [],
-                    };
-                }
-                playerData.fleet = vehicles;
-                localStorage.setItem("player_1", JSON.stringify(playerData));
-                console.log(
-                    "Stored",
-                    vehicles.length,
-                    "vehicles in localStorage"
-                );
-                renderVehicles(vehicles);
-            });
-        } else {
-            console.log("No vehicles rendered pre-login");
+        if (!mapRef.current) {
+            try {
+                mapRef.current = L.map("map-area", {
+                    zoomControl: false,
+                }).setView([30.2672, -97.7431], 12);
+                createTileLayer("dark").addTo(mapRef.current);
+                mapRef.current.invalidateSize();
+                console.log("Main map initialized successfully");
+            } catch (error) {
+                console.error("Failed to initialize Leaflet map:", error);
+                setErrorMessage("Failed to initialize map");
+                return;
+            }
         }
 
         return () => {
             if (mapRef.current) {
                 mapRef.current.remove();
+                mapRef.current = null;
             }
         };
+    }, []);
+
+    /**
+     * Fetches vehicles when logged in and updates state.
+     */
+    useEffect(() => {
+        if (!isLoggedIn) {
+            console.log("No vehicles rendered pre-login");
+            setVehicles([]);
+            setIsLoadingVehicles(false);
+            return;
+        }
+
+        const loadVehicles = async () => {
+            setIsLoadingVehicles(true);
+            console.log("Triggering vehicle fetch on login state change");
+            const fetchedVehicles = await fetchVehicles();
+            console.log(`Vehicles fetched: ${fetchedVehicles.length}`);
+            setVehicles(fetchedVehicles);
+            let playerData: any;
+            try {
+                playerData = JSON.parse(
+                    localStorage.getItem("player_1") || "{}"
+                );
+            } catch (error) {
+                console.error("Failed to parse player_1 data:", error);
+                setErrorMessage("Failed to load player data");
+                playerData = {
+                    fleet: [],
+                    bank_balance: 10000.0,
+                    garages: [],
+                };
+            }
+            playerData.fleet = fetchedVehicles;
+            localStorage.setItem("player_1", JSON.stringify(playerData));
+            console.log(
+                "Stored",
+                fetchedVehicles.length,
+                "vehicles in localStorage"
+            );
+            setIsLoadingVehicles(false);
+        };
+
+        loadVehicles();
     }, [isLoggedIn]);
 
     return (
@@ -656,7 +595,13 @@ const App: React.FC = () => {
                     aria-hidden="true"
                 ></div>
                 <div id="map-area" aria-label="Map area"></div>
-                <div id="about-portal"></div>
+                {!isLoadingVehicles && (
+                    <MapManager
+                        vehicles={vehicles}
+                        setErrorMessage={setErrorMessage}
+                        mapRef={mapRef}
+                    />
+                )}
                 <CyberFooter />
                 {isRegisterOpen && <RegisterForm onClose={handleClose} />}
                 {isBrowserOpen && (
