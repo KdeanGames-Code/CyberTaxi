@@ -3,7 +3,7 @@
  * Renders map, top menu, registration form, footer, browser, and context menu, per GDD v1.1.
  * Initializes Leaflet map and integrates auth/vehicle logic via useAuth and useVehicles hooks.
  * @module Main
- * @version 0.3.3
+ * @version 0.3.10
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -13,7 +13,7 @@ import { CyberFooter } from "./components/ui/CyberFooter";
 import { AboutPortal } from "./components/ui/AboutPortal";
 import { CyberBrowser } from "./components/ui/CyberBrowser";
 import { PopupMenu } from "./components/ui/PopupMenu";
-import { createTopMenu } from "./components/TopMenu";
+import { TopMenu } from "./components/TopMenu";
 import { MapManager } from "./components/map/MapManager";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -70,6 +70,7 @@ const App: React.FC = () => {
     const [registerMode, setRegisterMode] = useState<"login" | "register">(
         "login"
     );
+    const [isFormOpen, setIsFormOpen] = useState(true);
     const { isLoggedIn, handleClose } = useAuth();
     const { vehicles, errorMessage, isLoadingVehicles } =
         useVehicles(isLoggedIn);
@@ -114,11 +115,11 @@ const App: React.FC = () => {
         console.log(`PopupMenu action selected: ${action}`);
         if (action === "register") {
             setRegisterMode("register");
-            handleClose();
+            setIsFormOpen(true);
             setIsPopupOpen(false);
         } else if (action === "login") {
             setRegisterMode("login");
-            handleClose();
+            setIsFormOpen(true);
             setIsPopupOpen(false);
         } else if (action === "logout") {
             localStorage.removeItem("jwt_token");
@@ -126,7 +127,8 @@ const App: React.FC = () => {
             localStorage.removeItem("username");
             localStorage.removeItem("player_id");
             setIsPopupOpen(false);
-            handleClose(); // Trigger useAuth to sync isLoggedIn
+            setIsFormOpen(true);
+            handleClose();
             console.log(
                 "Logged out, jwt_token, registerData, username, and player_id cleared"
             );
@@ -162,17 +164,13 @@ const App: React.FC = () => {
     }, []);
 
     /**
-     * Initializes top menu and map.
+     * Initializes map.
      */
     useEffect(() => {
         const appElement = document.getElementById("app");
         if (!appElement) {
             console.error("Root element #app not found in index.html");
             return;
-        }
-
-        if (topMenuRef.current) {
-            topMenuRef.current.appendChild(createTopMenu());
         }
 
         const mapElement = document.getElementById("map-area");
@@ -205,6 +203,15 @@ const App: React.FC = () => {
         };
     }, []);
 
+    /**
+     * Handles form close action.
+     */
+    const handleFormClose = () => {
+        console.log("Main.tsx handleFormClose triggered");
+        setIsFormOpen(false);
+        handleClose();
+    };
+
     return (
         <ErrorBoundary>
             <AboutPortal />
@@ -212,6 +219,7 @@ const App: React.FC = () => {
                 className="main-container"
                 role="main"
                 aria-label="Main game interface"
+                style={{ position: "relative", zIndex: 0 }}
             >
                 {errorMessage && (
                     <div className="error-message">{errorMessage}</div>
@@ -220,8 +228,14 @@ const App: React.FC = () => {
                     id="top-menu-container"
                     ref={topMenuRef}
                     aria-hidden="true"
+                >
+                    <TopMenu />
+                </div>
+                <div
+                    id="map-area"
+                    style={{ position: "relative", zIndex: 500 }}
+                    aria-label="Map area"
                 ></div>
-                <div id="map-area" aria-label="Map area"></div>
                 {!isLoadingVehicles && isLoggedIn && (
                     <MapManager
                         vehicles={vehicles}
@@ -230,8 +244,11 @@ const App: React.FC = () => {
                     />
                 )}
                 <CyberFooter />
-                {!isLoggedIn && (
-                    <RegisterForm onClose={handleClose} mode={registerMode} />
+                {!isLoggedIn && isFormOpen && (
+                    <RegisterForm
+                        onClose={handleFormClose}
+                        mode={registerMode}
+                    />
                 )}
                 {isBrowserOpen && (
                     <CyberBrowser

@@ -1,8 +1,8 @@
 /**
  * windows.css - Styles for draggable and resizable windows in CyberTaxi.
- * Defines cyberpunk-themed styles for windows, forms, context menus, and browser UI, including RegisterForm validation messages.
+ * Defines cyberpunk-themed styles for windows, forms, context menus, and browser UI, including RegisterForm general error messages.
  * Used by Window.tsx, RegisterForm.tsx, AboutWindow.tsx, and CyberBrowser.tsx, per GDD v1.1.
- * @version 0.2.3
+ * @version 0.2.19
  */
 
 /* Draggable window base styles for modals */
@@ -94,6 +94,7 @@
 .form-group {
     display: flex;
     flex-direction: column;
+    position: relative; /* For error-fallback positioning */
 }
 .form-group label {
     font-size: 12px;
@@ -106,10 +107,14 @@
     background: #1a1a1a;
     color: #f5f5f5;
     font-family: "Orbitron", sans-serif;
+    width: 100%;
 }
 .form-group input:focus {
     outline: none;
     box-shadow: 0 0 5px rgba(212, 160, 23, 0.7);
+}
+.register-form.submitted input:invalid {
+    border-color: #ff4d4f; /* Neon red for invalid inputs after submission */
 }
 .form-actions {
     display: flex;
@@ -156,16 +161,54 @@
 .form-status.error {
     color: #ff4d4f;
 }
-.error-message {
+.error-message.form-error {
     background: #1a2a44; /* Dark teal */
-    color: #ff4d4d; /* Neon red */
+    color: #ff4d4f; /* Neon red */
     font-size: 11px;
     padding: 4px 8px;
-    border: 1px solid #ff4d4d;
+    border: 1px solid #ff4d4f;
     border-radius: 4px;
-    margin: 0;
-    box-shadow: 0 0 5px rgba(255, 77, 77, 0.3); /* Neon red glow */
+    margin-bottom: 10px;
     text-align: center;
+    width: 100%;
+    z-index: 1000;
+}
+
+/* Suppress native validation tooltips */
+input:invalid::-webkit-validation-bubble,
+input:invalid::-webkit-validation-bubble-arrow {
+    display: none;
+}
+
+/* Fallback error messages */
+.error-fallback {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 4px;
+    background: #1a2a44;
+    color: #ff4d4f;
+    font-size: 11px;
+    padding: 4px 8px;
+    border: 1px solid #ff4d4f;
+    border-radius: 4px;
+    box-shadow: 0 0 5px rgba(255, 77, 77, 0.3);
+    z-index: 2000;
+    width: fit-content;
+    max-width: 120px;
+    text-align: left;
+}
+.error-fallback:not(:empty) {
+    display: block !important; /* Show when validationMessages exists */
+}
+.error-fallback::before {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: 10px;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid #ff4d4f;
 }
 
 /* Context menu styles for CyberFooter */
@@ -343,5 +386,20 @@
     }
     .vehicle-image {
         max-width: 150px;
+    }
+    .error-message.form-error {
+        font-size: 10px;
+        padding: 3px 6px;
+    }
+    .error-fallback {
+        font-size: 10px;
+        padding: 3px 6px;
+        max-width: 100px;
+    }
+    .error-fallback::before {
+        left: 8px;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-bottom: 5px solid #ff4d4f;
     }
 }
