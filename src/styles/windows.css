@@ -1,9 +1,8 @@
 /**
  * windows.css - Styles for draggable and resizable windows in CyberTaxi.
- * Defines cyberpunk-themed styles for windows, forms, context menus, and browser UI.
- * Used by Window.tsx, RegisterForm.tsx, AboutWindow.tsx, and CyberBrowser.tsx.
- * @fileoverview Provides consistent styling for modals and UI elements per GDD v1.1.
- * @version 0.2.2
+ * Defines cyberpunk-themed styles for windows, forms, context menus, and browser UI, including RegisterForm validation messages.
+ * Used by Window.tsx, RegisterForm.tsx, AboutWindow.tsx, and CyberBrowser.tsx, per GDD v1.1.
+ * @version 0.2.3
  */
 
 /* Draggable window base styles for modals */
@@ -34,22 +33,18 @@
     scrollbar-width: thin;
     scrollbar-color: #00a3e0 #1a1a1a;
 }
-
 .draggable-window.resizable::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
-
 .draggable-window.resizable::-webkit-scrollbar-track {
     background: #1a1a1a;
     border: 1px solid #e8b923;
 }
-
 .draggable-window.resizable::-webkit-scrollbar-thumb {
     background: #00a3e0;
     border-radius: 4px;
 }
-
 .draggable-window.resizable::-webkit-scrollbar-thumb:hover {
     background: #d4a017;
 }
@@ -64,11 +59,9 @@
     border-bottom: 1px solid #e8b923;
     cursor: grab;
 }
-
 .window-header:active {
     cursor: grabbing;
 }
-
 .window-header h3 {
     margin: 0;
     font-size: 14px;
@@ -82,7 +75,6 @@
     cursor: pointer;
     pointer-events: auto;
 }
-
 .close-btn:hover {
     color: #00a3e0;
 }
@@ -99,17 +91,14 @@
     gap: 10px;
     padding: 10px;
 }
-
 .form-group {
     display: flex;
     flex-direction: column;
 }
-
 .form-group label {
     font-size: 12px;
     color: #d4a017;
 }
-
 .form-group input {
     padding: 5px;
     border: 1px solid #e8b923;
@@ -118,7 +107,15 @@
     color: #f5f5f5;
     font-family: "Orbitron", sans-serif;
 }
-
+.form-group input:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(212, 160, 23, 0.7);
+}
+.form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
 .submit-btn {
     padding: 8px;
     background: #d4a017;
@@ -129,7 +126,13 @@
     font-weight: bold;
     cursor: pointer;
 }
-
+.submit-btn:hover {
+    background: #e8b923;
+}
+.submit-btn:disabled {
+    background: #4a4a4a;
+    cursor: not-allowed;
+}
 .toggle-btn {
     padding: 8px;
     background: transparent;
@@ -140,21 +143,29 @@
     font-size: 12px;
     cursor: pointer;
 }
-
 .toggle-btn:hover {
     background: #d4a017;
     color: #1a1a1a;
 }
-
 .form-status {
     font-size: 12px;
     color: #d4a017;
     text-align: center;
     margin-top: 10px;
 }
-
 .form-status.error {
     color: #ff4d4f;
+}
+.error-message {
+    background: #1a2a44; /* Dark teal */
+    color: #ff4d4d; /* Neon red */
+    font-size: 11px;
+    padding: 4px 8px;
+    border: 1px solid #ff4d4d;
+    border-radius: 4px;
+    margin: 0;
+    box-shadow: 0 0 5px rgba(255, 77, 77, 0.3); /* Neon red glow */
+    text-align: center;
 }
 
 /* Context menu styles for CyberFooter */
@@ -168,13 +179,11 @@
     color: #d4a017;
     z-index: 3000;
 }
-
 .menu-item {
     padding: 8px;
     cursor: pointer;
     font-size: 12px;
 }
-
 .menu-item:hover {
     background: #d4a017;
     color: #1a1a1a;
@@ -184,7 +193,6 @@
 .footer-icon {
     position: relative;
 }
-
 .footer-icon:hover::after {
     content: "CyberBrowser V1";
     position: absolute;
@@ -212,25 +220,21 @@
     color: #d4a017;
     text-align: center;
 }
-
 .about-header {
     display: flex;
     align-items: center;
     gap: 10px;
     justify-content: center;
 }
-
 .about-header .fa-taxi {
     font-size: 20px;
     color: #d4a017;
 }
-
 .about-header h2 {
     font-size: 16px;
     color: #d4a017;
     margin: 0;
 }
-
 .about-vehicle {
     width: 100%;
     max-width: 200px;
@@ -246,12 +250,10 @@
     gap: 10px;
     padding: 10px;
 }
-
 .url-bar {
     display: flex;
     align-items: center;
 }
-
 .url-bar input {
     width: 100%;
     padding: 5px;
@@ -262,19 +264,16 @@
     font-family: "Orbitron", sans-serif;
     font-size: 12px;
 }
-
 .purchase-section {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
-
 .vehicle-options {
     display: flex;
     gap: 10px;
     justify-content: space-around;
 }
-
 .vehicle-card {
     flex: 1;
     padding: 10px;
@@ -283,18 +282,15 @@
     border-radius: 4px;
     text-align: center;
 }
-
 .vehicle-card h4 {
     margin: 0;
     font-size: 14px;
     color: #d4a017;
 }
-
 .vehicle-card p {
     margin: 5px 0;
     font-size: 12px;
 }
-
 .purchase-btn {
     padding: 8px;
     background: #d4a017;
@@ -305,22 +301,18 @@
     font-weight: bold;
     cursor: pointer;
 }
-
 .purchase-btn:disabled {
     background: #4a4a4a;
     cursor: not-allowed;
 }
-
 .purchase-btn:hover:not(:disabled) {
     background: #00a3e0;
 }
-
 .purchase-status {
     font-size: 12px;
     color: #d4a017;
     text-align: center;
 }
-
 .vehicle-image {
     width: 100%;
     max-width: 200px;

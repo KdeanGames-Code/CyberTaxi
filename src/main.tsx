@@ -3,7 +3,7 @@
  * Renders map, top menu, registration form, footer, browser, and context menu, per GDD v1.1.
  * Initializes Leaflet map and integrates auth/vehicle logic via useAuth and useVehicles hooks.
  * @module Main
- * @version 0.3.2
+ * @version 0.3.3
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -67,6 +67,9 @@ const App: React.FC = () => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
     const [popupContext, setPopupContext] = useState("footer");
+    const [registerMode, setRegisterMode] = useState<"login" | "register">(
+        "login"
+    );
     const { isLoggedIn, handleClose } = useAuth();
     const { vehicles, errorMessage, isLoadingVehicles } =
         useVehicles(isLoggedIn);
@@ -109,7 +112,12 @@ const App: React.FC = () => {
      */
     const handlePopupItemSelect = (action: string) => {
         console.log(`PopupMenu action selected: ${action}`);
-        if (action === "register" || action === "login") {
+        if (action === "register") {
+            setRegisterMode("register");
+            handleClose();
+            setIsPopupOpen(false);
+        } else if (action === "login") {
+            setRegisterMode("login");
             handleClose();
             setIsPopupOpen(false);
         } else if (action === "logout") {
@@ -222,7 +230,9 @@ const App: React.FC = () => {
                     />
                 )}
                 <CyberFooter />
-                {!isLoggedIn && <RegisterForm onClose={handleClose} />}
+                {!isLoggedIn && (
+                    <RegisterForm onClose={handleClose} mode={registerMode} />
+                )}
                 {isBrowserOpen && (
                     <CyberBrowser
                         onClose={() => {

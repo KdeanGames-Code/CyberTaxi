@@ -2,10 +2,10 @@
  * PopupMenu.tsx - Renders a dynamic context menu for CyberTaxi UI.
  * Used by CyberFooter.tsx (globe click) and TopMenu.ts (Taxi click) with customizable menu items.
  * @module PopupMenu
- * @version 0.2.6
+ * @version 0.2.7
  */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import "../../styles/windows.css";
 
 /**
@@ -38,26 +38,34 @@ export const PopupMenu: React.FC<PopupMenuProps> = ({
     onClose,
     onItemSelect,
 }) => {
-    // Handle outside click to close
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    /**
+     * Closes menu on outside click.
+     */
     useEffect(() => {
         const handleOutsideClick = (e: MouseEvent) => {
-            const menu = document.querySelector(".context-menu");
-            if (menu && !menu.contains(e.target as Node)) {
+            if (
+                menuRef.current &&
+                !menuRef.current.contains(e.target as Node)
+            ) {
                 console.log(`PopupMenu closed for ${context}: outside click`);
                 onClose();
             }
         };
-
-        document.addEventListener("click", handleOutsideClick);
+        document.addEventListener("mousedown", handleOutsideClick);
         console.log(
             `PopupMenu opened for ${context} at x:${position.x}, y:${position.y}`
         );
         return () => {
-            document.removeEventListener("click", handleOutsideClick);
+            document.removeEventListener("mousedown", handleOutsideClick);
         };
     }, [context, onClose, position]);
 
-    // Handle menu item click
+    /**
+     * Handles menu item click.
+     * @param {string} action - Action associated with the menu item.
+     */
     const handleItemClick = (action: string) => {
         console.log(`Menu item clicked for ${context}: ${action}`);
         onItemSelect(action);
@@ -68,6 +76,7 @@ export const PopupMenu: React.FC<PopupMenuProps> = ({
         <div
             className="context-menu"
             style={{ top: position.y, left: position.x }}
+            ref={menuRef}
             role="menu"
             aria-label={`Context menu for ${context}`}
         >
