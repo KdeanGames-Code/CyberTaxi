@@ -2,6 +2,7 @@
  * AboutPortal.tsx - Manages React portal for rendering AboutWindow below top menu.
  * Toggles visibility and positions window with draggable support.
  * @module AboutPortal
+ * @version 0.3.0
  */
 
 import React, { useState, useEffect } from "react";
@@ -17,18 +18,27 @@ interface AboutPortalProps {}
 /**
  * AboutPortal component renders AboutWindow in a portal, positioned below top menu.
  * Exposes toggle function globally for TopMenu.ts to control visibility.
- * @returns {JSX.Element | null} Portal with AboutWindow or null if closed.
+ * Ensures portal container exists before rendering.
+ * @returns {JSX.Element | null} Portal with AboutWindow or null if closed or container missing.
  */
 export const AboutPortal: React.FC<AboutPortalProps> = () => {
     const [isOpen, setIsOpen] = useState(false);
 
-    // Toggle About window
+    /**
+     * Toggles the About window visibility.
+     * @returns {void}
+     */
     const handleToggle = () => {
-        setIsOpen(!isOpen);
-        console.log("About window toggled:", !isOpen);
+        setIsOpen((prev) => {
+            console.log(`About window toggled: ${!prev}`);
+            return !prev;
+        });
     };
 
-    // Expose toggle function to global scope for TopMenu.ts
+    /**
+     * Sets up global toggleAboutWindow function for TopMenu.ts.
+     * Cleans up on unmount to prevent memory leaks.
+     */
     useEffect(() => {
         console.log("Setting toggleAboutWindow");
         (window as any).toggleAboutWindow = handleToggle;
@@ -36,19 +46,36 @@ export const AboutPortal: React.FC<AboutPortalProps> = () => {
             console.log("Cleaning up toggleAboutWindow");
             delete (window as any).toggleAboutWindow;
         };
-    }, []); // Empty deps to ensure single setup
+    }, []); // Empty deps for single setup
 
-    return isOpen
-        ? createPortal(
-              <AboutWindow
-                  onClose={() => {
-                      setIsOpen(false);
-                      console.log("About window toggled: false");
-                  }}
-                  style={{ zIndex: 2000 }}
-                  initialPosition={{ top: 40, left: 400 }}
-              />,
-              document.getElementById("about-portal")!
-          )
-        : null;
+    /**
+     * Verifies portal container exists before rendering.
+     * @returns {HTMLElement | null} Portal container element or null if not found.
+     */
+    const getPortalContainer = () => {
+        const container = document.getElementById("about-portal");
+        if (container) {
+            console.log("About portal container verified");
+        } else {
+            console.error("About portal container #about-portal not found");
+        }
+        return container;
+    };
+
+    const container = getPortalContainer();
+    if (!isOpen || !container) {
+        return null;
+    }
+
+    return createPortal(
+        <AboutWindow
+            onClose={() => {
+                setIsOpen(false);
+                console.log("About window toggled: false");
+            }}
+            style={{ zIndex: 2000 }}
+            initialPosition={{ top: 40, left: 400 }}
+        />,
+        container
+    );
 };
