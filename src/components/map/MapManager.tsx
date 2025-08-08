@@ -165,8 +165,12 @@ export const MapManager: React.FC<MapManagerProps> = ({
     // Render vehicles when vehicles or markers are ready
     useEffect(() => {
         console.log(`MapManager received ${vehicles.length} vehicles`);
-        if (!mapRef.current || !markersRef.current) {
-            console.log("Skipping render: map or markers not ready");
+        if (!mapRef.current || !markersRef.current || vehicles.length === 0) {
+            if (vehicles.length === 0) {
+                console.log("Skipping empty vehicle render");
+            } else {
+                console.log("Skipping render: map or markers not ready");
+            }
             return;
         }
         renderVehicles(vehicles);
