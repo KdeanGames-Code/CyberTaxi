@@ -3,7 +3,7 @@
  * Handles user signup via POST /api/auth/signup and login via POST /api/auth/login/username, stores JWT, and saves form data to localStorage.
  * Uses username for UI, maps to player_id internally, per GDD v1.1.
  * @module RegisterForm
- * @version 0.2.42
+ * @version 0.2.44
  */
 
 import React, { useState, useEffect, useRef } from "react";
@@ -11,19 +11,30 @@ import type { FormEvent } from "react";
 import { Window } from "../ui/Window";
 import "../../styles/windows.css";
 
+/**
+ * Props for RegisterForm component.
+ * @interface RegisterFormProps
+ */
 interface RegisterFormProps {
     onClose: () => void;
     mode?: "login" | "register";
 }
 
+/**
+ * Renders the login/registration form with validation and API integration.
+ * @param props - Component props.
+ * @returns JSX.Element - Form window.
+ */
 export const RegisterForm: React.FC<RegisterFormProps> = ({
     onClose,
     mode = "login",
 }) => {
     const [formMode, setFormMode] = useState<"login" | "register">(mode);
     const [formData, setFormData] = useState({
-        username: "",
-        email: "test@example.com",
+        username: localStorage.getItem("username") || "",
+        email: localStorage.getItem("registerData")
+            ? JSON.parse(localStorage.getItem("registerData")!).email
+            : "test@example.com",
         password: "test123",
     });
     const [formError, setFormError] = useState<string>("");
@@ -39,6 +50,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     const emailRef = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
 
+    /**
+     * Pre-fills form with stored credentials from localStorage.
+     */
     useEffect(() => {
         console.log("Checking localStorage for username pre-fill");
         const savedData = localStorage.getItem("registerData");
@@ -61,6 +75,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         }
     }, []);
 
+    /**
+     * Syncs form mode and resets state when mode prop changes.
+     */
     useEffect(() => {
         setFormMode(mode);
         setFormError("");
@@ -72,36 +89,54 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         });
     }, [mode]);
 
+    /**
+     * Logs validation message updates.
+     */
     useEffect(() => {
         console.log("Validation messages updated:", validationMessages);
     }, [validationMessages]);
 
+    /**
+     * Handles input changes and clears validation errors.
+     * @param e - Input change event.
+     */
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
-        setValidationMessages((prev) => ({ ...prev, [name]: "" }));
+        setValidationMessages((prev) => ({ ...prev, [name as string]: "" }));
         setFormError("");
         if (e.target) {
             e.target.setCustomValidity("");
         }
     };
 
+    /**
+     * Sets custom validation messages for invalid inputs.
+     * @param e - Invalid event.
+     */
     const handleInvalid = (e: React.InvalidEvent<HTMLInputElement>) => {
         const input = e.currentTarget;
-        console.log(`Invalid event triggered for ${input.name}`);
+        const name = input.name as string; // Type assertion to ensure string
+        console.log(`Invalid event triggered for ${name}`);
         let message = "";
         if (input.validity.valueMissing) {
-            message = `Please enter a ${input.name}`;
-        } else if (input.name === "email") {
+            message = `Please enter a ${name}`;
+        } else if (name === "email") {
             const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
             if (!emailRegex.test(input.value)) {
                 message = "Please enter a valid email (e.g., user@example.com)";
             }
         }
         input.setCustomValidity(message);
-        setValidationMessages((prev) => ({ ...prev, [input.name]: message }));
+        setValidationMessages((prev) => ({ ...prev, [name]: message }));
     };
 
+    /**
+     * Attempts login with username and password.
+     * @param username - User’s username.
+     * @param password - User’s password.
+     * @returns Promise<boolean> - True if login succeeds.
+     */
     const attemptLogin = async (username: string, password: string) => {
         try {
             console.log(`Attempting login with username: ${username}`);
@@ -157,6 +192,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         }
     };
 
+    /**
+     * Handles form submission for login or signup.
+     * Attempts auto-login on 409 error during signup.
+     * @param e - Form submit event.
+     */
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         console.log(`Form submitted, mode: ${formMode}`);
@@ -175,7 +215,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
                 !ref.current.validity.valid &&
                 ref.current.name
             ) {
-                const name = ref.current.name;
+                const name = ref.current.name as string; // Type assertion
                 let message = "";
                 if (ref.current.validity.valueMissing) {
                     message = `Please enter a ${name}`;
@@ -297,6 +337,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         }
     };
 
+    /**
+     * Toggles between login and register modes.
+     */
     const toggleMode = () => {
         console.log(
             "Toggling to mode:",
@@ -307,8 +350,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         setIsSubmitted(false);
         setValidationMessages({});
         setFormData({
-            username: "",
-            email: "test@example.com",
+            username: localStorage.getItem("username") || "",
+            email: localStorage.getItem("registerData")
+                ? JSON.parse(localStorage.getItem("registerData")!).email
+                : "test@example.com",
             password: "test123",
         });
         [usernameRef, emailRef, passwordRef].forEach((ref) => {
@@ -316,6 +361,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         });
     };
 
+    /**
+     * Closes the form window.
+     */
     const handleWindowClose = () => {
         console.log("RegisterForm close button triggered");
         onClose();

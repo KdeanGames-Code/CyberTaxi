@@ -1,9 +1,9 @@
 /**
  * main.tsx - Main entry point for CyberTaxi game.
  * Renders map, top menu, registration form, footer, browser, and context menu, per GDD v1.1.
- * Initializes Leaflet map and integrates auth/vehicle logic via useAuth and useVehicles hooks.
+ * Initializes Leaflet map, manages auth/vehicle logic via useAuth and useVehicles hooks, and handles auto-login.
  * @module Main
- * @version 0.3.16
+ * @version 0.3.17
  */
 import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
@@ -24,15 +24,26 @@ import { useAuth } from "./components/auth/useAuth";
 import { useVehicles } from "./components/vehicles/useVehicles";
 import "./styles/global.css";
 
+/**
+ * Error boundary component to catch and display runtime errors.
+ * @interface ErrorBoundaryProps
+ */
 interface ErrorBoundaryProps {
     children: React.ReactNode;
 }
 
+/**
+ * State for ErrorBoundary component.
+ * @interface ErrorBoundaryState
+ */
 interface ErrorBoundaryState {
     hasError: boolean;
     error: Error | null;
 }
 
+/**
+ * ErrorBoundary class to handle runtime errors with a fallback UI.
+ */
 class ErrorBoundary extends React.Component<
     ErrorBoundaryProps,
     ErrorBoundaryState
@@ -42,11 +53,19 @@ class ErrorBoundary extends React.Component<
         error: null,
     };
 
+    /**
+     * Updates state when an error is caught.
+     * @param error - The caught error.
+     * @returns Updated state.
+     */
     static getDerivedStateFromError(error: Error): ErrorBoundaryState {
         console.error("ErrorBoundary caught error:", error);
         return { hasError: true, error };
     }
 
+    /**
+     * Resets error state to retry rendering.
+     */
     resetError = () => {
         this.setState({ hasError: false, error: null });
     };
@@ -83,8 +102,13 @@ class ErrorBoundary extends React.Component<
     }
 }
 
+/**
+ * Main App component for CyberTaxi.
+ * Manages UI state, map initialization, and auto-login on app load.
+ * @returns JSX.Element - Main game interface.
+ */
 const App: React.FC = () => {
-    const { isLoggedIn, handleClose } = useAuth(); // Moved up
+    const { isLoggedIn, handleClose } = useAuth();
     const { vehicles, errorMessage, isLoadingVehicles } =
         useVehicles(isLoggedIn);
     const topMenuRef = useRef<HTMLDivElement>(null);
@@ -100,11 +124,67 @@ const App: React.FC = () => {
     );
     const [isFormOpen, setIsFormOpen] = useState(!isLoggedIn);
 
+    /**
+     * Attempts auto-login using stored credentials from localStorage.
+     */
+    useEffect(() => {
+        const token = localStorage.getItem("jwt_token");
+        const username = localStorage.getItem("username");
+        const savedData = localStorage.getItem("registerData");
+        if (token && username && savedData) {
+            console.log("Attempting auto-login with stored credentials");
+            fetch("http://localhost:3000/api/auth/login/username", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ username, password: "test123" }), // Password not stored; use placeholder or prompt
+            })
+                .then((response) => {
+                    if (!response.ok) throw new Error("Auto-login failed");
+                    return response.json();
+                })
+                .then((result) => {
+                    if (result.status === "Success" && result.token) {
+                        console.log(
+                            "Auto-login successful, token refreshed:",
+                            result.token
+                        );
+                        localStorage.setItem("jwt_token", result.token);
+                        if (result.player_id) {
+                            localStorage.setItem(
+                                "player_id",
+                                result.player_id.toString()
+                            );
+                        }
+                        setIsFormOpen(false);
+                    }
+                })
+                .catch((error) => {
+                    console.error("Auto-login error:", error);
+                    localStorage.removeItem("jwt_token");
+                    setIsFormOpen(true);
+                    setRegisterMode("login");
+                });
+        } else {
+            setIsFormOpen(true);
+            setRegisterMode("login");
+        }
+    }, []);
+
+    /**
+     * Syncs form visibility and mode with login state.
+     */
     useEffect(() => {
         setIsFormOpen(!isLoggedIn);
-        setRegisterMode(isLoggedIn ? "login" : "register");
+        setRegisterMode(isLoggedIn ? "login" : "login");
     }, [isLoggedIn]);
 
+    /**
+     * Toggles CyberBrowser or opens PopupMenu on footer globe click.
+     * @param e - Optional mouse event for PopupMenu positioning.
+     */
     const handleToggleBrowser = (e?: MouseEvent) => {
         if (e) {
             setPopupPosition({ x: e.clientX, y: e.clientY });
@@ -122,6 +202,10 @@ const App: React.FC = () => {
         }
     };
 
+    /**
+     * Handles taxi logo click to open PopupMenu.
+     * @param e - Custom event with click coordinates.
+     */
     const handleTaxiClick = (e: CustomEvent) => {
         console.log("click-taxi received at x:", e.detail.x, "y:", e.detail.y);
         setPopupPosition({ x: e.detail.x, y: e.detail.y });
@@ -129,6 +213,10 @@ const App: React.FC = () => {
         setIsPopupOpen(true);
     };
 
+    /**
+     * Handles PopupMenu item selections.
+     * @param action - Selected menu action (e.g., "logout", "login").
+     */
     const handlePopupItemSelect = (action: string) => {
         console.log(`PopupMenu action selected: ${action}`);
         if (action === "register") {
@@ -164,12 +252,18 @@ const App: React.FC = () => {
         }
     };
 
+    /**
+     * Closes the registration/login form.
+     */
     const handleFormClose = () => {
         console.log("Main.tsx handleFormClose triggered");
         setIsFormOpen(false);
         handleClose();
     };
 
+    /**
+     * Sets up global event listeners for CyberBrowser and taxi click.
+     */
     useEffect(() => {
         (window as any).toggleCyberBrowser = handleToggleBrowser;
         document.addEventListener(
@@ -185,6 +279,9 @@ const App: React.FC = () => {
         };
     }, []);
 
+    /**
+     * Initializes Leaflet map with dark tiles.
+     */
     useEffect(() => {
         const mapElement = document.getElementById("map-area");
         if (!mapElement) {
@@ -211,6 +308,9 @@ const App: React.FC = () => {
         };
     }, []);
 
+    /**
+     * Invalidates map size when UI components change visibility.
+     */
     useEffect(() => {
         if (mapRef.current) {
             mapRef.current.invalidateSize();
