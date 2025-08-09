@@ -1,11 +1,11 @@
 /**
  * MapManager.tsx - Manages vehicle marker rendering and clustering for the CyberTaxi map.
- * Integrates with Leaflet map initialized in main.tsx, rendering player and non-player vehicles as markers with clustering, per GDD v1.1.
+ * Integrates with Leaflet map initialized in main.tsx, rendering player and non-player vehicles in a single cluster, per GDD v1.1.
  * Uses /api/player/:username/vehicles for player vehicles and /api/vehicles/others for non-player vehicles.
  * @module MapManager
- * @version 0.3.4
+ * @version 0.3.5
  */
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import type { LatLngTuple, Map, MarkerClusterGroup } from "leaflet";
 import "leaflet.markercluster";
@@ -23,7 +23,7 @@ interface MapManagerProps {
 }
 
 /**
- * Renders vehicle markers on a Leaflet map with clustering for player and non-player vehicles.
+ * Renders vehicle markers on a Leaflet map with a single cluster for player and non-player vehicles.
  * @param props - Component props.
  * @returns null - No DOM output, manages markers only.
  */
@@ -32,19 +32,19 @@ export const MapManager: React.FC<MapManagerProps> = ({
     setErrorMessage,
     mapRef,
 }) => {
-    const playerClusterRef = useRef<MarkerClusterGroup | null>(null);
-    const otherClusterRef = useRef<MarkerClusterGroup | null>(null);
+    const clusterRef = useRef<MarkerClusterGroup | null>(null);
+    const [otherVehicles, setOtherVehicles] = useState<Vehicle[]>([]);
 
     /**
-     * Initializes marker cluster groups for player and non-player vehicles.
+     * Initializes a single marker cluster group for all vehicles.
      */
     useEffect(() => {
-        if (mapRef.current && !playerClusterRef.current) {
-            playerClusterRef.current = L.markerClusterGroup({
+        if (mapRef.current && !clusterRef.current) {
+            clusterRef.current = L.markerClusterGroup({
                 iconCreateFunction: (cluster) => {
                     const childCount = cluster.getChildCount();
                     console.log(
-                        `Player cluster rendering with ${childCount} vehicles`
+                        `Cluster rendering with ${childCount} vehicles`
                     );
                     return L.divIcon({
                         html: `<div class="custom-marker vehicle-cluster-custom" style="background: #D4A017; color: #F5F5F5; border: 2px solid #E8B923; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);">${childCount}</div>`,
@@ -54,41 +54,19 @@ export const MapManager: React.FC<MapManagerProps> = ({
                 },
                 maxClusterRadius: 50,
             });
-            mapRef.current.addLayer(playerClusterRef.current);
-            console.log("Marker cluster initialized for player vehicles");
-        }
-        if (mapRef.current && !otherClusterRef.current) {
-            otherClusterRef.current = L.markerClusterGroup({
-                iconCreateFunction: (cluster) => {
-                    const childCount = cluster.getChildCount();
-                    console.log(
-                        `Other cluster rendering with ${childCount} vehicles`
-                    );
-                    return L.divIcon({
-                        html: `<div class="custom-marker vehicle-cluster-custom" style="background: #4b0082; color: #F5F5F5; border: 2px solid #E8B923; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);">${childCount}</div>`,
-                        className: "",
-                        iconSize: [30, 30],
-                    });
-                },
-                maxClusterRadius: 50,
-            });
-            mapRef.current.addLayer(otherClusterRef.current);
-            console.log("Marker cluster initialized for other vehicles");
+            mapRef.current.addLayer(clusterRef.current);
+            console.log("Marker cluster initialized for all vehicles");
         }
         return () => {
-            if (mapRef.current && playerClusterRef.current) {
-                mapRef.current.removeLayer(playerClusterRef.current);
-                playerClusterRef.current = null;
-            }
-            if (mapRef.current && otherClusterRef.current) {
-                mapRef.current.removeLayer(otherClusterRef.current);
-                otherClusterRef.current = null;
+            if (mapRef.current && clusterRef.current) {
+                mapRef.current.removeLayer(clusterRef.current);
+                clusterRef.current = null;
             }
         };
     }, [mapRef]);
 
     /**
-     * Fetches and renders non-player vehicles from /api/vehicles/others.
+     * Fetches non-player vehicles from /api/vehicles/others.
      */
     useEffect(() => {
         const fetchOtherVehicles = async () => {
@@ -119,14 +97,9 @@ export const MapManager: React.FC<MapManagerProps> = ({
                     "Other vehicles API response:",
                     JSON.stringify(data, null, 2)
                 );
-                if (
-                    data.status === "Success" &&
-                    otherClusterRef.current &&
-                    mapRef.current
-                ) {
-                    otherClusterRef.current.clearLayers();
-                    data.vehicles.forEach((vehicle: Vehicle) => {
-                        if (
+                if (data.status === "Success") {
+                    const validVehicles = data.vehicles.filter(
+                        (vehicle: Vehicle) =>
                             vehicle.coords &&
                             Array.isArray(vehicle.coords) &&
                             vehicle.coords.length === 2 &&
@@ -136,24 +109,11 @@ export const MapManager: React.FC<MapManagerProps> = ({
                             vehicle.coords[0] <= 90 &&
                             vehicle.coords[1] >= -180 &&
                             vehicle.coords[1] <= 180
-                        ) {
-                            const marker = createVehicleMarker(
-                                vehicle,
-                                "other"
-                            );
-                            otherClusterRef.current!.addLayer(marker);
-                            console.log(
-                                `Adding other vehicle marker for ${vehicle.id} at ${vehicle.coords}`
-                            );
-                        } else {
-                            console.warn(
-                                `Invalid coordinates for other vehicle ${vehicle.id}:`,
-                                vehicle.coords
-                            );
-                        }
-                    });
-                    mapRef.current.addLayer(otherClusterRef.current);
-                    console.log("Other vehicle cluster group added to map");
+                    );
+                    setOtherVehicles(validVehicles);
+                    console.log(
+                        `Fetched ${validVehicles.length} valid non-player vehicles`
+                    );
                 } else {
                     console.error("Other vehicles fetch failed:", data.message);
                     setErrorMessage(
@@ -178,31 +138,31 @@ export const MapManager: React.FC<MapManagerProps> = ({
     }, [mapRef, setErrorMessage]);
 
     /**
-     * Renders player vehicles and adjusts map view.
+     * Renders all vehicles (player and non-player) in a single cluster and adjusts map view.
      */
     useEffect(() => {
-        console.log(`MapManager received ${vehicles.length} vehicles`);
-        if (
-            !mapRef.current ||
-            !playerClusterRef.current ||
-            vehicles.length === 0
-        ) {
-            if (vehicles.length === 0) {
-                console.log("Skipping empty vehicle render");
-            } else {
-                console.log("Skipping render: map or player markers not ready");
-            }
+        console.log(
+            `MapManager received ${vehicles.length} player vehicles and ${otherVehicles.length} non-player vehicles`
+        );
+        if (!mapRef.current || !clusterRef.current) {
+            console.log("Skipping render: map or cluster not ready");
             return;
         }
 
-        playerClusterRef.current.clearLayers();
+        clusterRef.current.clearLayers();
+        const allVehicles = [...vehicles, ...otherVehicles];
+        if (allVehicles.length === 0) {
+            console.log("Skipping empty vehicle render");
+            return;
+        }
+
         console.log(
-            `Rendering ${vehicles.length} player vehicles post-login:`,
-            vehicles
+            `Rendering ${allVehicles.length} vehicles (player and non-player):`,
+            allVehicles
         );
 
         const bounds: LatLngTuple[] = [];
-        vehicles.forEach((vehicle) => {
+        allVehicles.forEach((vehicle, index) => {
             if (
                 vehicle.coords &&
                 Array.isArray(vehicle.coords) &&
@@ -214,11 +174,15 @@ export const MapManager: React.FC<MapManagerProps> = ({
                 vehicle.coords[1] >= -180 &&
                 vehicle.coords[1] <= 180
             ) {
-                console.log("Creating marker for vehicle:", vehicle);
-                const marker = createVehicleMarker(vehicle, "player");
-                playerClusterRef.current!.addLayer(marker);
+                const type = index < vehicles.length ? "player" : "other";
                 console.log(
-                    `Adding vehicle marker for ${vehicle.id} at ${vehicle.coords} with type ${vehicle.type}`
+                    `Creating marker for vehicle ${vehicle.id} (${type}):`,
+                    vehicle
+                );
+                const marker = createVehicleMarker(vehicle, type);
+                clusterRef.current!.addLayer(marker);
+                console.log(
+                    `Adding vehicle marker for ${vehicle.id} at ${vehicle.coords} with type ${vehicle.type} (${type})`
                 );
                 console.log(
                     `Marker visibility for ${vehicle.id}: added to map and cluster`
@@ -232,42 +196,23 @@ export const MapManager: React.FC<MapManagerProps> = ({
             }
         });
 
+        console.log(`Cluster rendering with ${allVehicles.length} vehicles`);
+        mapRef.current.addLayer(clusterRef.current);
         console.log(
-            `Player cluster rendering with ${vehicles.length} vehicles`
-        );
-        mapRef.current.addLayer(playerClusterRef.current);
-        console.log(
-            `Vehicle cluster group updated with ${vehicles.length} vehicles`
+            `Vehicle cluster group updated with ${allVehicles.length} vehicles`
         );
 
-        playerClusterRef.current.on("clusterclick", (e) => {
+        clusterRef.current.on("clusterclick", (e) => {
             console.log(
-                `Player cluster click handled: ${
+                `Cluster click handled: ${
                     e.layer.getAllChildMarkers().length
                 } vehicles`
             );
         });
-        playerClusterRef.current.on("click", (e) => {
+        clusterRef.current.on("click", (e) => {
             if (!e.layer.getAllChildMarkers) {
                 console.log(
-                    `Player single marker clicked: vehicle ID ${
-                        (e.layer.options as any).vehicleId || "unknown"
-                    }`
-                );
-            }
-        });
-
-        otherClusterRef.current?.on("clusterclick", (e) => {
-            console.log(
-                `Other cluster click handled: ${
-                    e.layer.getAllChildMarkers().length
-                } vehicles`
-            );
-        });
-        otherClusterRef.current?.on("click", (e) => {
-            if (!e.layer.getAllChildMarkers) {
-                console.log(
-                    `Other single marker clicked: vehicle ID ${
+                    `Single marker clicked: vehicle ID ${
                         (e.layer.options as any).vehicleId || "unknown"
                     }`
                 );
@@ -283,15 +228,13 @@ export const MapManager: React.FC<MapManagerProps> = ({
                 mapRef.current.getBounds()
             );
         } else {
-            console.warn(
-                "No valid bounds for player vehicles, skipping fitBounds"
-            );
+            console.warn("No valid bounds for vehicles, skipping fitBounds");
         }
         console.log(
-            `Marker rendering completed for ${vehicles.length} vehicles`
+            `Marker rendering completed for ${allVehicles.length} vehicles`
         );
-        console.log(`MapManager rendered ${vehicles.length} vehicles`);
-    }, [vehicles, mapRef]);
+        console.log(`MapManager rendered ${allVehicles.length} vehicles`);
+    }, [vehicles, otherVehicles, mapRef]);
 
     return null;
 };
