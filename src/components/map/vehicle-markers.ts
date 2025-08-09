@@ -1,11 +1,10 @@
 /**
  * vehicle-markers.ts - Creates vehicle markers for CyberTaxi map.
- * Applies grey filter to markers until player is logged in, per GDD v1.1.
- * Uses .custom-marker, .active-marker, .new-marker, .parked-marker, .vehicle-marker-greyed from vehicles.css.
+ * Applies styles for player and non-player vehicles, per GDD v1.1.
+ * Uses .custom-marker, .active-marker, .new-marker, .parked-marker, .vehicle-marker-others from vehicles.css.
  * @module VehicleMarkers
- * @version 0.2.8
+ * @version 0.3.1
  */
-
 import L from "leaflet";
 
 /**
@@ -31,21 +30,29 @@ export interface Vehicle {
 }
 
 /**
- * Creates a vehicle marker with grey filter if not logged in.
- * Uses .custom-marker, .active-marker (fare), .new-marker (new), .parked-marker (parked/charging), .vehicle-marker-greyed (other players) from vehicles.css.
- * @param {Vehicle} vehicle - Vehicle data.
- * @returns {L.Marker} Leaflet marker.
+ * Extended MarkerOptions interface to include vehicleId.
+ * @interface CustomMarkerOptions
  */
-export function createVehicleMarker(vehicle: Vehicle): L.Marker {
-    const isLoggedIn = !!localStorage.getItem("jwt_token");
-    console.log(
-        `Applying ${isLoggedIn ? "normal" : "grey"} filter to vehicle ${
-            vehicle.id
-        }`
-    );
+interface CustomMarkerOptions extends L.MarkerOptions {
+    vehicleId?: string;
+}
+
+/**
+ * Creates a vehicle marker for player or non-player vehicles.
+ * Applies grey filter (.vehicle-marker-others) for non-player vehicles when logged in.
+ * @param vehicle - Vehicle data.
+ * @param type - Marker type ("player" or "other").
+ * @returns L.Marker - Configured marker.
+ */
+export function createVehicleMarker(
+    vehicle: Vehicle,
+    type: "player" | "other"
+): L.Marker {
+    console.log(`Applying ${type} filter to vehicle ${vehicle.id}`);
     const statusClass = `${vehicle.status}-marker`;
-    const greyClass = isLoggedIn ? "" : " vehicle-marker-greyed";
-    const iconHtml = `<div class="custom-marker ${statusClass}${greyClass}"></div>`;
+    const typeClass =
+        type === "player" ? "vehicle-marker" : "vehicle-marker-others";
+    const iconHtml = `<div class="custom-marker ${statusClass} ${typeClass}"></div>`;
     const marker = L.marker(vehicle.coords, {
         icon: L.divIcon({
             html: iconHtml,
@@ -54,18 +61,21 @@ export function createVehicleMarker(vehicle: Vehicle): L.Marker {
             popupAnchor: [0, -7.5],
             className: "",
         }),
-        zIndexOffset: 1000, // Ensure above tiles
-        pane: "markerPane", // Explicitly use marker pane
-    }).bindPopup(
-        `CyberTaxi ${vehicle.id}<br>Type: ${vehicle.type}<br>Status: ${
-            vehicle.status
-        }<br>Wear: ${vehicle.wear.toFixed(
-            2
-        )}%<br>Battery: ${vehicle.battery.toFixed(2)}%`,
+        zIndexOffset: 1000, // Above tiles
+        pane: "markerPane", // Explicit marker pane
+        vehicleId: vehicle.id, // Store vehicleId for click events
+    } as CustomMarkerOptions).bindPopup(
+        `<b>${vehicle.type} (${
+            type === "player" ? "Your Vehicle" : "Other Player"
+        })</b><br>
+        ID: ${vehicle.id}<br>
+        Status: ${vehicle.status}<br>
+        Battery: ${vehicle.battery}%<br>
+        Mileage: ${vehicle.mileage || 0}`,
         { className: "custom-popup" }
     );
     console.log(
-        `Marker created for ${vehicle.id} with classes: custom-marker ${statusClass}${greyClass}`
+        `Marker created for ${vehicle.id} with classes: custom-marker ${statusClass} ${typeClass}`
     );
     return marker;
 }

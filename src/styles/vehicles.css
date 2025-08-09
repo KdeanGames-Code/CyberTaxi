@@ -1,11 +1,7 @@
 /**
- * vehicles.css - Markers and Popups for Fleet Visualization
- * @version 0.2.9
- */
-
-/**
- * vehicles.css - Markers and Popups for Fleet Visualization
- * @version 0.2.9
+ * vehicles.css - Styles for vehicle markers on CyberTaxi map.
+ * Defines styles for player and non-player vehicle markers and popups, per GDD v1.1.
+ * @version 0.3.0
  */
 
 /* Custom Marker Base Styles */
@@ -32,8 +28,8 @@
     background-color: #ffffff; /* White for new */
     border: 2px solid #808080; /* Gray border */
 }
-.vehicle-marker-greyed {
-    background-color: #4b0082; /* Dark purple for pre-login */
+.vehicle-marker-others {
+    background-color: #4b0082; /* Dark purple for non-player vehicles */
 }
 
 /* Custom Popup Styles */
