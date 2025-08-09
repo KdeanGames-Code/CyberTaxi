@@ -2,7 +2,7 @@
  * @file vehicles.js
  * @description API routes for vehicle management in CyberTaxi
  * @author CyberTaxi Team
- * @version 0.2.0
+ * @version 0.3.0
  */
 const express = require("express");
 const router = express.Router();
@@ -26,7 +26,6 @@ const authenticateJWT = (req, res, next) => {
             .status(401)
             .json({ status: "Error", message: "No token provided" });
     }
-
     try {
         const decoded = jwt.verify(
             token,
@@ -36,15 +35,95 @@ const authenticateJWT = (req, res, next) => {
         next();
     } catch (error) {
         console.error("JWT verification failed:", error.message);
-        return res
-            .status(403)
-            .json({
-                status: "Error",
-                message: "Invalid token",
-                details: error.message,
-            });
+        return res.status(403).json({
+            status: "Error",
+            message: "Invalid token",
+            details: error.message,
+        });
     }
 };
+
+/**
+ * Fetch all vehicles except those of the authenticated player
+ * @route GET /api/vehicles/others
+ * @param {string} [req.query.status] - Optional status filter (e.g., 'active')
+ * @returns {Object} JSON response with array of vehicles or error
+ */
+router.get("/vehicles/others", authenticateJWT, async (req, res) => {
+    try {
+        const { status } = req.query;
+        console.log(
+            `Fetching other players' vehicles for authenticated player_id: ${req.user.player_id}`
+        ); // Debug log
+
+        // Get playerTableId for authenticated player
+        const [playerRows] = await pool.execute(
+            "SELECT id FROM players WHERE player_id = ?",
+            [req.user.player_id]
+        );
+        console.log(`Player query result: ${JSON.stringify(playerRows)}`); // Debug log
+        if (playerRows.length === 0) {
+            console.log(`No player found for player_id: ${req.user.player_id}`);
+            return res
+                .status(404)
+                .json({ status: "Error", message: "Player not found" });
+        }
+        const playerTableId = playerRows[0].id;
+        console.log(`Using playerTableId: ${playerTableId}`); // Debug log
+
+        let query =
+            "SELECT id, type, status, wear, battery, mileage, tire_mileage, purchase_date, delivery_timestamp, cost, lat, lng, dest_lat, dest_lng FROM vehicles WHERE player_id != ?";
+        const params = [playerTableId];
+
+        if (status) {
+            query += " AND status = ?";
+            params.push(status);
+        }
+
+        console.log("Executing query:", query, "with params:", params); // Debug log
+        const startQuery = Date.now();
+        const [rows] = await pool.execute(query, params).catch((err) => {
+            console.error("Query execution failed:", err.message);
+            throw err;
+        });
+        console.log(`Vehicle query took ${Date.now() - startQuery}ms`); // Debug log
+
+        // Serialize coords and dest as arrays, convert DECIMAL fields to numbers
+        const serializedRows = rows.map((row) => ({
+            id: row.id,
+            type: row.type,
+            status: row.status,
+            wear: parseFloat(row.wear) || 0.0,
+            battery: parseFloat(row.battery) || 100.0,
+            mileage: parseFloat(row.mileage) || 0.0,
+            tire_mileage: parseFloat(row.tire_mileage) || 0.0,
+            purchase_date: row.purchase_date,
+            delivery_timestamp: row.delivery_timestamp,
+            cost: parseFloat(row.cost) || 0.0,
+            coords:
+                row.lat && row.lng
+                    ? [parseFloat(row.lat), parseFloat(row.lng)]
+                    : null,
+            dest:
+                row.dest_lat && row.dest_lng
+                    ? [parseFloat(row.dest_lat), parseFloat(row.dest_lng)]
+                    : null,
+        }));
+
+        console.log(
+            "Other vehicles fetch successful, rows:",
+            serializedRows.length
+        ); // Debug log
+        res.status(200).json({ status: "Success", vehicles: serializedRows });
+    } catch (error) {
+        console.error("Other vehicles fetch failed:", error.message);
+        res.status(500).json({
+            status: "Error",
+            message: "Failed to fetch other vehicles",
+            details: error.message,
+        });
+    }
+});
 
 /**
  * Purchase a new vehicle for a player
@@ -70,7 +149,6 @@ router.post("/vehicles/purchase", authenticateJWT, async (req, res) => {
                 .status(400)
                 .json({ status: "Error", message: "Missing required fields" });
         }
-
         // Validate coords format
         if (
             !Array.isArray(coords) ||
@@ -78,38 +156,29 @@ router.post("/vehicles/purchase", authenticateJWT, async (req, res) => {
             typeof coords[0] !== "number" ||
             typeof coords[1] !== "number"
         ) {
-            return res
-                .status(400)
-                .json({
-                    status: "Error",
-                    message: "Invalid coords format, must be [lat, lng]",
-                });
+            return res.status(400).json({
+                status: "Error",
+                message: "Invalid coords format, must be [lat, lng]",
+            });
         }
-
         // Validate status
         const validStatuses = ["active", "inactive", "maintenance"];
         if (!validStatuses.includes(status)) {
-            return res
-                .status(400)
-                .json({
-                    status: "Error",
-                    message:
-                        "Invalid status, must be active, inactive, or maintenance",
-                });
+            return res.status(400).json({
+                status: "Error",
+                message:
+                    "Invalid status, must be active, inactive, or maintenance",
+            });
         }
-
         // Validate type
         const validTypes = ["Model Y", "Model X", "Model S", "Cybertruck"];
         if (!validTypes.includes(type)) {
-            return res
-                .status(400)
-                .json({
-                    status: "Error",
-                    message:
-                        "Invalid vehicle type, must be Model Y, Model X, Model S, or Cybertruck",
-                });
+            return res.status(400).json({
+                status: "Error",
+                message:
+                    "Invalid vehicle type, must be Model Y, Model X, Model S, or Cybertruck",
+            });
         }
-
         // Verify player exists and get players.id
         const [playerRows] = await pool.execute(
             "SELECT id FROM players WHERE player_id = ?",
@@ -121,7 +190,6 @@ router.post("/vehicles/purchase", authenticateJWT, async (req, res) => {
                 .json({ status: "Error", message: "Player not found" });
         }
         const playerTableId = playerRows[0].id; // Use players.id for foreign key
-
         // Check sufficient funds
         const balance = await getUserBalance(player_id);
         if (balance < parseFloat(cost)) {
@@ -129,13 +197,11 @@ router.post("/vehicles/purchase", authenticateJWT, async (req, res) => {
                 .status(400)
                 .json({ status: "Error", message: "Insufficient funds" });
         }
-
         // Generate vehicle_id
         const [maxId] = await pool.execute(
             "SELECT COALESCE(MAX(id), 0) + 1 AS new_id FROM vehicles"
         );
         const vehicle_id = `CT-${String(maxId[0].new_id).padStart(3, "0")}`;
-
         // Insert new vehicle
         const [result] = await pool
             .execute(
@@ -157,13 +223,11 @@ router.post("/vehicles/purchase", authenticateJWT, async (req, res) => {
                 console.error("Insert failed:", err.message);
                 throw err;
             });
-
         // Update player balance
         await pool.execute(
             "UPDATE players SET bank_balance = bank_balance - ? WHERE player_id = ?",
             [parseFloat(cost), player_id]
         );
-
         console.log("Vehicle purchased:", vehicle_id); // Success log
         res.status(201).json({ success: true, vehicle_id });
     } catch (error) {
@@ -191,7 +255,6 @@ router.post("/vehicles", authenticateJWT, async (req, res) => {
                 .status(400)
                 .json({ status: "Error", message: "Missing required fields" });
         }
-
         // Verify player exists and get players.id
         const [playerRows] = await pool.execute(
             "SELECT id FROM players WHERE player_id = ?",
@@ -203,7 +266,6 @@ router.post("/vehicles", authenticateJWT, async (req, res) => {
                 .json({ status: "Error", message: "Player not found" });
         }
         const playerTableId = playerRows[0].id; // Use players.id for foreign key
-
         const [result] = await pool.execute(
             "INSERT INTO vehicles (player_id, type, status, cost, lat, lng, dest_lat, dest_lng, purchase_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), NOW())",
             [
@@ -245,7 +307,6 @@ router.get("/vehicles/:player_id", authenticateJWT, async (req, res) => {
         ); // Debug log
         const { player_id } = req.params;
         const { status } = req.query;
-
         // Verify player exists to respect FOREIGN KEY
         const [playerRows] = await pool
             .execute("SELECT id FROM players WHERE player_id = ?", [player_id])
@@ -259,7 +320,6 @@ router.get("/vehicles/:player_id", authenticateJWT, async (req, res) => {
                 .json({ status: "Error", message: "Player not found" });
         }
         const playerTableId = playerRows[0].id;
-
         // Update delivery_timestamp to NULL for active vehicles
         console.log("Updating delivery_timestamp for active vehicles"); // Debug log
         await pool
@@ -271,22 +331,18 @@ router.get("/vehicles/:player_id", authenticateJWT, async (req, res) => {
                 console.error("Update delivery_timestamp failed:", err.message);
                 throw err;
             });
-
         let query =
             "SELECT id, player_id, type, status, wear, battery, mileage, tire_mileage, purchase_date, delivery_timestamp, cost, created_at, updated_at, lat, lng, dest_lat, dest_lng FROM vehicles WHERE player_id = ?";
         const params = [playerTableId];
-
         if (status) {
             query += " AND status = ?";
             params.push(status);
         }
-
         console.log("Executing query:", query, "with params:", params); // Debug log
         const [rows] = await pool.execute(query, params).catch((err) => {
             console.error("Query execution failed:", err.message);
             throw err;
         });
-
         // Serialize coords and dest as arrays, convert DECIMAL fields to numbers
         const serializedRows = rows.map((row) => ({
             id: row.id,
@@ -311,7 +367,6 @@ router.get("/vehicles/:player_id", authenticateJWT, async (req, res) => {
                     ? [parseFloat(row.dest_lat), parseFloat(row.dest_lng)]
                     : null,
         }));
-
         console.log("Vehicle fetch successful, rows:", serializedRows.length); // Debug log
         res.status(200).json({ status: "Success", vehicles: serializedRows });
     } catch (error) {
@@ -336,7 +391,6 @@ router.get("/player/:username/vehicles", authenticateJWT, async (req, res) => {
         const { username } = req.params;
         const { status } = req.query;
         console.log(`Fetching vehicles for username: ${username}`); // Debug log
-
         // Map username to player_id
         const [playerRows] = await pool.execute(
             "SELECT id, player_id FROM players WHERE username = ?",
@@ -349,32 +403,25 @@ router.get("/player/:username/vehicles", authenticateJWT, async (req, res) => {
         }
         const playerTableId = playerRows[0].id;
         const player_id = playerRows[0].player_id;
-
         // Verify authenticated user
         if (req.user.player_id !== player_id) {
-            return res
-                .status(403)
-                .json({
-                    status: "Error",
-                    message: "Unauthorized access to player data",
-                });
+            return res.status(403).json({
+                status: "Error",
+                message: "Unauthorized access to player data",
+            });
         }
-
         let query =
             "SELECT id, player_id, type, status, wear, battery, mileage, tire_mileage, purchase_date, delivery_timestamp, cost, created_at, updated_at, lat, lng, dest_lat, dest_lng FROM vehicles WHERE player_id = ?";
         const params = [playerTableId];
-
         if (status) {
             query += " AND status = ?";
             params.push(status);
         }
-
         console.log("Executing query:", query, "with params:", params); // Debug log
         const [rows] = await pool.execute(query, params).catch((err) => {
             console.error("Query execution failed:", err.message);
             throw err;
         });
-
         // Serialize coords and dest as arrays, convert DECIMAL fields to numbers
         const serializedRows = rows.map((row) => ({
             id: row.id,
@@ -399,7 +446,6 @@ router.get("/player/:username/vehicles", authenticateJWT, async (req, res) => {
                     ? [parseFloat(row.dest_lat), parseFloat(row.dest_lng)]
                     : null,
         }));
-
         console.log("Vehicle fetch successful, rows:", serializedRows.length); // Debug log
         res.status(200).json({ status: "Success", vehicles: serializedRows });
     } catch (error) {
