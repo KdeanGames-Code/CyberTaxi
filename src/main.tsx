@@ -3,9 +3,8 @@
  * Renders map, top menu, registration form, footer, browser, and context menu, per GDD v1.1.
  * Initializes Leaflet map and integrates auth/vehicle logic via useAuth and useVehicles hooks.
  * @module Main
- * @version 0.3.10
+ * @version 0.3.16
  */
-
 import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { RegisterForm } from "./components/onboarding/register-form";
@@ -13,7 +12,7 @@ import { CyberFooter } from "./components/ui/CyberFooter";
 import { AboutPortal } from "./components/ui/AboutPortal";
 import { CyberBrowser } from "./components/ui/CyberBrowser";
 import { PopupMenu } from "./components/ui/PopupMenu";
-import { TopMenu } from "./components/TopMenu";
+import { TopMenu } from "./components/ui/TopMenu";
 import { MapManager } from "./components/map/MapManager";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -25,29 +24,58 @@ import { useAuth } from "./components/auth/useAuth";
 import { useVehicles } from "./components/vehicles/useVehicles";
 import "./styles/global.css";
 
-/**
- * Error Boundary Component to catch and display runtime errors.
- * @class ErrorBoundary
- * @extends React.Component
- */
+interface ErrorBoundaryProps {
+    children: React.ReactNode;
+}
+
+interface ErrorBoundaryState {
+    hasError: boolean;
+    error: Error | null;
+}
+
 class ErrorBoundary extends React.Component<
-    React.PropsWithChildren<{}>,
-    { hasError: boolean; error: Error | null }
+    ErrorBoundaryProps,
+    ErrorBoundaryState
 > {
-    state: { hasError: boolean; error: Error | null } = {
+    state: ErrorBoundaryState = {
         hasError: false,
         error: null,
     };
-    static getDerivedStateFromError(error: Error) {
+
+    static getDerivedStateFromError(error: Error): ErrorBoundaryState {
         console.error("ErrorBoundary caught error:", error);
         return { hasError: true, error };
     }
+
+    resetError = () => {
+        this.setState({ hasError: false, error: null });
+    };
+
     render() {
         if (this.state.hasError) {
             return (
-                <div className="error-message">
-                    Something went wrong:{" "}
-                    {this.state.error?.message || "Unknown error"}
+                <div
+                    className="error-message"
+                    style={{ textAlign: "center", color: "#ff4d4f" }}
+                >
+                    <p>
+                        Something went wrong:{" "}
+                        {this.state.error?.message || "Unknown error"}
+                    </p>
+                    <button
+                        onClick={this.resetError}
+                        style={{
+                            padding: "8px",
+                            background: "#d4a017",
+                            border: "none",
+                            borderRadius: "4px",
+                            color: "#1a1a1a",
+                            fontFamily: '"Orbitron", sans-serif',
+                            cursor: "pointer",
+                        }}
+                    >
+                        Retry
+                    </button>
                 </div>
             );
         }
@@ -55,30 +83,28 @@ class ErrorBoundary extends React.Component<
     }
 }
 
-/**
- * Main App component for CyberTaxi game.
- * Manages map initialization and UI components, using useAuth and useVehicles hooks.
- * @returns {JSX.Element} Main game interface.
- */
 const App: React.FC = () => {
+    const { isLoggedIn, handleClose } = useAuth(); // Moved up
+    const { vehicles, errorMessage, isLoadingVehicles } =
+        useVehicles(isLoggedIn);
     const topMenuRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<L.Map | null>(null);
     const [isBrowserOpen, setIsBrowserOpen] = useState(false);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
-    const [popupContext, setPopupContext] = useState("footer");
+    const [popupContext, setPopupContext] = useState<"footer" | "top-menu">(
+        "footer"
+    );
     const [registerMode, setRegisterMode] = useState<"login" | "register">(
         "login"
     );
-    const [isFormOpen, setIsFormOpen] = useState(true);
-    const { isLoggedIn, handleClose } = useAuth();
-    const { vehicles, errorMessage, isLoadingVehicles } =
-        useVehicles(isLoggedIn);
+    const [isFormOpen, setIsFormOpen] = useState(!isLoggedIn);
 
-    /**
-     * Toggles CyberBrowser or opens PopupMenu on footer globe click.
-     * @param {MouseEvent} [e] - Optional mouse event for PopupMenu positioning.
-     */
+    useEffect(() => {
+        setIsFormOpen(!isLoggedIn);
+        setRegisterMode(isLoggedIn ? "login" : "register");
+    }, [isLoggedIn]);
+
     const handleToggleBrowser = (e?: MouseEvent) => {
         if (e) {
             setPopupPosition({ x: e.clientX, y: e.clientY });
@@ -96,10 +122,6 @@ const App: React.FC = () => {
         }
     };
 
-    /**
-     * Handles Taxi logo click to open PopupMenu.
-     * @param {CustomEvent} e - Custom event with click coordinates.
-     */
     const handleTaxiClick = (e: CustomEvent) => {
         console.log("click-taxi received at x:", e.detail.x, "y:", e.detail.y);
         setPopupPosition({ x: e.detail.x, y: e.detail.y });
@@ -107,10 +129,6 @@ const App: React.FC = () => {
         setIsPopupOpen(true);
     };
 
-    /**
-     * Handles PopupMenu item selection actions.
-     * @param {string} action - Selected menu action (e.g., "logout", "open-tesla").
-     */
     const handlePopupItemSelect = (action: string) => {
         console.log(`PopupMenu action selected: ${action}`);
         if (action === "register") {
@@ -128,6 +146,7 @@ const App: React.FC = () => {
             localStorage.removeItem("player_id");
             setIsPopupOpen(false);
             setIsFormOpen(true);
+            setRegisterMode("login");
             handleClose();
             console.log(
                 "Logged out, jwt_token, registerData, username, and player_id cleared"
@@ -145,9 +164,12 @@ const App: React.FC = () => {
         }
     };
 
-    /**
-     * Sets up global toggleCyberBrowser and click-taxi event listeners.
-     */
+    const handleFormClose = () => {
+        console.log("Main.tsx handleFormClose triggered");
+        setIsFormOpen(false);
+        handleClose();
+    };
+
     useEffect(() => {
         (window as any).toggleCyberBrowser = handleToggleBrowser;
         document.addEventListener(
@@ -163,38 +185,24 @@ const App: React.FC = () => {
         };
     }, []);
 
-    /**
-     * Initializes map.
-     */
     useEffect(() => {
-        const appElement = document.getElementById("app");
-        if (!appElement) {
-            console.error("Root element #app not found in index.html");
-            return;
-        }
-
         const mapElement = document.getElementById("map-area");
         if (!mapElement) {
             console.error("Map container #map-area not found");
             return;
         }
-        console.log("Main map container verified");
-
         if (!mapRef.current) {
             try {
                 mapRef.current = L.map("map-area", {
                     zoomControl: false,
                 }).setView([30.2672, -97.7431], 12);
                 createTileLayer("dark").addTo(mapRef.current);
-                mapRef.current.invalidateSize();
                 console.log("Main map initialized successfully");
             } catch (error: unknown) {
                 console.error("Failed to initialize Leaflet map:", error);
                 return;
             }
         }
-
-        console.log("Main app rendered");
         return () => {
             if (mapRef.current) {
                 mapRef.current.remove();
@@ -203,14 +211,12 @@ const App: React.FC = () => {
         };
     }, []);
 
-    /**
-     * Handles form close action.
-     */
-    const handleFormClose = () => {
-        console.log("Main.tsx handleFormClose triggered");
-        setIsFormOpen(false);
-        handleClose();
-    };
+    useEffect(() => {
+        if (mapRef.current) {
+            mapRef.current.invalidateSize();
+            console.log("Map size invalidated");
+        }
+    }, [isBrowserOpen, isPopupOpen, isFormOpen]);
 
     return (
         <ErrorBoundary>
@@ -256,7 +262,7 @@ const App: React.FC = () => {
                             console.log("Browser closed");
                             setIsBrowserOpen(false);
                         }}
-                        playerId="1"
+                        playerId={localStorage.getItem("player_id") || "1"}
                     />
                 )}
                 {isPopupOpen && (

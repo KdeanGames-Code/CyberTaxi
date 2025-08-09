@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useRef } from "react";
-import "../styles/global.css";
+import "../../styles/global.css";
 
 /**
  * TopMenu component renders the top menu bar with logo, stats, energy bar, and help button.

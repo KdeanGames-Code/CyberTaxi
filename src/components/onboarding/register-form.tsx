@@ -1,9 +1,9 @@
 /**
  * register-form.tsx - Renders a non-resizable, draggable login/registration form for CyberTaxi onboarding.
- * Handles user signup via POST /api/auth/signup and login via POST /api/auth/login, stores JWT, and saves form data to localStorage.
+ * Handles user signup via POST /api/auth/signup and login via POST /api/auth/login/username, stores JWT, and saves form data to localStorage.
  * Uses username for UI, maps to player_id internally, per GDD v1.1.
  * @module RegisterForm
- * @version 0.2.37
+ * @version 0.2.42
  */
 
 import React, { useState, useEffect, useRef } from "react";
@@ -102,6 +102,61 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         setValidationMessages((prev) => ({ ...prev, [input.name]: message }));
     };
 
+    const attemptLogin = async (username: string, password: string) => {
+        try {
+            console.log(`Attempting login with username: ${username}`);
+            const response = await fetch(
+                "http://localhost:3000/api/auth/login/username",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password }),
+                }
+            );
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Login failed: ${errorText}`);
+            }
+            const result = await response.json();
+            console.log("Login response:", result);
+            if (result.status === "Success" && result.token) {
+                localStorage.setItem("jwt_token", result.token);
+                localStorage.setItem("username", username || "Kevin-Dean");
+                if (result.player_id) {
+                    localStorage.setItem(
+                        "player_id",
+                        result.player_id.toString()
+                    );
+                }
+                localStorage.setItem(
+                    "registerData",
+                    JSON.stringify({
+                        username: username || "Kevin-Dean",
+                        email: formData.email,
+                    })
+                );
+                localStorage.setItem(
+                    "player_1",
+                    JSON.stringify({
+                        player_id: result.player_id || 1,
+                        username: username || "Kevin-Dean",
+                        fleet: [],
+                        bank_balance: 10000.0,
+                        garages: [],
+                    })
+                );
+                console.log("Login successful, token stored:", result.token);
+                console.log("Calling onClose for successful login");
+                onClose();
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error("Login error:", error);
+            return false;
+        }
+    };
+
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         console.log(`Form submitted, mode: ${formMode}`);
@@ -143,21 +198,15 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         setIsSubmitting(true);
 
         try {
-            const payload =
-                formMode === "login"
-                    ? {
-                          player_id: parseInt(
-                              localStorage.getItem("player_id") || "1"
-                          ),
-                          password: formData.password,
-                      }
-                    : {
-                          username: formData.username,
-                          email: formData.email,
-                          password: formData.password,
-                      };
+            const payload = {
+                username: formData.username,
+                password: formData.password,
+                ...(formMode === "register" ? { email: formData.email } : {}),
+            };
             const endpoint =
-                formMode === "login" ? "/api/auth/login" : "/api/auth/signup";
+                formMode === "login"
+                    ? "/api/auth/login/username"
+                    : "/api/auth/signup";
             console.log(
                 `Sending POST ${endpoint} with username: ${formData.username}`
             );
@@ -168,6 +217,18 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             });
             if (!response.ok) {
                 const errorText = await response.text();
+                if (response.status === 409 && formMode === "register") {
+                    const loginSuccess = await attemptLogin(
+                        formData.username,
+                        formData.password
+                    );
+                    if (loginSuccess) {
+                        return; // Login succeeded, no error needed
+                    }
+                    throw new Error(
+                        "Username or email already exists. Try different credentials or log in."
+                    );
+                }
                 throw new Error(
                     `HTTP error! Status: ${response.status}, Details: ${errorText}`
                 );
@@ -226,7 +287,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
                 error instanceof Error
                     ? error.message
                     : "Network issue, please try again";
-            setFormError(`Error: ${errorMessage}`);
+            setFormError(errorMessage);
             console.error(
                 `${formMode === "login" ? "Login" : "Signup"} error:`,
                 errorMessage
@@ -290,6 +351,21 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
                         aria-live="assertive"
                     >
                         {formError}
+                        {formError.includes(
+                            "Username or email already exists"
+                        ) && (
+                            <span>
+                                {" "}
+                                <button
+                                    type="button"
+                                    className="toggle-btn"
+                                    onClick={toggleMode}
+                                    aria-label="Switch to login"
+                                >
+                                    Try logging in
+                                </button>
+                            </span>
+                        )}
                     </p>
                 )}
                 <div className="form-group">

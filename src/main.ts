@@ -1,6 +1,6 @@
 // src/main.ts
 import "./styles/global.css"; // Import global CSS
-import { createTopMenu } from "./components/TopMenu.ts";
+import { createTopMenu } from "./components/ui/TopMenu.tsx";
 import L from "leaflet"; // Import Leaflet
 import "leaflet/dist/leaflet.css"; // Leaflet CSS
 import { createTileLayer } from "./components/map/map-tiles.ts"; // Custom tile layer
