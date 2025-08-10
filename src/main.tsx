@@ -3,7 +3,7 @@
  * Renders map, top menu, registration form, footer, browser, and context menu, per GDD v1.1.
  * Initializes Leaflet map, manages auth/vehicle logic via useAuth and useVehicles hooks, and handles auto-login.
  * @module Main
- * @version 0.3.17
+ * @version 0.3.48
  */
 import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
@@ -103,17 +103,59 @@ class ErrorBoundary extends React.Component<
 }
 
 /**
+ * Error boundary for CyberBrowser to catch specific rendering errors.
+ */
+class CyberBrowserBoundary extends React.Component<
+    { children: React.ReactNode },
+    ErrorBoundaryState
+> {
+    state: ErrorBoundaryState = {
+        hasError: false,
+        error: null,
+    };
+
+    static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+        console.error("CyberBrowserBoundary caught error:", error);
+        return { hasError: true, error };
+    }
+
+    componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+        console.error("CyberBrowserBoundary caught:", error, errorInfo);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div
+                    className="error-message"
+                    style={{
+                        textAlign: "center",
+                        color: "#ff4d4f",
+                        padding: "10px",
+                    }}
+                >
+                    <p>
+                        CyberBrowser failed to load:{" "}
+                        {this.state.error?.message || "Unknown error"}
+                    </p>
+                </div>
+            );
+        }
+        return this.props.children;
+    }
+}
+
+/**
  * Main App component for CyberTaxi.
  * Manages UI state, map initialization, and auto-login on app load.
  * @returns JSX.Element - Main game interface.
  */
 const App: React.FC = () => {
-    const { isLoggedIn, handleClose } = useAuth();
+    const { isLoggedIn, handleClose, username, handleLogin } = useAuth();
     const { vehicles, errorMessage, isLoadingVehicles } =
         useVehicles(isLoggedIn);
     const topMenuRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<L.Map | null>(null);
-    const [isBrowserOpen, setIsBrowserOpen] = useState(false);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
     const [popupContext, setPopupContext] = useState<"footer" | "top-menu">(
@@ -123,15 +165,24 @@ const App: React.FC = () => {
         "login"
     );
     const [isFormOpen, setIsFormOpen] = useState(!isLoggedIn);
+    const [browserPage, setBrowserPage] = useState<
+        "tesla" | "realtor" | "agency" | null
+    >(null);
+    const [errorMessageState, setErrorMessage] = useState<string | null>(null);
 
     /**
      * Attempts auto-login using stored credentials from localStorage.
      */
     useEffect(() => {
         const token = localStorage.getItem("jwt_token");
-        const username = localStorage.getItem("username");
+        const savedUsername = localStorage.getItem("username");
         const savedData = localStorage.getItem("registerData");
-        if (token && username && savedData) {
+        console.log(
+            `Main.tsx: Checking auto-login, token: ${!!token}, username: ${
+                savedUsername || "none"
+            }`
+        );
+        if (token && savedUsername && savedData) {
             console.log("Attempting auto-login with stored credentials");
             fetch("http://localhost:3000/api/auth/login/username", {
                 method: "POST",
@@ -139,17 +190,27 @@ const App: React.FC = () => {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({ username, password: "test123" }), // Password not stored; use placeholder or prompt
+                body: JSON.stringify({
+                    username: savedUsername,
+                    password: "test123",
+                }),
             })
                 .then((response) => {
-                    if (!response.ok) throw new Error("Auto-login failed");
+                    console.log(
+                        `Main.tsx: Auto-login response status: ${response.status}`
+                    );
+                    if (!response.ok)
+                        throw new Error(
+                            `Auto-login failed: ${response.statusText}`
+                        );
                     return response.json();
                 })
                 .then((result) => {
+                    console.log("Main.tsx: Auto-login response:", result);
                     if (result.status === "Success" && result.token) {
                         console.log(
                             "Auto-login successful, token refreshed:",
-                            result.token
+                            result.token.slice(0, 10) + "..."
                         );
                         localStorage.setItem("jwt_token", result.token);
                         if (result.player_id) {
@@ -158,16 +219,29 @@ const App: React.FC = () => {
                                 result.player_id.toString()
                             );
                         }
-                        setIsFormOpen(false);
+                        localStorage.setItem(
+                            "username",
+                            result.username || savedUsername
+                        );
+                        handleLogin(
+                            result.token,
+                            result.username || savedUsername
+                        );
+                    } else {
+                        throw new Error("Invalid login response");
                     }
                 })
                 .catch((error) => {
                     console.error("Auto-login error:", error);
                     localStorage.removeItem("jwt_token");
+                    localStorage.removeItem("username");
+                    localStorage.removeItem("registerData");
                     setIsFormOpen(true);
                     setRegisterMode("login");
+                    setErrorMessage("Auto-login failed: " + error.message);
                 });
         } else {
+            console.log("Main.tsx: No valid credentials, opening login form");
             setIsFormOpen(true);
             setRegisterMode("login");
         }
@@ -177,48 +251,60 @@ const App: React.FC = () => {
      * Syncs form visibility and mode with login state.
      */
     useEffect(() => {
+        console.log(
+            `Main.tsx: Syncing form visibility, isLoggedIn: ${isLoggedIn}, registerMode: ${registerMode}, username: ${
+                username || "none"
+            }`
+        );
         setIsFormOpen(!isLoggedIn);
-        setRegisterMode(isLoggedIn ? "login" : "login");
-    }, [isLoggedIn]);
-
-    /**
-     * Toggles CyberBrowser or opens PopupMenu on footer globe click.
-     * @param e - Optional mouse event for PopupMenu positioning.
-     */
-    const handleToggleBrowser = (e?: MouseEvent) => {
-        if (e) {
-            setPopupPosition({ x: e.clientX, y: e.clientY });
-            setPopupContext("footer");
-            setIsPopupOpen(true);
-            console.log(
-                "PopupMenu triggered by globe click at x:",
-                e.clientX,
-                "y:",
-                e.clientY
-            );
-        } else {
-            setIsBrowserOpen(!isBrowserOpen);
-            console.log("CyberBrowser toggled:", !isBrowserOpen);
-        }
-    };
+    }, [isLoggedIn, registerMode, username]);
 
     /**
      * Handles taxi logo click to open PopupMenu.
-     * @param e - Custom event with click coordinates.
      */
-    const handleTaxiClick = (e: CustomEvent) => {
-        console.log("click-taxi received at x:", e.detail.x, "y:", e.detail.y);
-        setPopupPosition({ x: e.detail.x, y: e.detail.y });
+    const handleTaxiClick = (x: number, y: number) => {
+        console.log(`click-taxi received at x: ${x}, y: ${y}`);
+        setPopupPosition({ x, y });
         setPopupContext("top-menu");
         setIsPopupOpen(true);
     };
 
     /**
+     * Handles CyberBrowser open event from footer.
+     */
+    const handleOpenCyberBrowser = (e: CustomEvent) => {
+        const page = e.detail.page as
+            | "tesla"
+            | "realtor"
+            | "agency"
+            | undefined;
+        console.log(`open-cyber-browser received: page=${page || "tesla"}`);
+        setBrowserPage(page || "tesla");
+    };
+
+    /**
+     * Sets up listener for open-cyber-browser event.
+     */
+    useEffect(() => {
+        document.addEventListener(
+            "open-cyber-browser",
+            handleOpenCyberBrowser as EventListener
+        );
+        return () => {
+            document.removeEventListener(
+                "open-cyber-browser",
+                handleOpenCyberBrowser as EventListener
+            );
+        };
+    }, []);
+
+    /**
      * Handles PopupMenu item selections.
-     * @param action - Selected menu action (e.g., "logout", "login").
      */
     const handlePopupItemSelect = (action: string) => {
-        console.log(`PopupMenu action selected: ${action}`);
+        console.log(
+            `PopupMenu action selected: ${action}, isLoggedIn: ${isLoggedIn}`
+        );
         if (action === "register") {
             setRegisterMode("register");
             setIsFormOpen(true);
@@ -235,6 +321,7 @@ const App: React.FC = () => {
             setIsPopupOpen(false);
             setIsFormOpen(true);
             setRegisterMode("login");
+            setBrowserPage(null);
             handleClose();
             console.log(
                 "Logged out, jwt_token, registerData, username, and player_id cleared"
@@ -243,12 +330,17 @@ const App: React.FC = () => {
             console.log("Settings action triggered (placeholder)");
             setIsPopupOpen(false);
         } else if (action === "open-tesla") {
-            setIsBrowserOpen(true);
+            setBrowserPage("tesla");
             setIsPopupOpen(false);
-            console.log("Opening CyberBrowser from PopupMenu");
+            console.log("Opening CyberBrowser with Tesla page");
         } else if (action === "open-real-estate") {
-            console.log("Real Estate action triggered (placeholder)");
+            setBrowserPage("realtor");
             setIsPopupOpen(false);
+            console.log("Opening CyberBrowser with Realtor page");
+        } else if (action === "open-agency") {
+            setBrowserPage("agency");
+            setIsPopupOpen(false);
+            console.log("Opening CyberBrowser with Employment Agency page");
         }
     };
 
@@ -258,26 +350,15 @@ const App: React.FC = () => {
     const handleFormClose = () => {
         console.log("Main.tsx handleFormClose triggered");
         setIsFormOpen(false);
-        handleClose();
     };
 
     /**
-     * Sets up global event listeners for CyberBrowser and taxi click.
+     * Debug: Opens CyberBrowser with Tesla page.
      */
-    useEffect(() => {
-        (window as any).toggleCyberBrowser = handleToggleBrowser;
-        document.addEventListener(
-            "click-taxi",
-            handleTaxiClick as EventListener
-        );
-        return () => {
-            delete (window as any).toggleCyberBrowser;
-            document.removeEventListener(
-                "click-taxi",
-                handleTaxiClick as EventListener
-            );
-        };
-    }, []);
+    const handleDebugOpenBrowser = () => {
+        console.log("Debug: Forcing CyberBrowser open with Tesla page");
+        setBrowserPage("tesla");
+    };
 
     /**
      * Initializes Leaflet map with dark tiles.
@@ -286,6 +367,7 @@ const App: React.FC = () => {
         const mapElement = document.getElementById("map-area");
         if (!mapElement) {
             console.error("Map container #map-area not found");
+            setErrorMessage("Map container not found");
             return;
         }
         if (!mapRef.current) {
@@ -297,6 +379,12 @@ const App: React.FC = () => {
                 console.log("Main map initialized successfully");
             } catch (error: unknown) {
                 console.error("Failed to initialize Leaflet map:", error);
+                setErrorMessage(
+                    "Failed to initialize map: " +
+                        (error instanceof Error
+                            ? error.message
+                            : "Unknown error")
+                );
                 return;
             }
         }
@@ -316,7 +404,24 @@ const App: React.FC = () => {
             mapRef.current.invalidateSize();
             console.log("Map size invalidated");
         }
-    }, [isBrowserOpen, isPopupOpen, isFormOpen]);
+    }, [isPopupOpen, isFormOpen, browserPage]);
+
+    /**
+     * Logs CyberBrowser rendering conditions.
+     */
+    useEffect(() => {
+        if (browserPage && username) {
+            console.log(
+                `Attempting to render CyberBrowser with page: ${browserPage}, username: ${username}`
+            );
+        } else {
+            console.log(
+                `CyberBrowser not rendered: page=${browserPage}, username=${
+                    username || "none"
+                }`
+            );
+        }
+    }, [browserPage, username]);
 
     return (
         <ErrorBoundary>
@@ -325,17 +430,20 @@ const App: React.FC = () => {
                 className="main-container"
                 role="main"
                 aria-label="Main game interface"
-                style={{ position: "relative", zIndex: 0 }}
+                style={{ position: "relative", zIndex: 1 }}
             >
-                {errorMessage && (
-                    <div className="error-message">{errorMessage}</div>
+                {(errorMessage || errorMessageState) && (
+                    <div className="error-message">
+                        {errorMessage || errorMessageState}
+                    </div>
                 )}
                 <div
                     id="top-menu-container"
                     ref={topMenuRef}
                     aria-hidden="true"
+                    style={{ zIndex: 1000 }} // Match global.css
                 >
-                    <TopMenu />
+                    <TopMenu onTaxiClick={handleTaxiClick} />
                 </div>
                 <div
                     id="map-area"
@@ -345,25 +453,31 @@ const App: React.FC = () => {
                 {!isLoadingVehicles && isLoggedIn && (
                     <MapManager
                         vehicles={vehicles}
-                        setErrorMessage={() => {}}
+                        setErrorMessage={setErrorMessage}
                         mapRef={mapRef}
                     />
                 )}
                 <CyberFooter />
-                {!isLoggedIn && isFormOpen && (
+                {isFormOpen && (
                     <RegisterForm
                         onClose={handleFormClose}
                         mode={registerMode}
                     />
                 )}
-                {isBrowserOpen && (
-                    <CyberBrowser
-                        onClose={() => {
-                            console.log("Browser closed");
-                            setIsBrowserOpen(false);
-                        }}
-                        playerId={localStorage.getItem("player_id") || "1"}
-                    />
+                {browserPage && username && (
+                    <CyberBrowserBoundary>
+                        <div style={{ zIndex: 2000 }}>
+                            <CyberBrowser
+                                onClose={() => {
+                                    console.log("Browser closed");
+                                    setBrowserPage(null);
+                                }}
+                                username={username}
+                                activePage={browserPage}
+                                style={{ zIndex: 2000, display: "block" }}
+                            />
+                        </div>
+                    </CyberBrowserBoundary>
                 )}
                 {isPopupOpen && (
                     <PopupMenu
@@ -396,6 +510,10 @@ const App: React.FC = () => {
                                           label: "Real Estate",
                                           action: "open-real-estate",
                                       },
+                                      {
+                                          label: "Employment Agency",
+                                          action: "open-agency",
+                                      },
                                   ]
                         }
                         context={popupContext}
@@ -408,6 +526,25 @@ const App: React.FC = () => {
                         onItemSelect={handlePopupItemSelect}
                     />
                 )}
+                <button
+                    onClick={handleDebugOpenBrowser}
+                    style={{
+                        position: "fixed",
+                        bottom: "50px",
+                        left: "10px",
+                        padding: "8px",
+                        background: "#d4a017",
+                        border: "none",
+                        borderRadius: "4px",
+                        color: "#1a1a1a",
+                        fontFamily: '"Orbitron", sans-serif',
+                        cursor: "pointer",
+                        zIndex: 3000,
+                    }}
+                    aria-label="Debug: Open CyberBrowser"
+                >
+                    Debug: Open CyberBrowser
+                </button>
             </div>
         </ErrorBoundary>
     );

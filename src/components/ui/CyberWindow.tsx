@@ -1,39 +1,38 @@
 /**
- * Window.tsx - Renders a draggable, optionally resizable window for CyberTaxi UI.
+ * CyberWindow.tsx - Renders a draggable, optionally resizable window for CyberTaxi UI.
  * Saves position to localStorage, per GDD v1.1.
- * @module Window
- * @version 0.2.8
+ * @module CyberWindow
+ * @version 0.2.11
  */
-
 import React, { useRef, useEffect } from "react";
 import "../../styles/windows.css";
 
 /**
- * Props for the Window component.
- * @interface WindowProps
+ * Props for the CyberWindow component.
+ * @interface CyberWindowProps
  */
-interface WindowProps {
-    id: string;
-    title: string;
-    onClose: () => void;
-    isResizable?: boolean;
-    style?: React.CSSProperties;
-    initialPosition?: { top: number; left: number };
-    children: React.ReactNode;
+interface CyberWindowProps {
+    id: string; // Unique identifier for the window
+    title: React.ReactNode; // Window title, supports JSX
+    onClose: () => void; // Callback for closing the window
+    isResizable?: boolean; // Whether the window is resizable
+    style?: React.CSSProperties; // Custom styles for the window
+    initialPosition?: { top: number; left: number }; // Initial window position
+    children: React.ReactNode; // Window content
 }
 
 /**
- * Window component renders a cyberpunk-styled, draggable window with position saving.
- * @param {WindowProps} props - Component props.
+ * CyberWindow component renders a cyberpunk-styled, draggable window with position saving.
+ * @param {CyberWindowProps} props - Component props.
  * @returns {JSX.Element} Draggable window.
  */
-export const Window: React.FC<WindowProps> = ({
+export const CyberWindow: React.FC<CyberWindowProps> = ({
     id,
     title,
     onClose,
     isResizable = false,
     style,
-    initialPosition,
+    initialPosition = { top: 100, left: 100 }, // Default position
     children,
 }) => {
     const windowRef = useRef<HTMLDivElement>(null);
@@ -42,19 +41,24 @@ export const Window: React.FC<WindowProps> = ({
     useEffect(() => {
         const windowEl = windowRef.current;
         if (!windowEl) return;
-
         let isDragging = false;
-        let currentX = initialPosition?.left || 400;
-        let currentY = initialPosition?.top || 40;
+        let currentX = initialPosition.left;
+        let currentY = initialPosition.top;
         let initialX: number;
         let initialY: number;
 
-        // Load saved position
+        // Load saved position with bounds check
         const savedPosition = localStorage.getItem(`window_${id}_position`);
         if (savedPosition) {
             const { top, left } = JSON.parse(savedPosition);
-            currentX = left;
-            currentY = top;
+            // Ensure position is within viewport
+            const maxX = window.innerWidth - 400; // Assume window width ~400px
+            const maxY = window.innerHeight - 300; // Assume window height ~300px
+            currentX = Math.max(0, Math.min(left, maxX));
+            currentY = Math.max(0, Math.min(top, maxY));
+            windowEl.style.left = `${currentX}px`;
+            windowEl.style.top = `${currentY}px`;
+        } else {
             windowEl.style.left = `${currentX}px`;
             windowEl.style.top = `${currentY}px`;
         }
@@ -63,15 +67,19 @@ export const Window: React.FC<WindowProps> = ({
             isDragging = true;
             initialX = e.clientX - currentX;
             initialY = e.clientY - currentY;
-            windowEl.style.zIndex = "1001";
+            windowEl.style.zIndex = "2001";
             console.log(`Dragging started for window: ${id}`);
         };
 
         const handleMouseMove = (e: MouseEvent) => {
             if (!isDragging) return;
             e.preventDefault();
-            currentX = e.clientX - initialX;
-            currentY = e.clientY - initialY;
+            const newX = e.clientX - initialX;
+            const newY = e.clientY - initialY;
+            const maxX = window.innerWidth - windowEl.offsetWidth;
+            const maxY = window.innerHeight - windowEl.offsetHeight;
+            currentX = Math.max(0, Math.min(newX, maxX));
+            currentY = Math.max(0, Math.min(newY, maxY));
             windowEl.style.left = `${currentX}px`;
             windowEl.style.top = `${currentY}px`;
         };
@@ -106,7 +114,7 @@ export const Window: React.FC<WindowProps> = ({
                 document.removeEventListener("mouseup", handleMouseUp);
             }
         };
-    }, [initialPosition, id]);
+    }, [id, initialPosition]);
 
     // Handle close button
     const handleClose = () => {

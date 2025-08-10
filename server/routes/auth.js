@@ -2,7 +2,7 @@
  * @file auth.js
  * @description API routes for authentication in CyberTaxi
  * @author CyberTaxi Team
- * @version 0.2.0
+ * @version 0.3.0
  */
 const express = require("express");
 const router = express.Router();
@@ -167,7 +167,7 @@ router.post("/login", async (req, res) => {
  * Generate JWT token for a player by username
  * @route POST /api/auth/login/username
  * @param {Object} req.body - Player credentials (username, password)
- * @returns {Object} JSON response with JWT token or error
+ * @returns {Object} JSON response with JWT token, player_id, or error
  */
 router.post("/login/username", async (req, res) => {
     try {
@@ -229,7 +229,11 @@ router.post("/login/username", async (req, res) => {
             { expiresIn: "1h" }
         );
         console.log("User authenticated"); // Success log
-        res.status(200).json({ status: "Success", token });
+        res.status(200).json({
+            status: "Success",
+            token,
+            player_id: player.player_id,
+        });
     } catch (error) {
         console.error("Auth failed:", error.message);
         res.status(500).json({

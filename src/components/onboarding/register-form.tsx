@@ -3,13 +3,13 @@
  * Handles user signup via POST /api/auth/signup and login via POST /api/auth/login/username, stores JWT, and saves form data to localStorage.
  * Uses username for UI, maps to player_id internally, per GDD v1.1.
  * @module RegisterForm
- * @version 0.2.44
+ * @version 0.2.46
  */
-
 import React, { useState, useEffect, useRef } from "react";
 import type { FormEvent } from "react";
-import { Window } from "../ui/Window";
+import { CyberWindow } from "../ui/CyberWindow";
 import "../../styles/windows.css";
+import "../../styles/global.css";
 
 /**
  * Props for RegisterForm component.
@@ -58,8 +58,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         const savedData = localStorage.getItem("registerData");
         const token = localStorage.getItem("jwt_token");
         if (token) {
-            console.log("Token found, setting username to Kevin-Dean");
-            setFormData((prev) => ({ ...prev, username: "Kevin-Dean" }));
+            console.log("Token found, setting username from localStorage");
+            setFormData((prev) => ({
+                ...prev,
+                username: localStorage.getItem("username") || "",
+            }));
         } else if (savedData) {
             try {
                 const parsedData = JSON.parse(savedData);
@@ -156,7 +159,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             console.log("Login response:", result);
             if (result.status === "Success" && result.token) {
                 localStorage.setItem("jwt_token", result.token);
-                localStorage.setItem("username", username || "Kevin-Dean");
+                localStorage.setItem("username", username);
                 if (result.player_id) {
                     localStorage.setItem(
                         "player_id",
@@ -166,18 +169,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
                 localStorage.setItem(
                     "registerData",
                     JSON.stringify({
-                        username: username || "Kevin-Dean",
+                        username,
                         email: formData.email,
-                    })
-                );
-                localStorage.setItem(
-                    "player_1",
-                    JSON.stringify({
-                        player_id: result.player_id || 1,
-                        username: username || "Kevin-Dean",
-                        fleet: [],
-                        bank_balance: 10000.0,
-                        garages: [],
                     })
                 );
                 console.log("Login successful, token stored:", result.token);
@@ -236,7 +229,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             return;
         }
         setIsSubmitting(true);
-
         try {
             const payload = {
                 username: formData.username,
@@ -280,10 +272,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             );
             if (result.status === "Success" && result.token) {
                 localStorage.setItem("jwt_token", result.token);
-                localStorage.setItem(
-                    "username",
-                    formData.username || "Kevin-Dean"
-                );
+                localStorage.setItem("username", formData.username);
                 if (result.player_id) {
                     localStorage.setItem(
                         "player_id",
@@ -293,18 +282,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
                 localStorage.setItem(
                     "registerData",
                     JSON.stringify({
-                        username: formData.username || "Kevin-Dean",
+                        username: formData.username,
                         email: formData.email,
-                    })
-                );
-                localStorage.setItem(
-                    "player_1",
-                    JSON.stringify({
-                        player_id: result.player_id || 1,
-                        username: formData.username || "Kevin-Dean",
-                        fleet: [],
-                        bank_balance: 10000.0,
-                        garages: [],
                     })
                 );
                 console.log(
@@ -343,7 +322,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     const toggleMode = () => {
         console.log(
             "Toggling to mode:",
-            formMode === "login" ? "signup" : "login"
+            formMode === "login" ? "register" : "login"
         );
         setFormMode(formMode === "login" ? "register" : "login");
         setFormError("");
@@ -370,7 +349,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     };
 
     return (
-        <Window
+        <CyberWindow
             id="register-window"
             title={
                 formMode === "login"
@@ -523,6 +502,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
                     </button>
                 </div>
             </form>
-        </Window>
+        </CyberWindow>
     );
 };

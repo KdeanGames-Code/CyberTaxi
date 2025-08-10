@@ -3,7 +3,7 @@
  * Integrates with Leaflet map initialized in main.tsx, rendering player and non-player vehicles in a single cluster, per GDD v1.1.
  * Uses /api/player/:username/vehicles for player vehicles and /api/vehicles/others for non-player vehicles.
  * @module MapManager
- * @version 0.3.5
+ * @version 0.3.6
  */
 import React, { useEffect, useRef, useState } from "react";
 import L from "leaflet";
@@ -34,6 +34,7 @@ export const MapManager: React.FC<MapManagerProps> = ({
 }) => {
     const clusterRef = useRef<MarkerClusterGroup | null>(null);
     const [otherVehicles, setOtherVehicles] = useState<Vehicle[]>([]);
+    const [hasZoomed, setHasZoomed] = useState(false); // Track initial zoom
 
     /**
      * Initializes a single marker cluster group for all vehicles.
@@ -131,14 +132,13 @@ export const MapManager: React.FC<MapManagerProps> = ({
                 );
             }
         };
-
         if (mapRef.current) {
             fetchOtherVehicles();
         }
     }, [mapRef, setErrorMessage]);
 
     /**
-     * Renders all vehicles (player and non-player) in a single cluster and adjusts map view.
+     * Renders all vehicles (player and non-player) in a single cluster.
      */
     useEffect(() => {
         console.log(
@@ -148,19 +148,16 @@ export const MapManager: React.FC<MapManagerProps> = ({
             console.log("Skipping render: map or cluster not ready");
             return;
         }
-
         clusterRef.current.clearLayers();
         const allVehicles = [...vehicles, ...otherVehicles];
         if (allVehicles.length === 0) {
             console.log("Skipping empty vehicle render");
             return;
         }
-
         console.log(
             `Rendering ${allVehicles.length} vehicles (player and non-player):`,
             allVehicles
         );
-
         const bounds: LatLngTuple[] = [];
         allVehicles.forEach((vehicle, index) => {
             if (
@@ -195,19 +192,21 @@ export const MapManager: React.FC<MapManagerProps> = ({
                 );
             }
         });
-
         console.log(`Cluster rendering with ${allVehicles.length} vehicles`);
         mapRef.current.addLayer(clusterRef.current);
         console.log(
             `Vehicle cluster group updated with ${allVehicles.length} vehicles`
         );
-
         clusterRef.current.on("clusterclick", (e) => {
             console.log(
                 `Cluster click handled: ${
                     e.layer.getAllChildMarkers().length
                 } vehicles`
             );
+            // Zoom only on cluster click
+            mapRef.current!.fitBounds(e.layer.getBounds(), {
+                padding: [50, 50],
+            });
         });
         clusterRef.current.on("click", (e) => {
             if (!e.layer.getAllChildMarkers) {
@@ -218,23 +217,20 @@ export const MapManager: React.FC<MapManagerProps> = ({
                 );
             }
         });
-
-        if (bounds.length > 0) {
-            mapRef.current.fitBounds(L.latLngBounds(bounds), {
-                padding: [50, 50],
-            });
-            console.log(
-                "Map zoomed to marker bounds:",
-                mapRef.current.getBounds()
+        if (bounds.length > 0 && !hasZoomed) {
+            mapRef.current.setView(bounds[0], 12); // Set initial view without zoom
+            setHasZoomed(true);
+            console.log("Map set to initial view without auto-zoom");
+        } else if (!bounds.length) {
+            console.warn(
+                "No valid bounds for vehicles, skipping view adjustment"
             );
-        } else {
-            console.warn("No valid bounds for vehicles, skipping fitBounds");
         }
         console.log(
             `Marker rendering completed for ${allVehicles.length} vehicles`
         );
         console.log(`MapManager rendered ${allVehicles.length} vehicles`);
-    }, [vehicles, otherVehicles, mapRef]);
+    }, [vehicles, otherVehicles, mapRef, hasZoomed]);
 
     return null;
 };

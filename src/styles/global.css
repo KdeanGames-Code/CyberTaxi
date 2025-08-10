@@ -154,7 +154,7 @@ body {
 }
 
 /* Bottom Menu Styles */
-.bottom-menu {
+.cyber-footer {
     grid-row: 3 / 4;
     display: flex;
     justify-content: center; /* Center globe */

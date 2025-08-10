@@ -1,35 +1,28 @@
 /**
- * PopupMenu.tsx - Renders a dynamic context menu for CyberTaxi UI.
- * Used by CyberFooter.tsx (globe click) and TopMenu.ts (Taxi click) with customizable menu items.
+ * PopupMenu.tsx - Renders a context menu for CyberTaxi UI.
+ * Supports top-menu and footer contexts with dynamic items, per GDD v1.1.
  * @module PopupMenu
- * @version 0.2.7
+ * @version 0.2.9
  */
-
 import React, { useEffect, useRef } from "react";
-import "../../styles/windows.css";
+import "../../styles/global.css";
 
 /**
  * Props for the PopupMenu component.
  * @interface PopupMenuProps
- * @property {{ x: number; y: number }} position - Mouse coordinates for menu placement.
- * @property {{ label: string; action: string }[]} items - Menu items with labels and actions.
- * @property {string} context - Context identifier (e.g., 'footer', 'top-menu').
- * @property {() => void} onClose - Callback to close the menu.
- * @property {(action: string) => void} onItemSelect - Callback for item selection.
  */
 interface PopupMenuProps {
-    position: { x: number; y: number };
-    items: { label: string; action: string }[];
-    context: string;
-    onClose: () => void;
-    onItemSelect: (action: string) => void;
+    position: { x: number; y: number }; // Menu position
+    items: { label: string; action: string }[]; // Menu items
+    context: "footer" | "top-menu"; // Menu context
+    onClose: () => void; // Callback for closing the menu
+    onItemSelect: (action: string) => void; // Callback for item selection
 }
 
 /**
- * PopupMenu component renders a cyberpunk-styled context menu at specified coordinates.
- * Supports dynamic items, closes on item click or outside click, per GDD v1.1.
- * @param {PopupMenuProps} props - Component props.
- * @returns {JSX.Element} Context menu.
+ * Renders a context menu with dynamic items based on context.
+ * @param props - Component props.
+ * @returns JSX.Element - Context menu.
  */
 export const PopupMenu: React.FC<PopupMenuProps> = ({
     position,
@@ -49,22 +42,22 @@ export const PopupMenu: React.FC<PopupMenuProps> = ({
                 menuRef.current &&
                 !menuRef.current.contains(e.target as Node)
             ) {
-                console.log(`PopupMenu closed for ${context}: outside click`);
+                console.log(`PopupMenu closed by outside click for ${context}`);
                 onClose();
             }
         };
-        document.addEventListener("mousedown", handleOutsideClick);
+        document.addEventListener("click", handleOutsideClick);
         console.log(
             `PopupMenu opened for ${context} at x:${position.x}, y:${position.y}`
         );
         return () => {
-            document.removeEventListener("mousedown", handleOutsideClick);
+            document.removeEventListener("click", handleOutsideClick);
         };
-    }, [context, onClose, position]);
+    }, [context, position, onClose]);
 
     /**
-     * Handles menu item click.
-     * @param {string} action - Action associated with the menu item.
+     * Handles item click.
+     * @param action - Selected item action.
      */
     const handleItemClick = (action: string) => {
         console.log(`Menu item clicked for ${context}: ${action}`);
@@ -75,17 +68,17 @@ export const PopupMenu: React.FC<PopupMenuProps> = ({
     return (
         <div
             className="context-menu"
-            style={{ top: position.y, left: position.x }}
+            style={{ top: `${position.y}px`, left: `${position.x}px` }}
             ref={menuRef}
             role="menu"
-            aria-label={`Context menu for ${context}`}
+            aria-label={`${context} context menu`}
         >
             {items.map((item) => (
                 <div
                     key={item.action}
                     className="menu-item"
-                    onClick={() => handleItemClick(item.action)}
                     role="menuitem"
+                    onClick={() => handleItemClick(item.action)}
                     tabIndex={0}
                     onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") {

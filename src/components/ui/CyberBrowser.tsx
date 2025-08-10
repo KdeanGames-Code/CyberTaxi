@@ -1,454 +1,349 @@
 /**
- * CyberBrowser.tsx - Renders a resizable, draggable browser window for vehicle purchases.
- * Displays Tesla-inspired UI with vehicle images, purchase options, slot availability, and funds checks, per GDD v1.1.
+ * CyberBrowser.tsx - Renders a resizable, draggable browser window for CyberTaxi.
+ * Includes a menu bar with Tesla, Realtor, and Employment Agency options, a rounded URL dropdown, and dynamic content area, per GDD v1.1.
  * @module CyberBrowser
- * @version 0.2.9
+ * @version 0.3.25
  */
-
-import React, { useState, useEffect } from "react";
-import { Window } from "./Window";
-import { purchaseVehicle } from "../../utils/purchase-utils";
+import React, { Component, useEffect, useState } from "react";
+import { CyberWindow } from "./CyberWindow";
+import { TeslaPage } from "../browser/TeslaPage";
+import { RealtorPage } from "../browser/RealtorPage";
+import { EmploymentAgencyPage } from "../browser/EmploymentAgencyPage";
 import "../../styles/browser.css";
 
 /**
  * Props for the CyberBrowser component.
  * @interface CyberBrowserProps
- * @property {() => void} onClose - Callback to close the browser window.
- * @property {string} playerId - Player ID for purchase and slot operations.
  */
 interface CyberBrowserProps {
-    onClose: () => void;
-    playerId: string;
+    onClose: () => void; // Callback to close the browser
+    username: string; // Player username for API calls
+    activePage?: "tesla" | "realtor" | "agency"; // Initial page to display
+    style?: React.CSSProperties; // Custom styles for the window
 }
 
 /**
- * CyberBrowser component renders a cyberpunk-styled browser window with purchase UI.
- * Displays slot availability (e.g., "Slots Available: 2/5"), vehicle purchase options, and funds checks.
- * @param {CyberBrowserProps} props - Component props.
- * @returns {JSX.Element} Resizable, draggable window with purchase UI and slots.
+ * State for ErrorBoundary components.
+ * @interface ErrorBoundaryState
+ */
+interface ErrorBoundaryState {
+    hasError: boolean;
+    error: Error | null;
+    pageName?: string; // Add pageName to state
+}
+
+/**
+ * Error boundary for CyberBrowser to catch rendering errors.
+ */
+class CyberBrowserErrorBoundary extends Component<
+    { children: React.ReactNode },
+    ErrorBoundaryState
+> {
+    state: ErrorBoundaryState = {
+        hasError: false,
+        error: null,
+    };
+
+    static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+        console.error("CyberBrowserErrorBoundary caught error:", error);
+        return { hasError: true, error };
+    }
+
+    componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+        console.error("CyberBrowserErrorBoundary caught:", error, errorInfo);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div
+                    className="error-message"
+                    style={{
+                        textAlign: "center",
+                        color: "#ff4d4f",
+                        padding: "10px",
+                    }}
+                >
+                    <p>
+                        CyberBrowser failed to load:{" "}
+                        {this.state.error?.message || "Unknown error"}
+                    </p>
+                </div>
+            );
+        }
+        return this.props.children;
+    }
+}
+
+/**
+ * Error boundary for child page components (TeslaPage, RealtorPage, EmploymentAgencyPage).
+ */
+class PageErrorBoundary extends Component<
+    { children: React.ReactNode; pageName: string },
+    ErrorBoundaryState
+> {
+    state: ErrorBoundaryState = {
+        hasError: false,
+        error: null,
+        pageName: this.props.pageName, // Initialize pageName from props
+    };
+
+    static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
+        console.error(`PageErrorBoundary caught error:`, error);
+        return { hasError: true, error };
+    }
+
+    componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+        console.error(
+            `PageErrorBoundary for ${this.state.pageName} caught:`,
+            error,
+            errorInfo
+        );
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div
+                    className="error-message"
+                    style={{
+                        textAlign: "center",
+                        color: "#ff4d4f",
+                        padding: "10px",
+                    }}
+                >
+                    <p>
+                        {this.state.pageName || "Page"} failed to load:{" "}
+                        {this.state.error?.message || "Unknown error"}
+                    </p>
+                </div>
+            );
+        }
+        return this.props.children;
+    }
+}
+
+/**
+ * Renders a cyberpunk-styled browser with menu bar, URL dropdown, and content area.
+ * @param props - Component props.
+ * @returns JSX.Element - Browser window.
  */
 export const CyberBrowser: React.FC<CyberBrowserProps> = ({
     onClose,
-    playerId,
+    username,
+    activePage = "tesla",
+    style,
 }) => {
-    const [url] = useState("https://Tesla.ct");
-    const [purchaseStatus, setPurchaseStatus] = useState<string | null>(null);
-    const [slots, setSlots] = useState<{ total: number; used: number } | null>(
-        null
+    const [currentPage, setCurrentPage] = useState<
+        "tesla" | "realtor" | "agency"
+    >(activePage);
+    const [url, setUrl] = useState<string>(
+        `https://${activePage.charAt(0).toUpperCase() + activePage.slice(1)}.ct`
     );
-    const [balance, setBalance] = useState<number | null>(null);
-    const [error, setError] = useState<string | null>(null);
 
-    // Vehicle configurations
-    const vehicles = [
-        {
-            type: "Model Y",
-            cost: 50000,
-            image: "src/assets/showroom/ModelY-Showroom.png",
-        },
-        {
-            type: "RoboCab",
-            cost: 35000,
-            image: "src/assets/showroom/RoboCab-Showroom.jpg",
-        },
-    ];
-
-    // Refresh JWT token
-    const refreshToken = async () => {
-        const username = localStorage.getItem("username") || "Kevin-Dean";
+    /**
+     * Logs component rendering and checks DOM visibility.
+     */
+    useEffect(() => {
         console.log(
-            `Attempting to refresh token for player_id: ${playerId}, username: ${username}`
+            `CyberBrowser component mounted with username: ${username}, page: ${activePage}, style: ${JSON.stringify(
+                style
+            )}`
         );
-        try {
-            const response = await fetch(
-                "http://localhost:3000/api/auth/login",
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        player_id: parseInt(playerId, 10),
-                        password: "test123",
-                    }),
-                }
-            );
-            const data = await response.json();
-            console.log("Token refresh response:", data);
-            if (data.status === "Success") {
-                console.log(
-                    `Token refresh successful, new token: ${data.token}`
-                );
-                localStorage.setItem("jwt_token", data.token);
-                localStorage.setItem("player_id", data.player_id.toString());
-                localStorage.setItem("username", username);
-                return data.token;
-            } else {
-                console.error("Token refresh failed:", data.message);
-                setError("Failed to refresh session. Please log in again.");
-                localStorage.removeItem("jwt_token");
-                localStorage.removeItem("username");
-                localStorage.removeItem("player_id");
-                return null;
-            }
-        } catch (error) {
-            console.error("Token refresh error:", error);
-            setError("Failed to refresh session. Please log in again.");
-            localStorage.removeItem("jwt_token");
-            localStorage.removeItem("username");
-            localStorage.removeItem("player_id");
-            return null;
+        console.log(
+            `CyberBrowser initial state: currentPage=${currentPage}, url=${url}`
+        );
+        const browserElement = document.getElementById("cyber-browser");
+        if (browserElement) {
+            const computedStyle = window.getComputedStyle(browserElement);
+            console.log("CyberBrowser DOM element found, styles:", {
+                display: computedStyle.display,
+                visibility: computedStyle.visibility,
+                opacity: computedStyle.opacity,
+                zIndex: computedStyle.zIndex,
+                position: computedStyle.position,
+                top: computedStyle.top,
+                left: computedStyle.left,
+                width: computedStyle.width,
+                height: computedStyle.height,
+            });
+        } else {
+            console.warn("CyberBrowser DOM element #cyber-browser not found");
         }
+    }, [username, activePage, style]);
+
+    /**
+     * Syncs URL with current page.
+     */
+    useEffect(() => {
+        setUrl(
+            `https://${
+                currentPage.charAt(0).toUpperCase() + currentPage.slice(1)
+            }.ct`
+        );
+        console.log(`CyberBrowser page changed to: ${currentPage}`);
+    }, [currentPage]);
+
+    /**
+     * Sets up global toggleCyberBrowser function.
+     */
+    useEffect(() => {
+        (window as any).toggleCyberBrowser = (
+            page: "tesla" | "realtor" | "agency" | undefined
+        ) => {
+            setCurrentPage(page || "tesla");
+            console.log(`CyberBrowser toggled to page: ${page || "tesla"}`);
+        };
+        return () => {
+            delete (window as any).toggleCyberBrowser;
+        };
+    }, []);
+
+    /**
+     * Handles menu button clicks to switch pages.
+     * @param page - Page to switch to.
+     */
+    const handleMenuClick = (page: "tesla" | "realtor" | "agency") => {
+        setCurrentPage(page);
+        console.log(`Menu button clicked: ${page}`);
     };
 
-    // Fetch slots from API
-    useEffect(() => {
-        const fetchSlots = async (retries = 3, delay = 1000) => {
-            const token = localStorage.getItem("jwt_token");
-            console.log(`Fetching slots from /api/player/${playerId}/slots`, {
-                token: token ? `${token.slice(0, 10)}...` : "No token",
-            });
-            if (!token) {
-                console.error("No JWT token found");
-                setError("Authentication required. Please log in again.");
-                return;
-            }
-            try {
-                const response = await fetch(
-                    `http://localhost:3000/api/player/${playerId}/slots`,
-                    {
-                        method: "GET",
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            "Content-Type": "application/json",
-                        },
-                    }
-                );
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    if (response.status === 401 || response.status === 403) {
-                        console.error(
-                            "Token invalid or unauthorized:",
-                            errorText
-                        );
-                        setError(
-                            "Session expired. Attempting to refresh token..."
-                        );
-                        const newToken = await refreshToken();
-                        if (!newToken) {
-                            return;
-                        }
-                        console.log(
-                            `Retrying fetch with new token: ${newToken.slice(
-                                0,
-                                10
-                            )}...`
-                        );
-                        const retryResponse = await fetch(
-                            `http://localhost:3000/api/player/${playerId}/slots`,
-                            {
-                                method: "GET",
-                                headers: {
-                                    Authorization: `Bearer ${newToken}`,
-                                    "Content-Type": "application/json",
-                                },
-                            }
-                        );
-                        if (!retryResponse.ok) {
-                            const retryErrorText = await retryResponse.text();
-                            throw new Error(
-                                `HTTP ${retryResponse.status}: Failed to fetch slots after token refresh - ${retryErrorText}`
-                            );
-                        }
-                        const retryData = await retryResponse.json();
-                        console.log(
-                            "Slots retry response:",
-                            JSON.stringify(retryData, null, 2)
-                        );
-                        if (
-                            retryData.status === "Success" &&
-                            typeof retryData.total_slots === "number" &&
-                            typeof retryData.used_slots === "number"
-                        ) {
-                            setSlots({
-                                total: retryData.total_slots,
-                                used: retryData.used_slots,
-                            });
-                            console.log(
-                                `Rendering slots: ${retryData.used_slots}/${retryData.total_slots}`
-                            );
-                        } else {
-                            console.warn(
-                                "Invalid slots retry data:",
-                                retryData
-                            );
-                            setError("No valid slot data found");
-                        }
-                        return;
-                    }
-                    throw new Error(
-                        `HTTP ${response.status}: Failed to fetch slots - ${errorText}`
-                    );
-                }
-                const data = await response.json();
-                console.log("Slots response:", JSON.stringify(data, null, 2));
-                if (
-                    data.status === "Success" &&
-                    typeof data.total_slots === "number" &&
-                    typeof data.used_slots === "number"
-                ) {
-                    setSlots({
-                        total: data.total_slots,
-                        used: data.used_slots,
-                    });
-                    console.log(
-                        `Rendering slots: ${data.used_slots}/${data.total_slots}`
-                    );
-                } else {
-                    console.warn("Invalid slots data:", data);
-                    setError("No valid slot data found");
-                }
-            } catch (error) {
-                if (retries > 0) {
-                    console.warn(
-                        `Retrying fetch (/api/player/${playerId}/slots), ${retries} attempts left`
-                    );
-                    await new Promise((resolve) => setTimeout(resolve, delay));
-                    return fetchSlots(retries - 1, delay * 2);
-                }
-                console.error(
-                    `Failed to fetch slots from /api/player/${playerId}/slots:`,
-                    error
-                );
-                setError(
-                    `Failed to fetch slots: ${
-                        error instanceof Error ? error.message : "Unknown error"
-                    }`
-                );
-            }
-        };
-
-        const fetchBalance = async (retries = 3, delay = 1000) => {
-            const token = localStorage.getItem("jwt_token");
-            console.log(
-                `Fetching balance from /api/player/${playerId}/balance`,
-                { token: token ? `${token.slice(0, 10)}...` : "No token" }
-            );
-            if (!token) {
-                console.error("No JWT token found");
-                setError("Authentication required. Please log in again.");
-                return;
-            }
-            try {
-                const response = await fetch(
-                    `http://localhost:3000/api/player/${playerId}/balance`,
-                    {
-                        method: "GET",
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            "Content-Type": "application/json",
-                        },
-                    }
-                );
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    if (response.status === 401 || response.status === 403) {
-                        console.error(
-                            "Token invalid or unauthorized:",
-                            errorText
-                        );
-                        setError(
-                            "Session expired. Attempting to refresh token..."
-                        );
-                        const newToken = await refreshToken();
-                        if (!newToken) {
-                            return;
-                        }
-                        console.log(
-                            `Retrying fetch with new token: ${newToken.slice(
-                                0,
-                                10
-                            )}...`
-                        );
-                        const retryResponse = await fetch(
-                            `http://localhost:3000/api/player/${playerId}/balance`,
-                            {
-                                method: "GET",
-                                headers: {
-                                    Authorization: `Bearer ${newToken}`,
-                                    "Content-Type": "application/json",
-                                },
-                            }
-                        );
-                        if (!retryResponse.ok) {
-                            const retryErrorText = await retryResponse.text();
-                            throw new Error(
-                                `HTTP ${retryResponse.status}: Failed to fetch balance after token refresh - ${retryErrorText}`
-                            );
-                        }
-                        const retryData = await retryResponse.json();
-                        console.log(
-                            "Balance retry response:",
-                            JSON.stringify(retryData, null, 2)
-                        );
-                        if (
-                            retryData.status === "Success" &&
-                            typeof retryData.bank_balance === "number"
-                        ) {
-                            setBalance(retryData.bank_balance);
-                            console.log(
-                                `Balance fetched: ${retryData.bank_balance}`
-                            );
-                        } else {
-                            console.warn(
-                                "Invalid balance retry data:",
-                                retryData
-                            );
-                            setError("No valid balance data found");
-                        }
-                        return;
-                    }
-                    throw new Error(
-                        `HTTP ${response.status}: Failed to fetch balance - ${errorText}`
-                    );
-                }
-                const data = await response.json();
-                console.log("Balance response:", JSON.stringify(data, null, 2));
-                if (
-                    data.status === "Success" &&
-                    typeof data.bank_balance === "number"
-                ) {
-                    setBalance(data.bank_balance);
-                    console.log(`Balance fetched: ${data.bank_balance}`);
-                } else {
-                    console.warn("Invalid balance data:", data);
-                    setError("No valid balance data found");
-                }
-            } catch (error) {
-                if (retries > 0) {
-                    console.warn(
-                        `Retrying fetch (/api/player/${playerId}/balance), ${retries} attempts left`
-                    );
-                    await new Promise((resolve) => setTimeout(resolve, delay));
-                    return fetchBalance(retries - 1, delay * 2);
-                }
-                console.error(
-                    `Failed to fetch balance from /api/player/${playerId}/balance:`,
-                    error
-                );
-                setError(
-                    `Failed to fetch balance: ${
-                        error instanceof Error ? error.message : "Unknown error"
-                    }`
-                );
-            }
-        };
-
-        fetchSlots();
-        fetchBalance();
-    }, [playerId]);
-
-    // Handle vehicle purchase
-    const handlePurchase = (vehicleType: string) => {
-        const result = purchaseVehicle(playerId, vehicleType);
-        setPurchaseStatus(result.message);
-        console.log(`Purchase attempted for ${vehicleType}:`, result);
-        setTimeout(() => setPurchaseStatus(null), 3000); // Clear status after 3s
+    /**
+     * Handles URL dropdown changes.
+     * @param e - Change event.
+     */
+    const handleUrlChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selected = e.target.value;
+        const page = selected
+            .replace("https://", "")
+            .replace(".ct", "")
+            .toLowerCase() as "tesla" | "realtor" | "agency";
+        setCurrentPage(page);
+        console.log(`URL dropdown changed to: ${selected}`);
     };
 
     return (
-        <Window
-            id="cyber-browser"
-            title="CyberBrowser V1.0 - Tesla: New Vehicle's"
-            onClose={() => {
-                console.log("CyberBrowser onClose triggered");
-                onClose();
-            }}
-            isResizable={true}
-            initialPosition={{ top: 100, left: 100 }}
-        >
-            <div
-                className="browser-content"
-                role="region"
-                aria-label="CyberBrowser interface"
+        <CyberBrowserErrorBoundary>
+            <CyberWindow
+                id="cyber-browser"
+                title={
+                    <span>
+                        <i
+                            className="fas fa-globe globe-icon"
+                            aria-hidden="true"
+                        ></i>
+                        {" CyberBrowser"}
+                    </span>
+                }
+                onClose={() => {
+                    console.log("CyberBrowser onClose triggered");
+                    onClose();
+                }}
+                isResizable={true}
+                initialPosition={{ top: 100, left: 100 }}
+                style={{ zIndex: 2000, display: "block", ...style }}
             >
-                {error && <div className="error-message">{error}</div>}
-                <div className="url-bar">
-                    <input
-                        type="text"
-                        value={url}
-                        readOnly
-                        aria-label="Browser URL"
-                    />
-                </div>
-                <div className="purchase-section">
-                    <h3>Purchase Vehicles</h3>
-                    <div className="vehicle-options">
-                        {vehicles.map((vehicle) => {
-                            const canPurchase =
-                                slots &&
-                                balance !== null &&
-                                slots.used < slots.total &&
-                                balance >= vehicle.cost;
-                            console.log(
-                                `Checking funds for ${vehicle.type}: ${balance} vs ${vehicle.cost}`
-                            );
-                            return (
-                                <div
-                                    key={vehicle.type}
-                                    className="vehicle-card"
-                                >
-                                    <img
-                                        src={vehicle.image}
-                                        alt={`${vehicle.type} vehicle`}
-                                        className="vehicle-image"
-                                    />
-                                    <h4>{vehicle.type}</h4>
-                                    <p>
-                                        Cost: ${vehicle.cost.toLocaleString()}
-                                    </p>
-                                    {slots && balance !== null && (
-                                        <>
-                                            <p>
-                                                Slots: {slots.used}/
-                                                {slots.total}
-                                            </p>
-                                            {!canPurchase && (
-                                                <p className="insufficient-message">
-                                                    {slots.used >= slots.total
-                                                        ? "No slots available"
-                                                        : "Insufficient Funds"}
-                                                </p>
-                                            )}
-                                        </>
-                                    )}
-                                    <button
-                                        className="purchase-btn"
-                                        onClick={() =>
-                                            handlePurchase(vehicle.type)
-                                        }
-                                        aria-label={`Purchase ${vehicle.type}`}
-                                        disabled={!canPurchase}
-                                    >
-                                        Buy Now
-                                    </button>
-                                </div>
-                            );
-                        })}
-                    </div>
-                    {slots && (
-                        <div
-                            className="slots-display"
-                            aria-label="Vehicle slots status"
+                <div
+                    className="browser-content"
+                    role="region"
+                    aria-label="CyberBrowser interface"
+                >
+                    <div
+                        className="menu-bar"
+                        role="navigation"
+                        aria-label="Browser menu"
+                    >
+                        <button
+                            className={`menu-btn ${
+                                currentPage === "tesla" ? "active" : ""
+                            }`}
+                            onClick={() => handleMenuClick("tesla")}
+                            aria-label="Tesla page"
                         >
-                            <span>
-                                Slots Available: {slots.used}/{slots.total}
-                            </span>
-                        </div>
-                    )}
-                    {purchaseStatus && (
-                        <p className="purchase-status">{purchaseStatus}</p>
-                    )}
+                            <i className="fas fa-taxi" aria-hidden="true"></i>{" "}
+                            Tesla
+                        </button>
+                        <button
+                            className={`menu-btn ${
+                                currentPage === "realtor" ? "active" : ""
+                            }`}
+                            onClick={() => handleMenuClick("realtor")}
+                            aria-label="Realtor page"
+                        >
+                            <i
+                                className="fas fa-building"
+                                aria-hidden="true"
+                            ></i>{" "}
+                            Realtor
+                        </button>
+                        <button
+                            className={`menu-btn ${
+                                currentPage === "agency" ? "active" : ""
+                            }`}
+                            onClick={() => handleMenuClick("agency")}
+                            aria-label="Employment Agency page"
+                        >
+                            <i
+                                className="fas fa-briefcase"
+                                aria-hidden="true"
+                            ></i>{" "}
+                            Employment Agency
+                        </button>
+                    </div>
+                    <div className="url-bar">
+                        <select
+                            value={url}
+                            onChange={handleUrlChange}
+                            aria-label="Browser URL selector"
+                        >
+                            <option value="https://Tesla.ct">
+                                https://Tesla.ct
+                            </option>
+                            <option value="https://Realtor.ct">
+                                https://Realtor.ct
+                            </option>
+                            <option value="https://EmploymentAgency.ct">
+                                https://EmploymentAgency.ct
+                            </option>
+                        </select>
+                    </div>
+                    <div
+                        className="content-area"
+                        role="main"
+                        aria-label="Browser content"
+                    >
+                        {currentPage ? (
+                            <>
+                                {currentPage === "tesla" && (
+                                    <PageErrorBoundary pageName="TeslaPage">
+                                        <TeslaPage username={username} />
+                                    </PageErrorBoundary>
+                                )}
+                                {currentPage === "realtor" && (
+                                    <PageErrorBoundary pageName="RealtorPage">
+                                        <RealtorPage />
+                                    </PageErrorBoundary>
+                                )}
+                                {currentPage === "agency" && (
+                                    <PageErrorBoundary pageName="EmploymentAgencyPage">
+                                        <EmploymentAgencyPage />
+                                    </PageErrorBoundary>
+                                )}
+                            </>
+                        ) : (
+                            <div
+                                style={{
+                                    textAlign: "center",
+                                    color: "#f5f5f5",
+                                    padding: "10px",
+                                }}
+                            >
+                                <p>No page selected</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
-        </Window>
+            </CyberWindow>
+        </CyberBrowserErrorBoundary>
     );
 };

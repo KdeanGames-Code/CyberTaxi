@@ -2,23 +2,20 @@
  * AboutWindow.tsx - Displays CyberTaxi game credits in a non-resizable, draggable window.
  * Renders below top menu with a taxi icon, vehicle image, and team credits.
  * @module AboutWindow
- * @version 0.2.1
+ * @version 0.2.2
  */
-
 import React from "react";
-import { Window } from "./Window";
+import { CyberWindow } from "./CyberWindow";
+import "../../styles/windows.css";
 
 /**
  * Props for the AboutWindow component.
  * @interface AboutWindowProps
- * @property {() => void} onClose - Callback to close the About window.
- * @property {React.CSSProperties} [style] - Optional CSS styles for positioning.
- * @property {{ top: number; left: number }} [initialPosition] - Initial position for dragging.
  */
 interface AboutWindowProps {
-    onClose: () => void;
-    style?: React.CSSProperties;
-    initialPosition?: { top: number; left: number };
+    onClose: () => void; // Callback to close the About window
+    style?: React.CSSProperties; // Optional CSS styles for positioning
+    initialPosition?: { top: number; left: number }; // Initial position for dragging
 }
 
 /**
@@ -33,7 +30,7 @@ export const AboutWindow: React.FC<AboutWindowProps> = ({
     initialPosition,
 }) => {
     return (
-        <Window
+        <CyberWindow
             id="about-window"
             title="About CyberTaxi V 1.0"
             onClose={onClose}
@@ -63,6 +60,6 @@ export const AboutWindow: React.FC<AboutWindowProps> = ({
                 </p>
                 <p>CyberTaxi Team</p>
             </div>
-        </Window>
+        </CyberWindow>
     );
 };
