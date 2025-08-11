@@ -2,7 +2,7 @@
  * TeslaPage.tsx - Renders the Tesla purchase page in CyberBrowser for CyberTaxi.
  * Displays vehicle options (Model Y, RoboCab) with images, checks player funds and slots, and handles purchases, per GDD v1.1.
  * @module TeslaPage
- * @version 0.2.4
+ * @version 0.2.6
  */
 import React, { useEffect, useState } from "react";
 import "../../styles/browser.css";
@@ -13,15 +13,6 @@ import "../../styles/browser.css";
  */
 interface TeslaPageProps {
     username: string; // Player username for API calls
-}
-
-/**
- * Interface for slot data.
- * @interface Slots
- */
-interface Slots {
-    total: number;
-    used: number;
 }
 
 /**
@@ -169,7 +160,12 @@ export const TeslaPage: React.FC<TeslaPageProps> = ({ username }) => {
                 }
             } else {
                 const data = await response.json();
-                if (data.status === "Success") {
+                console.log("Slots response:", JSON.stringify(data, null, 2));
+                if (
+                    data.status === "Success" &&
+                    typeof data.total_slots === "number" &&
+                    typeof data.used_slots === "number"
+                ) {
                     setAvailableSlots(data.total_slots - data.used_slots);
                 } else {
                     throw new Error(data.message || "Failed to fetch slots");
@@ -265,6 +261,7 @@ export const TeslaPage: React.FC<TeslaPageProps> = ({ username }) => {
                 }
             } else {
                 const data = await response.json();
+                console.log("Balance response:", JSON.stringify(data, null, 2));
                 if (data.status === "Success") {
                     setBalance(data.bank_balance);
                 } else {

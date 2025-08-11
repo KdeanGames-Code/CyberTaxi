@@ -526,25 +526,6 @@ const App: React.FC = () => {
                         onItemSelect={handlePopupItemSelect}
                     />
                 )}
-                <button
-                    onClick={handleDebugOpenBrowser}
-                    style={{
-                        position: "fixed",
-                        bottom: "50px",
-                        left: "10px",
-                        padding: "8px",
-                        background: "#d4a017",
-                        border: "none",
-                        borderRadius: "4px",
-                        color: "#1a1a1a",
-                        fontFamily: '"Orbitron", sans-serif',
-                        cursor: "pointer",
-                        zIndex: 3000,
-                    }}
-                    aria-label="Debug: Open CyberBrowser"
-                >
-                    Debug: Open CyberBrowser
-                </button>
             </div>
         </ErrorBoundary>
     );
