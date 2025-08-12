@@ -1,0 +1,163 @@
+/* src/styles/MenuBar.css */
+/**
+ * @file MenuBar.css
+ * @description Stylesheet for the CyberTaxi MenuBar component.
+ * @author Kevin-Dean Livingstone & CyberTaxi Team
+ * @version 0.1.0
+ * @note Defines a cyberpunk-themed top bar with grid layout and interactive elements.
+ */
+
+/* MenuBar Styles */
+/**
+ * Sets up the top menu with a gradient background and fixed positioning.
+ * @style Uses grid for layout, matching the original top-menu design.
+ */
+.menu-bar {
+    height: 40px;
+    background: linear-gradient(to bottom right, #2f2f2f, #1a1a1a);
+    border: 2px solid #e8b923;
+    border-radius: 8px;
+    display: grid;
+    grid-template-columns: 40px 2fr 200px;
+    grid-template-rows: 1fr;
+    gap: 2px;
+    padding: 0;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6),
+        inset 0 2px 4px rgba(255, 255, 255, 0.1);
+    align-items: center;
+    position: fixed;
+    width: calc(100% - 10px);
+    top: 3px;
+    left: 3px;
+    z-index: 1000;
+    overflow: visible;
+}
+
+/* Logo Style */
+/**
+ * Styles the taxi logo icon in the menu bar.
+ * @style Centers the icon with a gold color.
+ */
+.fas.fa-taxi.logo {
+    grid-column: 1 / 2;
+    font-size: 24px;
+    color: #d4a017;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 100%;
+    margin: 0;
+}
+
+/* Stats Container */
+/**
+ * Holds the stats display within the menu bar.
+ * @style Aligns stats horizontally with spacing.
+ */
+.stats-container {
+    grid-column: 2 / 3;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.stats {
+    display: flex;
+    gap: 20px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    font-family: "Orbitron", sans-serif;
+    color: #d4a017;
+    font-weight: 700;
+    font-size: 10px;
+}
+
+.stat-item span {
+    line-height: 1;
+}
+
+/* Energy and Help Section */
+/**
+ * Groups energy bar and help icon on the right.
+ * @style Aligns elements with a gap for spacing.
+ */
+.energy-help {
+    grid-column: 3 / 4;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 2px;
+    width: 200px;
+    padding-right: 20px;
+    margin: 0;
+}
+
+.energy {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #d4a017;
+    font-family: "Orbitron", sans-serif;
+    font-weight: 700;
+    font-size: 10px;
+    margin: 0 20px 0 0;
+}
+
+.energy-bar {
+    width: 80px;
+    height: 8px;
+    background-color: #3f310e;
+    border: 1px solid #d4a017;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 2px;
+}
+
+.energy-fill {
+    height: 100%;
+    width: 75%;
+    background-color: #00a3e0;
+    transition: width 0.3s;
+}
+
+.help {
+    font-size: 20px;
+    color: #cfd8d3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    margin: 0;
+    cursor: pointer;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive Design */
+/**
+ * Adjusts layout for smaller screens, ensuring readability.
+ * @media Targets devices below 768px width.
+ */
+@media (max-width: 768px) {
+    .menu-bar {
+        grid-template-columns: 1fr;
+        height: auto;
+        padding: 10px;
+        width: calc(100% - 20px);
+    }
+    .stats-container,
+    .energy-help {
+        justify-content: space-around;
+        width: 100%;
+        margin: 5px 0;
+    }
+    .energy-bar {
+        width: 60px;
+    }
+}

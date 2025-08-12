@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta
+            name="description"
+            content="CyberTaxi Project Plan for Version One"
+        />
+        <title>CyberTaxi Project Plan (V1)</title>
+        <style>
+            @media print {
+                body {
+                    font-size: 12pt;
+                }
+                .page-break {
+                    page-break-before: always;
+                }
+            }
+        </style>
+    </head>
+    <body
+        style="
+            font-family: Arial, sans-serif;
+            background-color: #2f2f2f;
+            color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        "
+    >
+        <header
+            style="
+                text-align: center;
+                padding: 20px;
+                background-color: #1a1a1a;
+                color: #d4a017;
+                border-bottom: 2px solid #d4a017;
+            "
+        >
+            <h1 style="margin: 0; font-size: 24pt">
+                CyberTaxi Project Plan (Version One)
+            </h1>
+            <p style="margin: 5px 0; font-size: 12pt">Authors: Kevin-Dean</p>
+            <p style="margin: 5px 0; font-size: 12pt">
+                Version 1.0, July 24, 2025
+            </p>
+        </header>
+
+        <section
+            style="
+                margin: 20px 0;
+                padding: 15px;
+                background-color: #1a1a1a;
+                border-left: 4px solid #d4a017;
+            "
+        >
+            <h2 style="color: #d4a017; font-size: 18pt; margin-bottom: 10px">
+                Overview
+            </h2>
+            <p>
+                This plan outlines development for Version One, focusing on
+                implementing the 14 completed chunks as a playable MVP. UI/UX
+                centric, with small sub-chunks (one function/menu/API per).
+                Starts with server setup (Node.js/Express/MySQL for data). File
+                structure: src/ (frontend Vite), server/ (backend), database/
+                (MySQL scripts), shared/ (utils/libraries), tests/ (jest),
+                deploy/ (scripts). PWA-ready with offline support (service
+                workers, localStorage). Detailed with 80+ sub-chunks—implement
+                one per iteration.
+            </p>
+        </section>
+
+        <section
+            style="
+                margin: 20px 0;
+                padding: 15px;
+                background-color: #1a1a1a;
+                border-left: 4px solid #d4a017;
+            "
+        >
+            <h2 style="color: #d4a017; font-size: 18pt; margin-bottom: 10px">
+                Phase 1: Server & Database Setup
+            </h2>
+            <p>
+                Foundational backend for UI data (e.g., bank/garages for
+                onboarding in #14). UI centric: APIs enable dynamic frontend
+                fetches.
+            </p>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    Setup Express server (server/app.js, library: express).
+                    Configure routes folder for UI APIs.
+                </li>
+                <li>
+                    Add JWT auth middleware (server/utils/auth-utils.js,
+                    library: jsonwebtoken). Secure UI sessions.
+                </li>
+                <li>
+                    Create user signup API (server/routes/auth.js, integrates #1
+                    bank). POST /api/auth/signup for UI forms.
+                </li>
+                <li>
+                    Setup MySQL connection (server/models/db.js, library:
+                    mysql2). Pool for UI query scalability.
+                </li>
+                <li>
+                    Define user schema (database/schemas.sql, fields:
+                    bank_balance default 60000). For UI profile displays.
+                </li>
+                <li>
+                    Define garage schema (database/schemas.sql, fields:
+                    lease_type, demand_zone). For UI map selections.
+                </li>
+                <li>
+                    Define vehicle schema (database/schemas.sql, fields:
+                    delivery_timestamp). For UI order queues.
+                </li>
+                <li>
+                    Add basic API health (server/routes/health.js, GET /health
+                    checks MySQL). For UI debugging.
+                </li>
+                <li>
+                    Setup error handling middleware
+                    (server/utils/error-utils.js). For UI error feedback.
+                </li>
+                <li>
+                    Create query library (shared/utils/query-utils.js). e.g.,
+                    getUserBalance for UI updates.
+                </li>
+            </ul>
+            <p>
+                Reasoning: Backend supports UI data (secure APIs for PWA sync).
+                Aligns with #1/#14. Suggested Prompts: Ask Backend for Express
+                setup. Ask Database Admin for MySQL schemas.
+            </p>
+        </section>
+
+        <section
+            style="
+                margin: 20px 0;
+                padding: 15px;
+                background-color: #1a1a1a;
+                border-left: 4px solid #d4a017;
+            "
+        >
+            <h2 style="color: #d4a017; font-size: 18pt; margin-bottom: 10px">
+                Phase 2: Core UI Framework
+            </h2>
+            <p>
+                Base PWA UI with Vite (manifest, service workers), top menu, map
+                (Leaflet). UI centric: Foundations for all interfaces.
+            </p>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    Setup Vite project (vite.config.js, library: vite). Add PWA
+                    plugin for service workers.
+                </li>
+                <li>
+                    Create manifest.json (public/manifest.json). For app
+                    icon/install UX.
+                </li>
+                <li>
+                    Build top menu component
+                    (src/components/top-menu/top-menu.js, with bank/score from
+                    #1). Responsive flexbox.
+                </li>
+                <li>
+                    Add help icon flyout
+                    (src/components/top-menu/help-flyout.js, for #14 tutorials).
+                    ARIA popover.
+                </li>
+                <li>
+                    Integrate Leaflet map base
+                    (src/components/map/map-component.js, library: leaflet).
+                    Lazy load for performance.
+                </li>
+                <li>
+                    Style global CSS (src/styles/global.css, dark/neon theme).
+                    Media queries for mobile.
+                </li>
+                <li>
+                    Add energy bar in top menu
+                    (src/components/top-menu/energy-bar.js, hover % from #9).
+                    Progress CSS.
+                </li>
+                <li>
+                    Add flyout button library (src/utils/flyout-utils.js). For
+                    expandable UX.
+                </li>
+                <li>
+                    Setup service workers (src/service-worker.js, library:
+                    workbox). For offline map caching.
+                </li>
+                <li>
+                    Add basic UX test (tests/ui-core.test.js, library: vitest).
+                    For menu responsiveness.
+                </li>
+            </ul>
+            <p>
+                Reasoning: UI centric for PWA (responsive/offline-ready). Ties
+                to #14 prompts/map. Suggested Prompts: Ask Front End for Vite
+                setup with Leaflet. Ask Game Mechanics for energy bar logic.
+            </p>
+        </section>
+
+        <section
+            style="
+                margin: 20px 0;
+                padding: 15px;
+                background-color: #1a1a1a;
+                border-left: 4px solid #d4a017;
+            "
+        >
+            <h2 style="color: #d4a017; font-size: 18pt; margin-bottom: 10px">
+                Phase 3: Onboarding & Tutorials
+            </h2>
+            <p>
+                UI flows for signup/onboarding (#14 prompts/modals, skippable),
+                garage map (from #5). UI centric: Frustration-free entry.
+            </p>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    Create signup form UI
+                    (src/components/onboarding/signup-form.js, fields:
+                    username/email). Semantic/validation.
+                </li>
+                <li>
+                    Add onboarding modal sequence
+                    (src/components/onboarding/onboarding-modal.js, "Lease a
+                    garage" prompt). Transitions.
+                </li>
+                <li>
+                    Implement garage selection map overlay
+                    (src/components/onboarding/garage-map-overlay.js, highlights
+                    demand). Leaflet layers.
+                </li>
+                <li>
+                    Add vehicle order flyout menu
+                    (src/components/onboarding/vehicle-order-flyout.js, prices
+                    from #2). Dropdown.
+                </li>
+                <li>
+                    Build delivery notification toast
+                    (src/components/onboarding/delivery-toast.js, timer from
+                    #2). Animate/dismiss.
+                </li>
+                <li>
+                    Add tutorial tooltip library
+                    (src/utils/tutorial-tooltip-utils.js, battery hover from
+                    #9). Event listeners.
+                </li>
+                <li>
+                    Implement skip/restart toggle
+                    (src/components/settings/tutorial-toggle.js, localStorage
+                    from #14). Switch.
+                </li>
+                <li>
+                    Add "Restart Tutorial" button
+                    (src/components/onboarding/restart-button.js, from #14).
+                    Reset flags.
+                </li>
+                <li>
+                    Integrate backend API for signup (shared/utils/api-utils.js,
+                    POST /auth/signup). Fetch bank.
+                </li>
+                <li>
+                    Test offline onboarding (tests/onboarding.test.js). Cache
+                    modals.
+                </li>
+            </ul>
+            <p>
+                Reasoning: UI centric for start (modals/toasts from #14). PWA
+                offline for localStorage. Suggested Prompts: Ask Front End for
+                onboarding modal. Ask Backend for signup API.
+            </p>
+        </section>
+
+        <section
+            style="
+                margin: 20px 0;
+                padding: 15px;
+                background-color: #1a1a1a;
+                border-left: 4px solid #d4a017;
+            "
+        >
+            <h2 style="color: #d4a017; font-size: 18pt; margin-bottom: 10px">
+                Phase 4: Fleet & Vehicle Mechanics
+            </h2>
+            <p>
+                UI for vehicle badges/fleet list (wear/battery from #8, purchase
+                from #2), details flyout (fare history). UI centric: Fleet UX.
+            </p>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    Create fleet list component
+                    (src/components/fleet/fleet-list.js, badges from #2). Grid
+                    layout.
+                </li>
+                <li>
+                    Add wear progress bar (src/components/fleet/wear-bar.js,
+                    modifiers from #8). Color-coded.
+                </li>
+                <li>
+                    Implement battery bar hover
+                    (src/components/fleet/battery-bar.js, tips from #9).
+                    Popover.
+                </li>
+                <li>
+                    Build vehicle details flyout
+                    (src/components/fleet/vehicle-details-flyout.js, history
+                    from #2/#4). Expandable.
+                </li>
+                <li>
+                    Add tire seasonal toggle
+                    (src/components/fleet/tire-toggle.js, from #8). Dropdown.
+                </li>
+                <li>
+                    Implement maintenance button
+                    (src/components/fleet/maintenance-button.js, costs from #8).
+                    Modal.
+                </li>
+                <li>
+                    Add used market list
+                    (src/components/fleet/used-market-list.js, pricing from #2).
+                    Sorted table.
+                </li>
+                <li>
+                    Add offline fleet library
+                    (src/utils/fleet-offline-utils.js). Cache badges.
+                </li>
+                <li>
+                    Integrate backend API for fleet (shared/utils/api-utils.js,
+                    GET /vehicles). Load data.
+                </li>
+                <li>
+                    Test fleet offline (tests/fleet.test.js). For
+                    responsiveness.
+                </li>
+            </ul>
+            <p>
+                Reasoning: UI centric for management (badges/flyouts from #11).
+                PWA offline for wear. Suggested Prompts: Ask Front End for fleet
+                badge. Ask Game Mechanics for wear formula.
+            </p>
+        </section>
+
+        <section
+            style="
+                margin: 20px 0;
+                padding: 15px;
+                background-color: #1a1a1a;
+                border-left: 4px solid #d4a017;
+            "
+        >
+            <h2 style="color: #d4a017; font-size: 18pt; margin-bottom: 10px">
+                Phase 5: Garage & Charging
+            </h2>
+            <p>
+                UI for garage list/map (leasing from #5, chargers from #7/#9),
+                progress bars for construction. UI centric: Base operations UX.
+            </p>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    Create garage selection map
+                    (src/components/garage/garage-map.js, demand toggle from
+                    #5/#13). Leaflet filters.
+                </li>
+                <li>
+                    Add lease form flyout
+                    (src/components/garage/lease-flyout.js, terms from #5). Form
+                    enums.
+                </li>
+                <li>
+                    Implement charger install UI
+                    (src/components/garage/charger-install.js, costs/times from
+                    #7). Option cards.
+                </li>
+                <li>
+                    Build charging progress bar
+                    (src/components/garage/charging-bar.js, rates from #9).
+                    Animated.
+                </li>
+                <li>
+                    Add parking spaces display
+                    (src/components/garage/parking-display.js, spaces from #5).
+                    Icon grid.
+                </li>
+                <li>
+                    Integrate construction timer
+                    (src/components/garage/construction-bar.js, days from
+                    #5/#7). Countdown.
+                </li>
+                <li>
+                    Add sell garage button
+                    (src/components/garage/sell-button.js, return from #5).
+                    Confirmation.
+                </li>
+                <li>
+                    Add offline garage library
+                    (src/utils/garage-offline-utils.js). Cache lease.
+                </li>
+                <li>
+                    Integrate backend API for garages
+                    (shared/utils/api-utils.js, GET /garages). Load options.
+                </li>
+                <li>Test garage offline (tests/garage.test.js). For map.</li>
+            </ul>
+            <p>
+                Reasoning: UI centric for bases (map/flyouts from #5). PWA
+                offline for timers. Suggested Prompts: Ask Front End for garage
+                map. Ask Backend for lease API.
+            </p>
+        </section>
+
+        <section
+            style="
+                margin: 20px 0;
+                padding: 15px;
+                background-color: #1a1a1a;
+                border-left: 4px solid #d4a017;
+            "
+        >
+            <h2 style="color: #d4a017; font-size: 18pt; margin-bottom: 10px">
+                Phase 6: Earnings & Demand
+            </h2>
+            <p>
+                UI for fare history/leaderboards (earnings from #4, demand heat
+                maps from #13), rankings flyout. UI centric: Core loop UX.
+            </p>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    Create fare history table
+                    (src/components/earnings/fare-history-table.js, formula from
+                    #4). Collapsible.
+                </li>
+                <li>
+                    Add demand heat map toggle
+                    (src/components/earnings/demand-heat-toggle.js, boosts from
+                    #13). Switch.
+                </li>
+                <li>
+                    Build leaderboard flyout
+                    (src/components/earnings/leaderboard-flyout.js, badges from
+                    #13). Tabbed.
+                </li>
+                <li>
+                    Implement closest taxi indicator
+                    (src/components/earnings/closest-taxi-indicator.js, from
+                    #4/#13). Icon.
+                </li>
+                <li>
+                    Add event boost display
+                    (src/components/earnings/event-boost.js, +20% from #12).
+                    Badge.
+                </li>
+                <li>
+                    Integrate rankings list
+                    (src/components/earnings/rankings-list.js, daily/weekly from
+                    #13). Sorted.
+                </li>
+                <li>
+                    Add Tesla share deduction visual
+                    (src/components/earnings/tesla-share-indicator.js, from #4).
+                    Tooltip.
+                </li>
+                <li>
+                    Add offline earnings library
+                    (src/utils/earnings-offline-utils.js). Cache history.
+                </li>
+                <li>
+                    Integrate backend API for earnings
+                    (shared/utils/api-utils.js, GET /earnings). Load data.
+                </li>
+                <li>
+                    Test earnings offline (tests/earnings.test.js). For table.
+                </li>
+            </ul>
+            <p>
+                Reasoning: UI centric for loop (tables/flyouts from #4/#13). PWA
+                offline for history. Suggested Prompts: Ask Front End for
+                leaderboard flyout. Ask Game Mechanics for fare formula.
+            </p>
+        </section>
+
+        <section
+            style="
+                margin: 20px 0;
+                padding: 15px;
+                background-color: #1a1a1a;
+                border-left: 4px solid #d4a017;
+            "
+        >
+            <h2 style="color: #d4a017; font-size: 18pt; margin-bottom: 10px">
+                Phase 7: Profiles & Leaderboards
+            </h2>
+            <p>
+                UI for company profile flyout (fleet/garages from #11,
+                leaderboards from #13), expandable details. UI centric: Player
+                tracking UX.
+            </p>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    Create company profile flyout
+                    (src/components/profiles/company-flyout.js, name/overview
+                    from #11). Trigger button.
+                </li>
+                <li>
+                    Add fleet overview list
+                    (src/components/profiles/fleet-overview.js, from #11).
+                    Accordion.
+                </li>
+                <li>
+                    Implement garages expandable
+                    (src/components/profiles/garages-section.js, sizes/chargers
+                    from #11). Click expand.
+                </li>
+                <li>
+                    Add progress tracking dashboard
+                    (src/components/profiles/progress-dashboard.js, from #11).
+                    Charts.
+                </li>
+                <li>
+                    Integrate leaderboards in profile
+                    (src/components/profiles/leaderboards-section.js, badges
+                    from #13). Nested tabs.
+                </li>
+                <li>
+                    Build username/email display
+                    (src/components/profiles/user-info.js, from #11). Editable.
+                </li>
+                <li>
+                    Add settings toggle for tutorials
+                    (src/components/profiles/settings-toggle.js, from #14).
+                    Switch.
+                </li>
+                <li>
+                    Add offline profile library
+                    (src/utils/profile-offline-utils.js). Cache data.
+                </li>
+                <li>
+                    Integrate backend API for profiles
+                    (shared/utils/api-utils.js, GET /profiles). Load data.
+                </li>
+                <li>
+                    Test profiles offline (tests/profiles.test.js). For
+                    expandable.
+                </li>
+            </ul>
+            <p>
+                Reasoning: UI centric for tracking (flyouts/sections from
+                #11/#13). PWA offline for profiles. Suggested Prompts: Ask Front
+                End for profile flyout. Ask Database Admin for profile schema.
+            </p>
+        </section>
+
+        <section
+            style="
+                margin: 20px 0;
+                padding: 15px;
+                background-color: #1a1a1a;
+                border-left: 4px solid #d4a017;
+            "
+        >
+            <h2 style="color: #d4a017; font-size: 18pt; margin-bottom: 10px">
+                Phase 8: Environmental & Staff
+            </h2>
+            <p>
+                UI for weather/traffic overlays (from #12), staff hiring flyout
+                (from #10). UI centric: Dynamic gameplay UX.
+            </p>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    Create weather forecast section
+                    (src/components/environmental/weather-forecast.js,
+                    rain/traffic/protests from #12). Card.
+                </li>
+                <li>
+                    Add map overlays for events
+                    (src/components/environmental/event-overlay.js, +20% wear
+                    from #12). Layer toggle.
+                </li>
+                <li>
+                    Build staff hiring flyout
+                    (src/components/staff/staff-hire-flyout.js, $4k/month from
+                    #10). Option cards.
+                </li>
+                <li>
+                    Implement cleaning/maintenance buttons
+                    (src/components/staff/maintenance-button.js, reductions from
+                    #10). Action.
+                </li>
+                <li>
+                    Add shift scheduling UI
+                    (src/components/staff/shift-scheduler.js, 8-12 hours from
+                    #10). Calendar.
+                </li>
+                <li>
+                    Integrate protest alert prompts
+                    (src/components/environmental/protest-alert.js, 5% chance
+                    from #12). Modal.
+                </li>
+                <li>
+                    Add API update timer
+                    (src/components/environmental/api-timer.js, 15-min
+                    Open-Meteo from #12). Countdown.
+                </li>
+                <li>
+                    Add offline environmental library
+                    (src/utils/environmental-offline-utils.js). Cache weather.
+                </li>
+                <li>
+                    Integrate backend API for environmental
+                    (shared/utils/api-utils.js, GET /environmental). Load data.
+                </li>
+                <li>
+                    Test environmental offline (tests/environmental.test.js).
+                    For overlay.
+                </li>
+            </ul>
+            <p>
+                Reasoning: UI centric for gameplay (overlays/buttons from
+                #12/#10). PWA offline for alerts. Suggested Prompts: Ask Front
+                End for weather overlay. Ask Backend for Open-Meteo.
+            </p>
+        </section>
+
+        <section
+            style="
+                margin: 20px 0;
+                padding: 15px;
+                background-color: #1a1a1a;
+                border-left: 4px solid #d4a017;
+            "
+        >
+            <h2 style="color: #d4a017; font-size: 18pt; margin-bottom: 10px">
+                Phase 9: Integration/Testing/Deployment
+            </h2>
+            <p>
+                Integrate all (e.g., onboarding with fleet from #14/#2), test
+                offline/onboarding, deploy v1. File Structure: tests/ for
+                unit/integration (jest); deploy/ for scripts (vercel/netlify).
+            </p>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    Integrate onboarding with garage UI
+                    (src/integration/onboarding-garage.js, API calls). Link
+                    flows.
+                </li>
+                <li>
+                    Add unit tests for earnings (tests/earnings.test.js,
+                    library: jest, formulas from #4). Verify math.
+                </li>
+                <li>
+                    Test offline tutorials (service workers cache prompts from
+                    #14). Simulate disconnect.
+                </li>
+                <li>
+                    Integrate demand with map (src/integration/demand-map.js,
+                    heat toggle from #13). Dynamic updates.
+                </li>
+                <li>
+                    Add integration tests for delivery (tests/delivery.test.js,
+                    timers from #2). End-to-end.
+                </li>
+                <li>
+                    Test leaderboards UI (tests/leaderboards.test.js, badges
+                    from #13). Data load.
+                </li>
+                <li>
+                    Setup deployment script (deploy/vite-deploy.js, library:
+                    vercel/netlify for PWA). CI/CD.
+                </li>
+                <li>
+                    Final v1 smoke test (real-time sim, all chunks). Manual UX
+                    walk-through.
+                </li>
+                <li>
+                    Add end-to-end tests for profiles (tests/profiles.e2e.js,
+                    library: cypress, from #11). Browser simulation.
+                </li>
+                <li>
+                    Deploy v1 and monitor (deploy/monitor.js). Logs/analytics.
+                </li>
+            </ul>
+            <p>
+                Reasoning: UI centric testing (UX flows), ensuring v1 MVP. PWA
+                deployment with Vite. Suggested Prompts: Ask all devs for
+                integration tests. Ask Team Coordinator for v1 synthesis.
+            </p>
+        </section>
+
+        <footer
+            style="
+                text-align: center;
+                padding: 10px;
+                background-color: #1a1a1a;
+                color: #cfd8d3;
+                border-top: 2px solid #d4a017;
+                margin-top: 20px;
+            "
+        >
+            <p>© 2025 CyberTaxi Team. All rights reserved.</p>
+        </footer>
+    </body>
+</html>

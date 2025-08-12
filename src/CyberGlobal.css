@@ -1,0 +1,98 @@
+/* src/CyberGlobal.css */
+/**
+ * @file CyberGlobal.css
+ * @description Global stylesheet for CyberTaxi, defining the base layout and theme.
+ * @author Kevin-Dean Livingstone & CyberTaxi Team
+ * @version 0.1.1
+ * @note Establishes a three-row grid (MenuBar, Map, BottomMenu) with a cyberpunk aesthetic, avoiding padding layout issues.
+ */
+
+/* Base Styles */
+/**
+ * Sets the foundation for the app, ensuring full viewport height and no text selection.
+ * @style Applies to html and body for consistent layout.
+ */
+html,
+body {
+    margin: 0;
+    font-family: "Orbitron", "Roboto", sans-serif;
+    background-color: #2f2f2f;
+    color: #d4a017;
+    height: 100vh;
+    overflow: hidden;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Layout Grid */
+/**
+ * Defines the main grid layout with three rows: MenuBar, Map area, and BottomMenu.
+ * @style Uses grid-template-rows for a fixed top/bottom and flexible map area, no padding to preserve layout.
+ */
+#app {
+    display: grid;
+    grid-template-rows: auto 1fr auto; /* Top (MenuBar), Map, Bottom (BottomMenu) */
+    height: 100vh;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+    padding: 0;
+    overflow: hidden;
+}
+
+/* Placeholder Styles for Containers */
+/**
+ * Temporary styles for MenuBar, Map, and BottomMenu containers.
+ * @style Provides basic positioning and background; to be replaced with component-specific CSS in src/styles/.
+ */
+.menu-bar {
+    background: #1a1a1a;
+    text-align: center;
+}
+
+.map-area {
+    background: #222;
+    position: relative;
+    overflow: hidden;
+}
+
+.bottom-menu {
+    background: #1a1a1a;
+    text-align: center;
+}
+
+/* Responsive Design */
+/**
+ * Adjusts layout for smaller screens, ensuring usability.
+ * @media Targets devices below 768px width.
+ */
+@media (max-width: 768px) {
+    #app {
+        grid-template-rows: auto 1fr auto;
+    }
+    .menu-bar,
+    .bottom-menu {
+        font-size: 14px;
+    }
+}
+
+/* Error Message Style */
+/**
+ * Defines the appearance of error messages displayed globally.
+ * @style Positions fixed at the top center, with cyberpunk theming.
+ */
+.error-message {
+    position: fixed;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2f2f2f;
+    color: #d4a017;
+    border: 2px solid #e8b923;
+    padding: 10px;
+    border-radius: 6px;
+    z-index: 1000;
+    font-family: "Orbitron", sans-serif;
+}

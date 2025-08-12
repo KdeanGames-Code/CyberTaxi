@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content="CyberTaxi Game Design Document" />
+        <title>CyberTaxi GDD</title>
+        <style>
+            @media print {
+                body {
+                    font-size: 12pt;
+                }
+                .page-break {
+                    page-break-before: always;
+                }
+            }
+        </style>
+    </head>
+    <body
+        style="
+            font-family: Arial, sans-serif;
+            background-color: #2f2f2f;
+            color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        "
+    >
+        <header
+            style="
+                text-align: center;
+                padding: 20px;
+                background-color: #1a1a1a;
+                color: #d4a017;
+                border-bottom: 2px solid #d4a017;
+            "
+        >
+            <h1 style="margin: 0; font-size: 24pt">
+                CyberTaxi Game Design Document
+            </h1>
+            <p style="margin: 5px 0; font-size: 12pt">
+                Authors: Alex “CyberPilot” Dean and Professor Skyforge
+            </p>
+            <p style="margin: 5px 0; font-size: 12pt">
+                Version 1.1, June 24, 2025
+            </p>
+        </header>
+
+        <section
+            style="
+                margin: 20px 0;
+                padding: 15px;
+                background-color: #1a1a1a;
+                border-left: 4px solid #d4a017;
+            "
+        >
+            <h2 style="color: #d4a017; font-size: 18pt; margin-bottom: 10px">
+                Overview
+            </h2>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li><strong>Game Title:</strong> CyberTaxi</li>
+                <li><strong>Genre:</strong> Strategy/Simulation</li>
+                <li>
+                    <strong>Platform:</strong> Web (Progressive Web App),
+                    initially built with HTML, CSS, and JavaScript
+                </li>
+                <li>
+                    <strong>Target Audience:</strong> Gamers, Tesla enthusiasts,
+                    strategy fans
+                </li>
+                <li>
+                    <strong>Setting:</strong> Current-day urban environments,
+                    starting with Austin, TX
+                </li>
+                <li>
+                    <strong>Core Concept:</strong> Players own and manage a
+                    fleet of autonomous Tesla RoboTaxis, competing to earn
+                    fares, upgrade operations, and expand while navigating
+                    real-world challenges.
+                </li>
+            </ul>
+        </section>
+
+        <section
+            style="
+                margin: 20px 0;
+                padding: 15px;
+                background-color: #1a1a1a;
+                border-left: 4px solid #d4a017;
+            "
+        >
+            <h2 style="color: #d4a017; font-size: 18pt; margin-bottom: 10px">
+                Game Play
+            </h2>
+            <h3 style="color: #00a3e0; font-size: 16pt; margin-bottom: 10px">
+                Objective
+            </h3>
+            <p style="margin-left: 20px">
+                Maximize in-game earnings and progress through strategic
+                decisions and mission completions.
+            </p>
+
+            <h3 style="color: #00a3e0; font-size: 16pt; margin-bottom: 10px">
+                Mechanics
+            </h3>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    <strong>Fleet Management:</strong> Players own and oversee
+                    CyberTaxis (e.g., CT-001, CT-002, CT-003), monitoring their
+                    status and routes.
+                </li>
+                <li>
+                    <strong>Fare System:</strong> The closest CyberTaxi (across
+                    all players) gets the ride, with Tesla taking a share to
+                    support the service (percentage TBD).
+                </li>
+                <li>
+                    <strong>Starting Point:</strong> Players purchase a garage
+                    to build their company, starting with one charging station.
+                    Capacity to add more depends on available power, with
+                    construction costs for upgrades.
+                </li>
+                <li>
+                    <strong>Upgrades:</strong> Unlocked by progress milestones
+                    (e.g., Real Estate Agent, wireless charging, Superchargers),
+                    details to be determined.
+                </li>
+                <li>
+                    <strong>Purchases:</strong> CyberTaxis from an in-game Tesla
+                    store (e.g., Model Y, future RoboCab), with a used car
+                    market for trading.
+                </li>
+                <li>
+                    <strong>Leasing/Purchasing:</strong> Properties leased
+                    (30/60 days/1 year) or bought, subleasable to others for a
+                    revenue cut.
+                </li>
+                <li>
+                    <strong>Wear/Maintenance:</strong> Increases with use and
+                    conditions, affecting performance; high wear requires towing
+                    (cost TBD).
+                </li>
+                <li>
+                    <strong>Environmental Factors:</strong> Weather and traffic
+                    impact drive times, with protests as occasional challenges
+                    offering potential rewards.
+                </li>
+                <li>
+                    <strong>Demand:</strong> Visual cues guide CyberTaxi
+                    placement to high-demand areas.
+                </li>
+                <li>
+                    <strong>Towing:</strong> Available for high wear, with a
+                    cost and time penalty.
+                </li>
+                <li>
+                    <strong>Leaderboards:</strong> Track company progress,
+                    revenue, distance, and overall performance.
+                </li>
+            </ul>
+        </section>
+
+        <section
+            style="
+                margin: 20px 0;
+                padding: 15px;
+                background-color: #1a1a1a;
+                border-left: 4px solid #d4a017;
+            "
+        >
+            <h2 style="color: #d4a017; font-size: 18pt; margin-bottom: 10px">
+                User Interface (UI)
+            </h2>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    <strong>Top Menu:</strong> Fixed, displaying key info and a
+                    help icon (Tesla Cybercab colors).
+                </li>
+                <li>
+                    <strong>Left Panel:</strong> Static, lists CyberTaxis with
+                    status, includes toggle buttons.
+                </li>
+                <li>
+                    <strong>Right Panel:</strong> Full-width map with real-time
+                    CyberTaxi movement, clickable routes (CyberGold), other
+                    players’ taxis (Silver Gray).
+                </li>
+                <li>
+                    <strong>Property Market:</strong> Interface for viewing
+                    available locations.
+                </li>
+                <li>
+                    <strong>Wear Display:</strong> Visual indicator per vehicle.
+                </li>
+                <li>
+                    <strong>Weather/Traffic:</strong> Overlay indicators,
+                    protest alerts.
+                </li>
+                <li>
+                    <strong>Tesla Store:</strong> Mimics Tesla’s website for
+                    purchases.
+                </li>
+            </ul>
+        </section>
+
+        <section
+            style="
+                margin: 20px 0;
+                padding: 15px;
+                background-color: #1a1a1a;
+                border-left: 4px solid #d4a017;
+            "
+        >
+            <h2 style="color: #d4a017; font-size: 18pt; margin-bottom: 10px">
+                User Experience (UX)
+            </h2>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    <strong>Navigation:</strong> Smooth, responsive design with
+                    a native feel.
+                </li>
+                <li>
+                    <strong>Interactivity:</strong> Clickable elements for
+                    routes, charging, towing.
+                </li>
+                <li>
+                    <strong>Aesthetics:</strong> Tesla Cybercab palette,
+                    animations, potential sound effects.
+                </li>
+                <li>
+                    <strong>Tutorial:</strong> Initial level for learning
+                    basics.
+                </li>
+            </ul>
+        </section>
+
+        <section
+            style="
+                margin: 20px 0;
+                padding: 15px;
+                background-color: #1a1a1a;
+                border-left: 4px solid #d4a017;
+            "
+        >
+            <h2 style="color: #d4a017; font-size: 18pt; margin-bottom: 10px">
+                Art and Sound
+            </h2>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    <strong>Visuals:</strong> Current-day urban maps, CyberGold
+                    markers.
+                </li>
+                <li>
+                    <strong>Sound:</strong> Ambient city noise, interactive
+                    cues.
+                </li>
+            </ul>
+        </section>
+
+        <section
+            style="
+                margin: 20px 0;
+                padding: 15px;
+                background-color: #1a1a1a;
+                border-left: 4px solid #d4a017;
+            "
+        >
+            <h2 style="color: #d4a017; font-size: 18pt; margin-bottom: 10px">
+                Development Notes
+            </h2>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    <strong>Current Status:</strong> In development,
+                    Austin-focused, aiming for a playable version.
+                </li>
+                <li>
+                    <strong>Next Steps:</strong> Test garage mechanics, refine
+                    wear/protest systems, design Tesla store UI.
+                </li>
+            </ul>
+        </section>
+
+        <section
+            style="
+                margin: 20px 0;
+                padding: 15px;
+                background-color: #1a1a1a;
+                border-left: 4px solid #d4a017;
+            "
+        >
+            <h2 style="color: #d4a017; font-size: 18pt; margin-bottom: 10px">
+                Future Features
+            </h2>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    <strong>Alliances:</strong> Shared garages, profit splits.
+                </li>
+                <li>
+                    <strong>Weather Events:</strong> Rain, traffic, protests
+                    with strategic options.
+                </li>
+                <li><strong>City Expansion:</strong> Post-Austin rollout.</li>
+                <li>
+                    <strong>Leaderboards:</strong> Updates with performance
+                    badges.
+                </li>
+            </ul>
+        </section>
+
+        <footer
+            style="
+                text-align: center;
+                padding: 10px;
+                background-color: #1a1a1a;
+                color: #cfd8d3;
+                border-top: 2px solid #d4a017;
+                margin-top: 20px;
+            "
+        >
+            <p>© 2025 CyberTaxi Team. All rights reserved.</p>
+        </footer>
+    </body>
+</html>

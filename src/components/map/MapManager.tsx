@@ -3,7 +3,7 @@
  * Integrates with Leaflet map initialized in main.tsx, rendering player and non-player vehicles in a single cluster, per GDD v1.1.
  * Uses /api/player/:username/vehicles for player vehicles and /api/vehicles/others for non-player vehicles.
  * @module MapManager
- * @version 0.3.6
+ * @version 0.3.10
  */
 import React, { useEffect, useRef, useState } from "react";
 import L from "leaflet";
@@ -35,13 +35,19 @@ export const MapManager: React.FC<MapManagerProps> = ({
     const clusterRef = useRef<MarkerClusterGroup | null>(null);
     const [otherVehicles, setOtherVehicles] = useState<Vehicle[]>([]);
     const [hasZoomed, setHasZoomed] = useState(false); // Track initial zoom
+    const [renderKey, setRenderKey] = useState(0); // Force re-render on key change
 
     /**
-     * Initializes a single marker cluster group for all vehicles.
+     * Initializes a single marker cluster group for all vehicles with custom options.
      */
     useEffect(() => {
         if (mapRef.current && !clusterRef.current) {
             clusterRef.current = L.markerClusterGroup({
+                showCoverageOnHover: true,
+                zoomToBoundsOnClick: true,
+                spiderfyOnMaxZoom: true,
+                removeOutsideVisibleBounds: false, // Disable to keep markers visible
+                maxClusterRadius: 50,
                 iconCreateFunction: (cluster) => {
                     const childCount = cluster.getChildCount();
                     console.log(
@@ -53,10 +59,11 @@ export const MapManager: React.FC<MapManagerProps> = ({
                         iconSize: [30, 30],
                     });
                 },
-                maxClusterRadius: 50,
             });
             mapRef.current.addLayer(clusterRef.current);
-            console.log("Marker cluster initialized for all vehicles");
+            console.log(
+                "Marker cluster initialized for all vehicles with options"
+            );
         }
         return () => {
             if (mapRef.current && clusterRef.current) {
@@ -115,6 +122,7 @@ export const MapManager: React.FC<MapManagerProps> = ({
                     console.log(
                         `Fetched ${validVehicles.length} valid non-player vehicles`
                     );
+                    setRenderKey((prev) => prev + 1); // Force re-render on new data
                 } else {
                     console.error("Other vehicles fetch failed:", data.message);
                     setErrorMessage(
@@ -138,17 +146,20 @@ export const MapManager: React.FC<MapManagerProps> = ({
     }, [mapRef, setErrorMessage]);
 
     /**
-     * Renders all vehicles (player and non-player) in a single cluster.
+     * Renders all vehicles (player and non-player) in a single cluster, forcing refresh on key or vehicle change.
      */
     useEffect(() => {
         console.log(
-            `MapManager received ${vehicles.length} player vehicles and ${otherVehicles.length} non-player vehicles`
+            `MapManager received ${vehicles.length} player vehicles and ${otherVehicles.length} non-player vehicles, renderKey: ${renderKey}`
         );
         if (!mapRef.current || !clusterRef.current) {
             console.log("Skipping render: map or cluster not ready");
             return;
         }
-        clusterRef.current.clearLayers();
+        clusterRef.current.clearLayers(); // Clear existing markers
+        if (mapRef.current) {
+            mapRef.current.invalidateSize(); // Ensure map size is updated
+        }
         const allVehicles = [...vehicles, ...otherVehicles];
         if (allVehicles.length === 0) {
             console.log("Skipping empty vehicle render");
@@ -193,6 +204,9 @@ export const MapManager: React.FC<MapManagerProps> = ({
             }
         });
         console.log(`Cluster rendering with ${allVehicles.length} vehicles`);
+        if (clusterRef.current) {
+            clusterRef.current.refreshClusters(); // Force cluster refresh
+        }
         mapRef.current.addLayer(clusterRef.current);
         console.log(
             `Vehicle cluster group updated with ${allVehicles.length} vehicles`
@@ -203,7 +217,6 @@ export const MapManager: React.FC<MapManagerProps> = ({
                     e.layer.getAllChildMarkers().length
                 } vehicles`
             );
-            // Zoom only on cluster click
             mapRef.current!.fitBounds(e.layer.getBounds(), {
                 padding: [50, 50],
             });
@@ -218,7 +231,7 @@ export const MapManager: React.FC<MapManagerProps> = ({
             }
         });
         if (bounds.length > 0 && !hasZoomed) {
-            mapRef.current.setView(bounds[0], 12); // Set initial view without zoom
+            mapRef.current.setView(bounds[0], 12);
             setHasZoomed(true);
             console.log("Map set to initial view without auto-zoom");
         } else if (!bounds.length) {
@@ -229,8 +242,7 @@ export const MapManager: React.FC<MapManagerProps> = ({
         console.log(
             `Marker rendering completed for ${allVehicles.length} vehicles`
         );
-        console.log(`MapManager rendered ${allVehicles.length} vehicles`);
-    }, [vehicles, otherVehicles, mapRef, hasZoomed]);
+    }, [vehicles, otherVehicles, mapRef, hasZoomed, renderKey]); // Ensure re-render on all changes
 
     return null;
 };

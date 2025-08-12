@@ -1,41 +1,51 @@
 /**
- * PopupMenu.tsx - Renders a context menu for CyberTaxi UI.
- * Supports top-menu and footer contexts with dynamic items, per GDD v1.1.
+ * PopupMenu.tsx - Renders the popup menu for CyberTaxi with context-sensitive items.
+ * Displays top-menu (Logout, Settings) and footer menu (Tesla, Real Estate, Employment Agency) based on provided items, per GDD v1.1.
+ * Matches the style and behavior of the CyberFooter right-click menu using .context-menu, including click-off closure.
  * @module PopupMenu
- * @version 0.2.9
+ * @version 0.2.15
  */
 import React, { useEffect, useRef } from "react";
-import "../../styles/global.css";
+import "../../styles/windows.css"; // Using windows.css for .context-menu style
+
+/**
+ * Interface for menu item objects.
+ * @interface MenuItem
+ */
+interface MenuItem {
+    label: string;
+    action: string;
+}
 
 /**
  * Props for the PopupMenu component.
  * @interface PopupMenuProps
  */
 interface PopupMenuProps {
-    position: { x: number; y: number }; // Menu position
-    items: { label: string; action: string }[]; // Menu items
-    context: "footer" | "top-menu"; // Menu context
-    onClose: () => void; // Callback for closing the menu
-    onItemSelect: (action: string) => void; // Callback for item selection
+    isOpen: boolean;
+    onClose: () => void;
+    position: { x: number; y: number };
+    context: "footer" | "top" | "top-menu";
+    items: MenuItem[];
+    onItemSelect: (action: string) => void;
 }
 
 /**
- * Renders a context menu with dynamic items based on context.
+ * Renders the popup menu with context-sensitive items, styled and behaving like CyberFooter right-click menu.
  * @param props - Component props.
- * @returns JSX.Element - Context menu.
+ * @returns JSX.Element - Popup menu UI.
  */
 export const PopupMenu: React.FC<PopupMenuProps> = ({
-    position,
-    items,
-    context,
+    isOpen,
     onClose,
+    position,
+    context,
+    items,
     onItemSelect,
 }) => {
     const menuRef = useRef<HTMLDivElement>(null);
 
-    /**
-     * Closes menu on outside click.
-     */
+    // Handle outside click to close menu, matching CyberFooter behavior
     useEffect(() => {
         const handleOutsideClick = (e: MouseEvent) => {
             if (
@@ -46,46 +56,50 @@ export const PopupMenu: React.FC<PopupMenuProps> = ({
                 onClose();
             }
         };
-        document.addEventListener("click", handleOutsideClick);
-        console.log(
-            `PopupMenu opened for ${context} at x:${position.x}, y:${position.y}`
-        );
+        if (isOpen) {
+            document.addEventListener("click", handleOutsideClick);
+        }
         return () => {
             document.removeEventListener("click", handleOutsideClick);
         };
-    }, [context, position, onClose]);
+    }, [isOpen, onClose, context]);
 
-    /**
-     * Handles item click.
-     * @param action - Selected item action.
-     */
-    const handleItemClick = (action: string) => {
-        console.log(`Menu item clicked for ${context}: ${action}`);
-        onItemSelect(action);
-        onClose();
-    };
+    if (!isOpen) return null;
 
     return (
         <div
-            className="context-menu"
-            style={{ top: `${position.y}px`, left: `${position.x}px` }}
-            ref={menuRef}
+            className="context-menu" // Matches CyberFooter style
+            style={{
+                top: `${position.y}px`,
+                left: `${position.x}px`,
+                zIndex: 3000, // Matches CyberFooter context-menu z-index
+            }}
             role="menu"
             aria-label={`${context} context menu`}
+            ref={menuRef}
         >
-            {items.map((item) => (
+            {items.map((item, index) => (
                 <div
-                    key={item.action}
+                    key={index}
                     className="menu-item"
-                    role="menuitem"
-                    onClick={() => handleItemClick(item.action)}
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            handleItemClick(item.action);
-                        }
+                    style={{
+                        padding: "8px",
+                        cursor: "pointer",
                     }}
+                    onClick={() => {
+                        console.log(
+                            `Clicked ${item.label}, action: ${item.action}`
+                        );
+                        onItemSelect(item.action);
+                        onClose();
+                    }}
+                    role="menuitem"
+                    tabIndex={0}
+                    onKeyPress={(e) =>
+                        e.key === "Enter" &&
+                        onItemSelect(item.action) &&
+                        onClose()
+                    }
                 >
                     {item.label}
                 </div>

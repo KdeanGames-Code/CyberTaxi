@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>CyberTaxi Player Manual (Detailed Draft)</title>
+        <style>
+            body {
+                font-family: "Roboto", sans-serif;
+                background-color: #2f2f2f;
+                color: #f5f5f5;
+                margin: 0;
+                padding: 20px;
+                line-height: 1.6;
+            }
+            .container {
+                max-width: 900px;
+                margin: 0 auto;
+                background: #1a1a1a;
+                border: 2px solid #e8b923;
+                border-radius: 8px;
+                padding: 20px;
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+            }
+            h1 {
+                color: #d4a017;
+                font-family: "Orbitron", sans-serif;
+                text-align: center;
+                margin-bottom: 20px;
+                font-size: 2.5em;
+            }
+            h2 {
+                color: #d4a017;
+                font-family: "Orbitron", sans-serif;
+                margin-top: 20px;
+                margin-bottom: 10px;
+                font-size: 1.8em;
+                border-bottom: 1px solid #e8b923;
+                padding-bottom: 5px;
+            }
+            h3 {
+                color: #d4a017;
+                font-family: "Orbitron", sans-serif;
+                margin-top: 15px;
+                margin-bottom: 5px;
+                font-size: 1.4em;
+            }
+            ul,
+            ol {
+                margin-left: 20px;
+                padding-left: 0;
+            }
+            li {
+                margin-bottom: 10px;
+                list-style-position: inside;
+            }
+            .tip {
+                background-color: #2f2f2f;
+                padding: 10px;
+                border-left: 4px solid #00a3e0;
+                margin: 10px 0;
+                font-style: italic;
+                color: #d4a017;
+            }
+            .warning {
+                background-color: #2f2f2f;
+                padding: 10px;
+                border-left: 4px solid #ff0000;
+                margin: 10px 0;
+                color: #ff0000;
+            }
+            a {
+                color: #00a3e0;
+                text-decoration: none;
+            }
+            a:hover {
+                text-decoration: underline;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 20px 0;
+                background-color: #2f2f2f;
+            }
+            th,
+            td {
+                border: 1px solid #e8b923;
+                padding: 8px;
+                text-align: left;
+            }
+            th {
+                background-color: #000000;
+                color: #d4a017;
+            }
+            td {
+                color: #f5f5f5;
+            }
+            .code-snippet {
+                background-color: #000000;
+                padding: 10px;
+                border: 1px solid #e8b923;
+                margin: 10px 0;
+                font-family: monospace;
+                white-space: pre-wrap;
+                color: #d4a017;
+            }
+            footer {
+                text-align: center;
+                margin-top: 20px;
+                font-size: 12px;
+                color: #cfd8d3;
+                border-top: 1px solid #e8b923;
+                padding-top: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>CyberTaxi Player Manual (Detailed Draft)</h1>
+            <p>
+                This detailed draft of the CyberTaxi Player Manual is based on
+                the latest Game Design Document (GDD), Gameplay Draft, and
+                Project Plan as of July 29, 2025. It expands on core mechanics,
+                UI interactions, strategies, and troubleshooting for testing
+                purposes. All mechanics align with Completed Chunks 1-14, with
+                notes on pending features. Use this for onboarding simulations
+                and balance feedback.
+            </p>
+
+            <h2>Overview</h2>
+            <p>
+                CyberTaxi is a strategy/simulation game where you manage a fleet
+                of autonomous Tesla RoboTaxis in real-time urban environments,
+                starting in Austin, TX. As a Progressive Web App (PWA), it
+                supports offline play for viewing cached data (e.g., fleet
+                status, maps) and syncs upon reconnection. The game targets
+                strategy fans, Tesla enthusiasts, and gamers who enjoy deep
+                management sims.
+            </p>
+            <p>
+                <strong>Core Loop:</strong> Purchase/lease vehicles and garages,
+                deploy your fleet to high-demand areas, earn fares from rides,
+                manage wear/battery/maintenance, and expand operations while
+                competing on leaderboards. Time runs in full real-time (1:1
+                ratio—no acceleration), encouraging ongoing engagement via
+                notifications.
+            </p>
+            <p>
+                <strong>Key Themes:</strong> Realism in autonomous taxi
+                management, competition for fares, and adaptation to urban
+                challenges like demand fluctuations and events.
+            </p>
+            <p>
+                <strong>Platform Notes:</strong> Access via
+                https://CyberTaxiGame.com. Install as a PWA for home screen
+                addition, offline access, and push notifications (e.g., vehicle
+                deliveries, low battery alerts).
+            </p>
+            <div class="tip">
+                Tip: For optimal experience, enable notifications during signup
+                to stay alerted on real-time events like stock arrivals or
+                maintenance completions, even when the app is closed.
+            </div>
+            <div class="warning">
+                Warning: Offline mode limits actions like purchases or live
+                routing—reconnect for full functionality. Data syncs
+                automatically to prevent loss.
+            </div>
+
+            <h2>1. Starting the Game</h2>
+            <p>
+                Begin at https://CyberTaxiGame.com, where the landing page
+                serves as a store/signup hub. It showcases progress updates,
+                gameplay teasers, and tier options to hook new players.
+            </p>
+            <ul>
+                <li>
+                    <strong>Signup Process:</strong> Enter
+                    email/username/password. Skippable onboarding modals guide
+                    you through basics (e.g., "Welcome! Let's lease your first
+                    garage."). Modals include tooltips and progress trackers.
+                </li>
+                <li>
+                    <strong>Free Tier:</strong> Starts with $60,000 bank
+                    balance. Use it freely for any purchase, like a small garage
+                    or your first vehicle.
+                </li>
+                <li>
+                    <strong>Subscription Tier:</strong> Adds $140,000 to your
+                    bank, enabling faster scaling (e.g., ordering 2 Model Ys and
+                    2 RoboCabs). This money is versatile—spend on garages,
+                    chargers, or staff. Subscriptions support development and
+                    unlock cosmetic badges on leaderboards.
+                </li>
+                <li>
+                    <strong>Initial Bank Balance:</strong> $60,000 (free) or
+                    $200,000 total (subscription). Displayed in the top menu
+                    with real-time updates.
+                </li>
+            </ul>
+            <p>
+                <strong>UI Entry Point:</strong> Post-signup, load into the
+                Austin map view with top menu (bank, score, energy bar) and side
+                buttons for flyouts (fleet, garage, company, charging).
+            </p>
+            <div class="tip">
+                Advanced Strategy: Use initial funds to lease a suburban garage
+                (low cost) for storage, then expand downtown for high-demand
+                fares. Monitor the demand heat map toggle early.
+            </div>
+            <div class="warning">
+                Warning: Bank overdrafts aren't possible—purchases fail if funds
+                are insufficient, prompting a "Insufficient Funds" modal with
+                earning tips.
+            </div>
+
+            <h2>2. Vehicle Purchases</h2>
+            <p>
+                Access the in-game Tesla browser section via the fleet flyout or
+                map menu. Vehicles are essential for earning—order new or browse
+                used markets.
+            </p>
+            <table>
+                <tr>
+                    <th>Vehicle Type</th>
+                    <th>Price</th>
+                    <th>Details</th>
+                    <th>Pros/Cons</th>
+                </tr>
+                <tr>
+                    <td>Tesla Model Y</td>
+                    <td>$50,000</td>
+                    <td>
+                        Standard autonomous taxi with good range and passenger
+                        capacity.
+                    </td>
+                    <td>
+                        Pros: Reliable, higher fare potential; Cons: Higher
+                        cost, moderate wear rate.
+                    </td>
+                </tr>
+                <tr>
+                    <td>Tesla RoboCab</td>
+                    <td>$35,000</td>
+                    <td>
+                        Speculative efficient model (based on 2025 estimates
+                        from Elon Musk's posts).
+                    </td>
+                    <td>
+                        Pros: Cheaper for scaling fleets; Cons: Potentially
+                        lower range, adjust post-playtest.
+                    </td>
+                </tr>
+            </table>
+            <ul>
+                <li>
+                    <strong>New Vehicles:</strong> Limited stock at Tesla
+                    Service Centers (3-8 per day, random arrival times for
+                    realism). If out of stock, delivery takes 2-3 days
+                    (real-time). Vehicles deliver only to garages—ensure you
+                    have space.
+                </li>
+                <li>
+                    <strong>Used Market:</strong> Cheaper options with wear
+                    (base 10% price reduction + further % based on wear level).
+                    Repair in-garage to boost resale value. Limited listings
+                    refresh daily.
+                </li>
+                <li>
+                    <strong>Notifications:</strong> Push alerts for stock
+                    arrivals or delivery completions (e.g., "Your Model Y has
+                    arrived at Downtown Garage!"). Mobile-friendly for on-the-go
+                    management.
+                </li>
+                <li>
+                    <strong>Action Steps:</strong> 1. Open Tesla browser flyout.
+                    2. Select model/quantity. 3. Confirm order (deducts from
+                    bank). 4. Track progress in fleet window with timers.
+                </li>
+            </ul>
+            <p>
+                <strong>Balance Notes:</strong> Prices and delivery times
+                adjustable post-playtest for fairness. Subscription funds
+                accelerate this phase without skipping mechanics.
+            </p>
+            <div class="tip">
+                Pro Tip: Time purchases around demand surges (e.g.,
+                events)—monitor service centers via map pins for stock. Buy used
+                for quick starts, but factor in repair costs (e.g., 5-15% of
+                price based on wear).
+            </div>
+            <div class="warning">
+                Warning: Vehicles without garage space auto-park at public lots
+                (higher fees)—always expand storage proactively.
+            </div>
+
+            <h2>3. First-Time Player Experience</h2>
+            <p>
+                New players receive guided onboarding to ease into real-time
+                mechanics. The game emphasizes frustration-free entry with
+                skippable elements.
+            </p>
+            <ul>
+                <li>
+                    <strong>Time Mechanics:</strong> Full real-time: 60 real
+                    seconds = 60 in-game seconds. No fast-forward—plan for
+                    session-based play (e.g., check-ins for management).
+                </li>
+                <li>
+                    <strong>Onboarding Flow:</strong> Post-signup modals: 1.
+                    Welcome overview. 2. Garage selection map (heat map
+                    tutorial). 3. First vehicle order demo. 4. Basic controls
+                    (flyouts, map toggles). Restart option in settings.
+                </li>
+                <li>
+                    <strong>Tutorials:</strong> Contextual tooltips (e.g., hover
+                    on energy bar: "Tracks fleet battery—charge to avoid
+                    downtime."). Offline review via cached modals.
+                </li>
+            </ul>
+            <div class="tip">
+                Efficiency Hack: Skip onboarding if experienced, but revisit for
+                advanced tips like wear formulas in the details flyout.
+            </div>
+            <div class="warning">
+                Warning: Real-time means delays (e.g., deliveries) persist
+                across sessions—use notifications to avoid missing key moments.
+            </div>
+
+            <h2>4. Earnings Mechanics</h2>
+            <p>
+                Earnings drive progression—complete rides to add fares to your
+                bank. View history in vehicle details or company profile.
+            </p>
+            <p>
+                <strong>Verbatim Formula (from GDD):</strong> Total Fare = $4.20
+                (base) + $0.69/mile - Tesla Share (percentage TBD, adjustable
+                post-playtest).
+            </p>
+            <ul>
+                <li>
+                    <strong>How It Works:</strong> Vehicles pick up rides
+                    autonomously in demand zones. Unavailable during trips
+                    (real-time duration based on distance/traffic). Earnings
+                    credited on drop-off.
+                </li>
+                <li>
+                    <strong>Fare History:</strong> Collapsible table in details
+                    window: Date, Distance, Fare, Deductions. Example: Short
+                    downtown ride = $10-15; Airport haul = $50+.
+                </li>
+                <li>
+                    <strong>Leaderboards:</strong> Global rankings by total
+                    earnings, efficiency (fares/mile), fleet size. Daily/weekly
+                    resets with badges.
+                </li>
+            </ul>
+            <div class="code-snippet">
+                Example Calculation: Distance = 10 miles → Fare = 4.20 + (0.69 *
+                10) = 11.10 - Tesla Share (e.g., 20% = 8.88 net).
+            </div>
+            <div class="tip">
+                Optimization Strategy: Deploy in high-demand (heat map red
+                zones) for frequent short rides. Rotate vehicles to minimize
+                downtime—aim for 80%+ utilization.
+            </div>
+            <div class="warning">
+                Warning: Long trips tie up vehicles longer—balance with demand;
+                ignored low battery reduces fares by 10-20% due to inefficiency.
+            </div>
+
+            <h2>5. Garage Setup</h2>
+            <p>
+                Garages are hubs for storage, charging, and maintenance.
+                Lease/buy via map listings with demand-based pricing.
+            </p>
+            <ul>
+                <li>
+                    <strong>Lease Terms (Verbatim):</strong> Monthly ($1,500 for
+                    small 500 sq ft, 2-vehicle garage), quarterly (5% discount),
+                    yearly (10% discount). Renewable auto unless canceled.
+                </li>
+                <li>
+                    <strong>Locations & Costs:</strong> Downtown (high demand,
+                    premium price); Suburbs (low cost, slower fares). 5-10
+                    initial sites, expandable. Heat map toggle shows static
+                    (daily patterns) and dynamic (events) demand.
+                </li>
+                <li>
+                    <strong>Sizes:</strong> Small (2 vehicles, tight fit);
+                    Larger options cost more but hold more (e.g., 5+ spots).
+                    Parking slots separate from charging.
+                </li>
+                <li>
+                    <strong>Purchase/Sell:</strong> Buy for permanence (higher
+                    upfront); Sell returns 100% (no fluctuations in v1).
+                </li>
+                <li>
+                    <strong>Initial State & Upgrades:</strong> Empty on lease.
+                    Add chargers (plug-in cheap/slow vs. wireless
+                    expensive/fast). Construction: 1-3 days real-time with
+                    progress bars.
+                </li>
+                <li>
+                    <strong>Action Steps:</strong> 1. Toggle garage map overlay.
+                    2. Select site (info popup: cost, demand). 3. Confirm
+                    lease/buy. 4. Monitor construction timer.
+                </li>
+            </ul>
+            <div class="tip">
+                Strategic Insight: Start suburban for affordability, upgrade
+                chargers early (e.g., wireless reduces downtime by 30%). Use
+                offline mode to plan layouts via cached maps.
+            </div>
+            <div class="warning">
+                Warning: Overcrowded garages incur fees—expand before fleet
+                growth. Construction halts operations in that garage.
+            </div>
+
+            <h2>6. Licenses and Permits</h2>
+            <p>
+                Required for legal operations—obtain via in-game city hall
+                browser section.
+            </p>
+            <ul>
+                <li>
+                    <strong>Types:</strong> Per-location permits (cost scales
+                    with zone demand, e.g., $500 downtown). Annual renewals with
+                    fleet-size fees.
+                </li>
+                <li>
+                    <strong>Application:</strong> Form flyout with approval
+                    timer (1-2 days real-time).
+                </li>
+                <li>
+                    <strong>Compliance:</strong> Track in company
+                    profile—expirations trigger warnings.
+                </li>
+            </ul>
+            <div class="tip">
+                Budget Tip: Bundle renewals yearly for discounts; prioritize
+                high-demand zones first.
+            </div>
+            <div class="warning">
+                Warning: Operating without permits risks fines (10-20% of daily
+                earnings) or vehicle impounds (downtime until resolved).
+            </div>
+
+            <h2>7. Chargers and Energy Management</h2>
+            <p>Install in garages for recharging—critical for uptime.</p>
+            <ul>
+                <li>
+                    <strong>Types:</strong> Plug-in (affordable, slower rate:
+                    ~50% charge/hour); Wireless (premium, faster: ~80%
+                    charge/hour). Costs: $500-2,000 each.
+                </li>
+                <li>
+                    <strong>Energy Bar (UI):</strong> Top menu fleet-wide
+                    tracker (hover: percentage, tips). Low levels flash
+                    warnings.
+                </li>
+                <li>
+                    <strong>Charging Rates:</strong> Garage: $0.12/kWh; Public
+                    SuperChargers: $0.25-0.50/kWh (slower for non-Tesla spots).
+                </li>
+                <li>
+                    <strong>Offline Support:</strong> Cached battery/wear data
+                    for monitoring; sync charges on reconnect.
+                </li>
+                <li>
+                    <strong>Action:</strong> In garage flyout, select install →
+                    choose type → confirm (deducts bank, starts timer).
+                </li>
+            </ul>
+            <div class="tip">
+                Pro Hack: Schedule auto-charging during low-demand nights via
+                settings toggle—maintain 70%+ average for max efficiency.
+            </div>
+            <div class="warning">
+                Warning: Ignoring low battery causes breakdowns (towing fees:
+                $100-500) and lost fares.
+            </div>
+
+            <h2>8. Vehicle Wear and Maintenance</h2>
+            <p>Wear accumulates with usage—monitor to avoid breakdowns.</p>
+            <ul>
+                <li>
+                    <strong>Wear Formula (Verbatim Suggestion):</strong>
+                    Increases per mile (e.g., 0.1% base + modifiers for
+                    traffic/weather). Visible in badges: Green (0-30%), Yellow
+                    (31-60%), Red (61-100%).
+                </li>
+                <li>
+                    <strong>Maintenance:</strong> Schedule in garage (costs
+                    5-15% of vehicle price based on wear; time: 1-4 hours
+                    real-time).
+                </li>
+                <li>
+                    <strong>Repairs:</strong> For 70%+ wear—downtime 1-2 days,
+                    higher costs.
+                </li>
+                <li>
+                    <strong>UI:</strong> Progress bars in fleet list; alerts for
+                    thresholds.
+                </li>
+            </ul>
+            <div class="tip">
+                Preventive Strategy: Rotate high-wear vehicles to garage early;
+                hire mechanics to reduce times by 20-50%.
+            </div>
+            <div class="warning">
+                Warning: 100% wear triggers auto-repair (forced downtime, double
+                costs)—proactive checks via details flyout.
+            </div>
+
+            <h2>9. Staff Hiring</h2>
+            <p>Hire for garage efficiency—access via company flyout.</p>
+            <ul>
+                <li>
+                    <strong>Roles:</strong> Mechanics (reduce maintenance
+                    time/costs); Cleaners (boost vehicle appeal for +5-10%
+                    fares).
+                </li>
+                <li>
+                    <strong>Costs:</strong> Salaries $500-1,500/month based on
+                    experience (profiles show stats: e.g., "Expert Mechanic:
+                    -30% repair time").
+                </li>
+                <li>
+                    <strong>Hiring Process:</strong> Browse listings → Select →
+                    Pay signing bonus → Assign to garage.
+                </li>
+            </ul>
+            <div class="tip">
+                Team Building: Start with one mechanic per garage; scale with
+                fleet size for ROI (e.g., saves 10-20% on long-term costs).
+            </div>
+            <div class="warning">
+                Warning: Staff turnover if underpaid—monitor morale in profiles
+                (low = quit risk).
+            </div>
+
+            <h2>10. Company Profiles</h2>
+            <p>Customize and track progress via side flyout.</p>
+            <ul>
+                <li>
+                    <strong>Overview:</strong> Fleet/garage stats, total
+                    earnings, efficiency metrics. Editable: Name, logo (upload
+                    or presets).
+                </li>
+                <li>
+                    <strong>Dashboard:</strong> Progress trackers (e.g., "Fleet
+                    Utilization: 75%"), fare summaries.
+                </li>
+                <li>
+                    <strong>Leaderboards Integration:</strong> View your rank;
+                    compare anonymized competitors.
+                </li>
+            </ul>
+            <div class="tip">
+                Branding Tip: Unique profiles attract in-game partnerships
+                (pending events)—focus on efficiency for top ranks.
+            </div>
+
+            <h2>11. Environmental Events</h2>
+            <p>Dynamic challenges affect operations—toggle overlays on map.</p>
+            <ul>
+                <li>
+                    <strong>Types:</strong> Weather (rain slows speed -20%),
+                    Traffic (delays rides), Protests (blocks zones).
+                </li>
+                <li>
+                    <strong>Impacts:</strong> Reduced fares/speed; alerts via
+                    notifications (e.g., "Rain in Downtown: Adapt routes!").
+                </li>
+                <li>
+                    <strong>Forecast:</strong> 24-hour preview in weather
+                    flyout.
+                </li>
+            </ul>
+            <div class="tip">
+                Adaptation Strategy: Diversify garages across zones; use events
+                for boosts (e.g., post-event surges +20% demand).
+            </div>
+            <div class="warning">
+                Warning: Unprepared events can halt fleets—monitor forecasts
+                daily.
+            </div>
+
+            <h2>12. Demand and Routing</h2>
+            <p>Demand drives fares—use heat maps for placement.</p>
+            <ul>
+                <li>
+                    <strong>Heat Maps:</strong> Static (e.g., downtown peaks
+                    evenings); Dynamic (events spike +20-50%). Toggle via map
+                    menu.
+                </li>
+                <li>
+                    <strong>Routing:</strong> Autonomous via API (e.g.,
+                    OpenRouteService). Click vehicle marker for path overlay
+                    (blue polyline).
+                </li>
+                <li>
+                    <strong>Closest Taxi:</strong> System assigns rides to
+                    nearest available vehicle.
+                </li>
+            </ul>
+            <div class="tip">
+                Demand Mastery: Position idle vehicles in red zones; combine
+                with staff for +fares during surges.
+            </div>
+
+            <h2>13. Leaderboards and Competition</h2>
+            <p>Compete globally—access via profile flyout.</p>
+            <ul>
+                <li>
+                    <strong>Rankings:</strong> Earnings, Efficiency
+                    (fares/vehicle), Fleet Size. Badges for top 10%.
+                </li>
+                <li>
+                    <strong>Resets:</strong> Daily/Weekly for fresh challenges;
+                    historical views.
+                </li>
+                <li>
+                    <strong>Profiles:</strong> View competitors (anonymized
+                    stats) for benchmarking.
+                </li>
+            </ul>
+            <div class="tip">
+                Competitive Edge: Focus on efficiency over size—low wear/high
+                utilization scores higher.
+            </div>
+
+            <h2>14. Tutorials and Onboarding</h2>
+            <p>Ensures accessibility—integrated throughout.</p>
+            <ul>
+                <li>
+                    <strong>Modals:</strong> Skippable, step-by-step (e.g.,
+                    "Click here to order your first vehicle").
+                </li>
+                <li>
+                    <strong>Tooltips/Alerts:</strong> Contextual (e.g., low
+                    energy: "Charge now!"). Restart in settings.
+                </li>
+                <li>
+                    <strong>Notifications:</strong> Deliveries, events,
+                    thresholds (push for mobile).
+                </li>
+            </ul>
+            <div class="tip">
+                Learning Curve: Use offline cached tutorials for review;
+                advanced sections unlock post-milestones (e.g., after first
+                fare).
+            </div>
+
+            <h2>Pending Features and Expansions</h2>
+            <p>
+                <strong>Pending Chunks:</strong> Additional Events (more
+                environmental/competitive, e.g., market fluctuations in v2).
+            </p>
+            <p>
+                <strong>Open Questions:</strong> None—all core mechanics locked.
+                Post-playtest adjustments for balance (e.g., rates, times).
+            </p>
+            <p>
+                <strong>Future:</strong> Multi-city expansion, partnerships,
+                deeper simulations (e.g., AI route optimization).
+            </p>
+
+            <h2>UI and Controls Overview</h2>
+            <p>
+                <strong>Map:</strong> Leaflet-based dark mode with vehicle
+                markers (gold: active, red: parked/garage, white: new). Click
+                for popups/routes.
+            </p>
+            <p>
+                <strong>Windows/Flyouts:</strong> Draggable (fleet lists with
+                badges: ID, wear/battery bars, status). Details: Image, history
+                table, maintenance button.
+            </p>
+            <p>
+                <strong>Top Menu:</strong> Bank ($ icon), Score, Energy bar
+                (fill: blue, hover tips).
+            </p>
+            <p>
+                <strong>Side Buttons:</strong> Circular flyouts (fleet options:
+                active/parked/garage/new). Hover titles for guidance.
+            </p>
+            <p>
+                <strong>Offline:</strong> Cached views (maps, stats); actions
+                queue for sync.
+            </p>
+            <div class="tip">
+                UX Pro Tip: Customize shortcuts (pending settings); use resize
+                on windows for multi-view management.
+            </div>
+
+            <h2>Troubleshooting and Advanced Tips</h2>
+            <ul>
+                <li>
+                    <strong>Low Earnings:</strong> Check demand zones,
+                    battery/wear, permits. Test: Simulate rides via dev console
+                    (if enabled).
+                </li>
+                <li>
+                    <strong>Offline Issues:</strong> Ensure PWA installed;
+                    purchases require online—queued alerts on reconnect.
+                </li>
+                <li>
+                    <strong>Balance Feedback:</strong> Report via in-game form
+                    (e.g., "Fares too low?"). Testing: Focus on real-time feel.
+                </li>
+                <li>
+                    <strong>Meta Strategies:</strong> Community forums (future)
+                    for tips; diversify for events; aim for 500+ score via
+                    efficiency.
+                </li>
+            </ul>
+            <div class="tip">
+                Testing Note: Use project phases for verification—e.g., Phase 4
+                for fleet UI bugs.
+            </div>
+
+            <footer>
+                © 2025 CyberTaxi Team. Detailed Draft for Testing. Aligned with
+                GDD v1.1, Gameplay Draft v1.1, Project Plan v1. Version Date:
+                July 29, 2025.
+            </footer>
+        </div>
+    </body>
+</html>

@@ -2,9 +2,8 @@
  * useVehicles.ts - Custom React hook for managing vehicle data in CyberTaxi.
  * Fetches and stores player vehicles, handling errors and loading states, per GDD v1.1.
  * @module useVehicles
- * @version 0.1.0
+ * @version 0.1.0 (rolled back for stability)
  */
-
 import { useState, useEffect } from "react";
 import type { Vehicle } from "../map/vehicle-markers";
 
@@ -344,7 +343,6 @@ export const useVehicles = (isLoggedIn: boolean): VehicleState => {
             setErrorMessage(null);
             return;
         }
-
         const loadVehicles = async () => {
             setIsLoadingVehicles(true);
             console.log("Triggering vehicle fetch on login state change");
@@ -374,10 +372,8 @@ export const useVehicles = (isLoggedIn: boolean): VehicleState => {
             );
             setIsLoadingVehicles(false);
         };
-
         loadVehicles();
     }, [isLoggedIn]);
-
     return {
         vehicles,
         errorMessage,

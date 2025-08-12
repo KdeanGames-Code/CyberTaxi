@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content="CyberTaxi Game Design Document" />
+        <title>CyberTaxi Game Design Document (GDD)</title>
+        <style>
+            @media print {
+                body {
+                    font-size: 12pt;
+                }
+                .page-break {
+                    page-break-before: always;
+                }
+            }
+        </style>
+    </head>
+    <body
+        style="
+            font-family: Arial, sans-serif;
+            background-color: #2f2f2f;
+            color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        "
+    >
+        <header
+            style="
+                text-align: center;
+                padding: 20px;
+                background-color: #1a1a1a;
+                color: #d4a017;
+                border-bottom: 2px solid #d4a017;
+            "
+        >
+            <h1 style="margin: 0; font-size: 24pt">
+                CyberTaxi Game Design Document
+            </h1>
+            <p style="margin: 5px 0; font-size: 12pt">Authors: Kevin-Dean</p>
+            <p style="margin: 5px 0; font-size: 12pt">
+                Version 1.1, July 24, 2025
+            </p>
+        </header>
+
+        <section
+            style="
+                margin: 20px 0;
+                padding: 15px;
+                background-color: #1a1a1a;
+                border-left: 4px solid #d4a017;
+            "
+        >
+            <h2 style="color: #d4a017; font-size: 18pt; margin-bottom: 10px">
+                Overview
+            </h2>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li><strong>Game Title:</strong> CyberTaxi</li>
+                <li><strong>Genre:</strong> Strategy/Simulation</li>
+                <li>
+                    <strong>Platform:</strong> Web (Progressive Web App), built
+                    with HTML, CSS, and JavaScript
+                </li>
+                <li>
+                    <strong>Target Audience:</strong> Gamers, Tesla enthusiasts,
+                    strategy fans
+                </li>
+                <li>
+                    <strong>Setting:</strong> Current-day urban environments,
+                    starting with Austin, TX
+                </li>
+                <li>
+                    <strong>Core Concept:</strong> Players own and manage a
+                    fleet of autonomous Tesla RoboTaxis, competing to earn
+                    fares, upgrade operations, and expand while navigating
+                    real-world challenges.
+                </li>
+            </ul>
+        </section>
+
+        <section
+            style="
+                margin: 20px 0;
+                padding: 15px;
+                background-color: #1a1a1a;
+                border-left: 4px solid #d4a017;
+            "
+        >
+            <h2 style="color: #d4a017; font-size: 18pt; margin-bottom: 10px">
+                Completed Chunks
+            </h2>
+            <p>
+                These are the elements we've finalized so far. For full details,
+                refer to GameplayDraft.html.
+            </p>
+
+            <h3 style="color: #00a3e0; font-size: 16pt; margin-bottom: 10px">
+                1. Starting the Game
+            </h3>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    Website: Hosted at https://CyberTaxiGame.com. Default
+                    index.html is a store/signup page to attract users, show
+                    progress updates, and offer free/subscription options during
+                    development.
+                </li>
+                <li>Free Tier: Basic access, same as subscription to start.</li>
+                <li>
+                    Subscription Tier: Provides additional in-game money
+                    ($140,000) to order 2 Model Ys and 2 RoboCabs (vehicles must
+                    be ordered, with delivery mechanics TBD). Money is added to
+                    the bank and can be used for any purchases (e.g., vehicles,
+                    garages, lots, SuperChargers).
+                </li>
+                <li>
+                    Initial Bank Balance: $60,000, usable for any purchase at
+                    the player's discretion.
+                </li>
+            </ul>
+
+            <h3 style="color: #00a3e0; font-size: 16pt; margin-bottom: 10px">
+                2. Vehicle Purchase Basics
+            </h3>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    Vehicle Options and Prices:
+                    <ul style="list-style-type: circle; margin-left: 20px">
+                        <li>
+                            Tesla Model Y: $50,000 (based on 2025 pricing
+                            estimates).
+                        </li>
+                        <li>
+                            Tesla RoboCab: $35,000 (estimated from Elon's posts;
+                            speculative).
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    Subscription Vehicles: Extra money ($140,000) allows
+                    ordering 2 Model Ys and 2 RoboCabs, but they require
+                    delivery (2-3 days if no stock at Tesla Service Centers,
+                    adjustable post-playtest).
+                </li>
+                <li>
+                    Tesla Service Centers: New vehicles have daily inventory
+                    limits (3 to 8 vehicles per center; inventory arrives at
+                    random times, never consistent). Balance on playtesting.
+                </li>
+                <li>
+                    Delivery Time: 2-3 days for new vehicles if no stock at
+                    Tesla Service Centers. Adjust after balance.
+                </li>
+                <li>
+                    Used Market: Various wear levels (price reflects that, e.g.,
+                    10% base reduction from purchase price, further reduced by %
+                    of wear on the vehicle; repair before sale increases value).
+                    Limited number of used vehicles available.
+                </li>
+                <li>
+                    Notifications: Notified when stock arrives (vehicles arrive
+                    only to garages, not lots). Notification in mobile as well.
+                </li>
+                <li>
+                    Action: Player orders via the in-game browser (Tesla
+                    section), waits for delivery, and adds to garage/lot.
+                </li>
+            </ul>
+
+            <h3 style="color: #00a3e0; font-size: 16pt; margin-bottom: 10px">
+                3. First-time Player Experience
+            </h3>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    Player-time Definition: 60 seconds in real life = 60 seconds
+                    in-game. Full real-time simulation—no accelerated time.
+                </li>
+            </ul>
+
+            <h3 style="color: #00a3e0; font-size: 16pt; margin-bottom: 10px">
+                4. Earnings Mechanics Basics
+            </h3>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    How Earnings Work: Added to the bank when a CyberTaxi
+                    completes a ride (pickup to drop-off).
+                </li>
+                <li>
+                    CyberTaxi is unavailable (not earning) during the
+                    trip—becomes available again after drop-off.
+                </li>
+                <li>
+                    Rates: $4.20 base + $0.69/mile, adjustable post-playtest.
+                    Formula: Total Fare = $4.20 + ($0.69 × Distance in miles) -
+                    Tesla Share (percentage TBD).
+                </li>
+            </ul>
+
+            <h3 style="color: #00a3e0; font-size: 16pt; margin-bottom: 10px">
+                5. Garage Setup Basics
+            </h3>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    Lease Terms: Monthly renewable, with options to pay
+                    quarterly (5% discount) or yearly (10% discount).
+                </li>
+                <li>
+                    Locations: Available in various Austin areas with
+                    demand-based pricing (e.g., downtown high-demand = higher
+                    cost, suburbs low-demand = lower cost). Specific sites and
+                    numbers TBD (start with 5-10 locations, expand as users
+                    added).
+                </li>
+                <li>
+                    Size and Cost: Small garage for 2 CyberTaxis, 500 sq ft,
+                    $1,500/month (adjustable post-playtest). Fits 2 cars
+                    (real-world 2-car garages are ~400-600 sq ft—500 sq ft is
+                    tight but doable with efficient layout). Lease/buy larger
+                    spaces if wanted, but costs more (e.g., means fewer
+                    revenue-generating vehicles).
+                </li>
+                <li>
+                    Garages and Lots: Leases and outright purchase options, with
+                    selling capability. Selling returns 100% of the purchase
+                    price for base game (market value fluctuations TBD for
+                    version 2—no penalties).
+                </li>
+                <li>
+                    Listings: Heat map toggle for demand (static for consistent
+                    day patterns, dynamic for time/events/special occasions).
+                </li>
+                <li>
+                    Initial Garage State: Leased garage is empty. Options for
+                    plug-in charger (cheaper) vs. wireless (expensive).
+                    Construction time: Real-time-ish (e.g., 1-3 days for
+                    chargers, depending on number; week or two for expansions).
+                </li>
+                <li>
+                    Construction Bars: Progress bars for construction (e.g.,
+                    charger install), with map toggle for construction sites and
+                    demand views. Design as "next-level Space X shit"
+                    (futuristic, neon visuals).
+                </li>
+                <li>
+                    Charging Rates: Cheaper than SuperChargers (e.g., $0.12/kWh
+                    vs. $0.25-$0.50/kWh public). Adjust post-playtest.
+                </li>
+                <li>
+                    Action: Player selects and pays for a garage from a list or
+                    map after signup; it becomes their base.
+                </li>
+                <li>
+                    Parking Spaces: Separate from vehicle slots (e.g., 3 parking
+                    spaces for 500 sq ft garage, giving total 5 spaces—more cars
+                    require lots or new locations; future expansions).
+                </li>
+                <li>
+                    Perks: No explicit perks (e.g., +20% earnings); proximity to
+                    demand is the natural perk (closer garages allow faster
+                    response to fares, as closest free CyberTaxi gets the ride).
+                </li>
+            </ul>
+
+            <h3 style="color: #00a3e0; font-size: 16pt; margin-bottom: 10px">
+                6. License System
+            </h3>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    License Requirement: All CyberTaxis need an Austin operating
+                    license ($1,000/year per vehicle, renewable; penalties for
+                    lapses TBD).
+                </li>
+                <li>
+                    Free License: City of Austin grants a Taxi permit for max 10
+                    vehicles. Vehicles still cost in-game money.
+                </li>
+                <li>
+                    Subscriber License: Called "Taxi License," provides
+                    unlimited vehicles. However, a taxi permit is needed for
+                    each vehicle at a set rate per year (in-game money, paid to
+                    the "game city").
+                </li>
+                <li>
+                    Action: Auto-applied on purchase/delivery; reminders for
+                    renewal.
+                </li>
+            </ul>
+
+            <h3 style="color: #00a3e0; font-size: 16pt; margin-bottom: 10px">
+                7. SuperCharger Setup
+            </h3>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    Installation Costs and Power Requirements: Home Charger
+                    (Wall Connector): $1,700 total (~$500 unit + $1,200 install,
+                    11.5 kW / 44 miles/hour), V2 SuperCharger: $50,000 install
+                    (150 kW, 30-60 min for 0-80%), V3 SuperCharger: $75,000
+                    install (250 kW, 20-30 min for 0-80%), V4 SuperCharger:
+                    $100,000 install (325 kW, 15-25 min for 0-80%), Wireless V2
+                    deferred to version 2 (~$2,000+, ~15 kW, 1-2 hours for full
+                    charge).
+                </li>
+                <li>
+                    Construction Times: Home: 1 day, V2: 3 days, V3: 5 days, V4:
+                    7 days.
+                </li>
+                <li>
+                    Garage/Lot Integration: SuperChargers installed in garages
+                    or lots (cost $’s, take time), garage size limits types
+                    (e.g., 500 sq ft caps at V2).
+                </li>
+                <li>
+                    Locations: Tied to real Tesla SuperCharger sites in Austin
+                    (6 initial).
+                </li>
+                <li>
+                    Manual Charging Action: Vehicles notify on arrival, player
+                    clicks to charge (80/100% set), disconnect early pays for
+                    power used.
+                </li>
+                <li>Notifications: Arrival, start, complete with timer.</li>
+                <li>
+                    Per-Charge Costs: $0.12/kWh garage/lot, $0.25-$0.50/kWh
+                    SuperCharger.
+                </li>
+                <li>
+                    Charge Progress Monitoring: Battery bar with hover %,
+                    real-time updates every 5 min.
+                </li>
+                <li>Cost Deduction: Prorated on power used.</li>
+                <li>
+                    Mobile Integration: Notifications/timer, defer UI to Front
+                    End Dev.
+                </li>
+            </ul>
+
+            <h3 style="color: #00a3e0; font-size: 16pt; margin-bottom: 10px">
+                8. Vehicle Wear and Tires
+            </h3>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    Wear Mechanics: Increases with use/conditions (e.g., 0.1%
+                    per mile, based on Tesla data; battery degradation over
+                    time).
+                </li>
+                <li>
+                    Wear Increases: 0.001% per mile, 5-10% degradation after
+                    100,000 miles, +20% in traffic/protests, +10% in weather.
+                </li>
+                <li>
+                    Tires: Seasonal options (e.g., snow tires for winter events,
+                    $500/set).
+                </li>
+                <li>
+                    Tires: Seasonal options (snow for v2), wear faster in harsh
+                    conditions, last 30,000-50,000 miles, rotate every 6,250
+                    miles.
+                </li>
+                <li>
+                    Maintenance Costs: Annual $400-$600, tire replacement
+                    $800-$1,200, 5-year $2,000-$3,000.
+                </li>
+                <li>
+                    Battery Replacement: $10,000-$20,000 at 20-30% degradation.
+                </li>
+                <li>
+                    Action: Monitor via Vehicle Details, high wear triggers
+                    maintenance (mechanics TBD).
+                </li>
+            </ul>
+
+            <h3 style="color: #00a3e0; font-size: 16pt; margin-bottom: 10px">
+                9. Charging Costs
+            </h3>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    Rates: $0.12/kWh at garage/home, $0.25-$0.50/kWh at
+                    SuperCharger.
+                </li>
+                <li>Power Usage: 0.25-0.3 kWh/mile for Model Y.</li>
+            </ul>
+
+            <h3 style="color: #00a3e0; font-size: 16pt; margin-bottom: 10px">
+                10. Staff for Repairs/Cleaning
+            </h3>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    Hiring Costs and Roles: Mechanic $4,000/month (reduces costs
+                    to $200-$400/year vs. $400-$600 service center, tire
+                    rotation $100), Cleaning Staff $2,500/month (auto-cleans
+                    during shifts).
+                </li>
+                <li>Impact: Mechanics cut costs/time by 50%.</li>
+                <li>
+                    Staffing Hours: X hours/day (8-12 configurable), player
+                    schedules shifts.
+                </li>
+                <li>
+                    Cleaning: Auto with staff, manual button without (no earning
+                    during garage).
+                </li>
+                <li>
+                    Action: Hire via in-game browser, pay monthly, staff levels
+                    up.
+                </li>
+            </ul>
+
+            <h3 style="color: #00a3e0; font-size: 16pt; margin-bottom: 10px">
+                11. User Profiles
+            </h3>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>Basic Fields: Username, email, bank balance.</li>
+                <li>
+                    Advanced Fields: Fleet overview, progress tracking, garages
+                    (list with sizes, locations, chargers).
+                </li>
+                <li>
+                    Company Profile: Company Name, overview with expandable
+                    details (e.g., click V3 chargers for list/details).
+                    "Company" flyout button.
+                </li>
+                <li>Action: Access/update via in-game browser.</li>
+            </ul>
+
+            <h3 style="color: #00a3e0; font-size: 16pt; margin-bottom: 10px">
+                12. Environmental Factors and Events
+            </h3>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    Weather/Traffic: Affects routes/earnings (e.g., rain slows
+                    trips, protests block areas).
+                </li>
+                <li>
+                    Weather: Rain in Austin (10-20% chance/day, -10-20% speed,
+                    +10% wear), +20% demand, snow/winter tires deferred to v2.
+                </li>
+                <li>
+                    Traffic: Rush hour peaks (7-9 AM/4-6 PM, +15% route time,
+                    +5% wear).
+                </li>
+                <li>
+                    Protests: 5% chance/week, blocks 1-2 hours, +20% wear if
+                    caught, bonus is evasion.
+                </li>
+                <li>
+                    Integration: Open-Meteo API (worldwide, free, no key),
+                    15-min queries with caching, CyberTaxi browser "Weather
+                    Forecast" section.
+                </li>
+                <li>
+                    Action: Notifications (e.g., "Rain in Downtown—reroute?"),
+                    player responds.
+                </li>
+            </ul>
+
+            <h3 style="color: #00a3e0; font-size: 16pt; margin-bottom: 10px">
+                13. Demand and Leaderboards
+            </h3>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    Zones: High/low demand on map (dynamic based on
+                    time/events).
+                </li>
+                <li>
+                    Demand: High/low demand zones on heat map toggle, with
+                    static patterns (e.g., downtown high day) and dynamic events
+                    (e.g., +20% from weather). Nightlife zones (bars 8 PM-2 AM,
+                    concerts/city events based on real Austin schedules, +30-50%
+                    demand) boost fares. Closest free CyberTaxi gets the ride.
+                </li>
+                <li>
+                    Leaderboards: Track revenue, distance, and nightlife fares
+                    (e.g., badges for top night earners), daily/weekly rankings.
+                </li>
+                <li>
+                    Action: Player places vehicles in high-demand/nightlife
+                    zones, leaderboards update real-time in Company Profile.
+                </li>
+            </ul>
+
+            <h3 style="color: #00a3e0; font-size: 16pt; margin-bottom: 10px">
+                14. Tutorials and Onboarding
+            </h3>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    First-Time Setup: Player signs up via store page, receives
+                    $60,000 bank, chooses a demand-based garage from map/list,
+                    leases it, and orders a first vehicle from the Tesla section
+                    (2-3 days delivery if no stock).
+                </li>
+                <li>
+                    Action: Step-by-step prompts trigger on first login (e.g.,
+                    "Welcome to CyberTaxi! Let’s get your fleet rolling—lease a
+                    garage here."), with map highlights, "Next"/"Skip Tutorial"
+                    options, and auto-saved progress via localStorage.
+                    Notifications for delivery, auto-adding to garage.
+                </li>
+                <li>
+                    In-Game Guides: Pop-ups/tool tips for mechanics (e.g.,
+                    "Hover battery bar for %—charge at 80% for faster turns"),
+                    interactive fare tips (e.g., "Closest taxi gets the
+                    ride—place in high-demand zones").
+                </li>
+                <li>
+                    Action: Guides trigger on first use (e.g., garage lease
+                    tutorial, wear alert), skippable via a persistent "Tutorial
+                    Off" toggle or "Restart Tutorial" in User Profiles.
+                </li>
+                <li>Chunk Status: Complete—no open questions remain.</li>
+            </ul>
+        </section>
+
+        <section
+            style="
+                margin: 20px 0;
+                padding: 15px;
+                background-color: #1a1a1a;
+                border-left: 4px solid #d4a017;
+            "
+        >
+            <h2 style="color: #d4a017; font-size: 18pt; margin-bottom: 10px">
+                Pending Chunks (To Do Next)
+            </h2>
+            <p>These are deferred to future versions or development stages.</p>
+            <ol style="list-style-type: decimal; margin-left: 20px">
+                <li>
+                    Additional Events: More environmental or competitive
+                    features.
+                </li>
+            </ol>
+        </section>
+        <section
+            style="
+                margin: 20px 0;
+                padding: 15px;
+                background-color: #1a1a1a;
+                border-left: 4px solid #d4a017;
+            "
+        >
+            <h2 style="color: #d4a017; font-size: 18pt; margin-bottom: 10px">
+                Future Expansions
+            </h2>
+            <ul style="list-style-type: disc; margin-left: 20px">
+                <li>
+                    <strong>Alliances:</strong> Shared garages, profit splits.
+                </li>
+                <li>
+                    <strong>Weather Events:</strong> Rain, traffic, protests
+                    with strategic options.
+                </li>
+                <li><strong>City Expansion:</strong> Post-Austin rollout.</li>
+                <li>
+                    <strong>Leaderboards:</strong> Updates with performance
+                    badges.
+                </li>
+            </ul>
+        </section>
+        <section
+            style="
+                margin: 20px 0;
+                padding: 15px;
+                background-color: #1a1a1a;
+                border-left: 4px solid #d4a017;
+            "
+        >
+            <h2 style="color: #d4a017; font-size: 18pt; margin-bottom: 10px">
+                Open Questions
+            </h2>
+            <p>
+                None—all completed chunks are locked in with no open questions
+                remaining.
+            </p>
+        </section>
+
+        <footer
+            style="
+                text-align: center;
+                padding: 10px;
+                background-color: #1a1a1a;
+                color: #cfd8d3;
+                border-top: 2px solid #d4a017;
+                margin-top: 20px;
+            "
+        >
+            <p>© 2025 CyberTaxi Team. All rights reserved.</p>
+        </footer>
+    </body>
+</html>
