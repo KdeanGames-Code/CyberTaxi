@@ -1,0 +1,55 @@
+/* src/styles/PopupMenu.css */
+/**
+ * @file PopupMenu.css
+ * @description Stylesheet for the CyberTaxi TaxiMenu (top menu context menu) component.
+ * @author Kevin-Dean Livingstone & CyberTaxi Team
+ * @version 0.1.0
+ * @note Defines a cyberpunk-themed dropdown menu tailored for TaxiMenu interactions.
+ */
+
+/* TaxiMenu Styles */
+/**
+ * Sets up the context menu with a cyberpunk aesthetic, inheriting from windows.css.
+ * @style Positions absolutely, matching the top menu context.
+ */
+.context-menu.taxi-menu {
+    position: fixed;
+    background: #2f2f2f;
+    border: 2px solid #e8b923;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    font-family: "Orbitron", sans-serif;
+    color: #d4a017;
+    z-index: 3000;
+    padding: 5px 0;
+}
+
+/* Menu Item Styles */
+/**
+ * Styles individual menu items for interactivity.
+ * @style Adds padding and hover effects for user feedback.
+ */
+.menu-item {
+    padding: 8px 15px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.menu-item:hover {
+    background: #d4a017;
+    color: #1a1a1a;
+}
+
+/* Responsive Adjustments */
+/**
+ * Ensures menu readability on smaller screens.
+ * @media Targets devices below 768px width.
+ */
+@media (max-width: 768px) {
+    .context-menu.taxi-menu {
+        font-size: 10px;
+    }
+    .menu-item {
+        padding: 6px 10px;
+    }
+}
