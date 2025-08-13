@@ -2,7 +2,7 @@
 /**
  * @file TaxiMenu.tsx
  * @description Context menu component for CyberTaxi top menu (TaxiMenu) interactions.
- * @author Kevin-Dean Livingstone & CyberTaxi Team
+ * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
  * @version 0.2.18
  * @note Replaces PopupMenu with a top-menu-specific menu, supporting Login/Logout, Register, and Settings based on login state.
  */

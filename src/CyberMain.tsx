@@ -2,11 +2,11 @@
 /**
  * @file CyberMain.tsx
  * @description Main entry point for CyberTaxi, defining the new UI/UX layout.
- * @author Kevin-Dean Livingstone & CyberTaxi Team
+ * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
  * @version 0.2.8
  * @note Replaces main.tsx with a three-row structure: MenuBar, Map, BottomMenu, using CyberGlobal.css, with TaxiMenu triggered by taxi click.
  */
-import React, { useState } from "react"; // Added useState for isLoggedIn
+import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
 import "./CyberGlobal.css"; // Base layout stylesheet
 import MenuBar from "./components/ui/controls/MenuBar"; // New MenuBar component
@@ -61,7 +61,7 @@ const CyberMain = () => {
 };
 
 /**
- * Renders the CyberMain.component to the DOM.
+ * Renders the CyberMain component to the DOM.
  * @note Assumes #app element exists in index.html; applies new layout with CyberGlobal.css and TaxiMenu.
  */
 ReactDOM.createRoot(document.getElementById("app")!).render(<CyberMain />);

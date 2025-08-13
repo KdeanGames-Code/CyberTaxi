@@ -2,7 +2,7 @@
 /**
  * @file MenuBar.tsx
  * @description Top navigation bar component for CyberTaxi UI.
- * @author Kevin-Dean Livingstone & CyberTaxi Team
+ * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
  * @version 0.1.3
  * @note Provides a fixed header with logo, stats (Bank before Score), and help/energy icons, with taxi click handler.
  */

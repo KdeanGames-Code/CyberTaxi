@@ -2,22 +2,21 @@
 /**
  * @file CyberGlobal.css
  * @description Global stylesheet for CyberTaxi, defining the base layout and theme.
- * @author Kevin-Dean Livingstone & CyberTaxi Team
- * @version 0.1.1
+ * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
+ * @version 0.1.2
  * @note Establishes a three-row grid (MenuBar, Map, BottomMenu) with a cyberpunk aesthetic, avoiding padding layout issues.
  */
-
 /* Base Styles */
 /**
  * Sets the foundation for the app, ensuring full viewport height and no text selection.
- * @style Applies to html and body for consistent layout.
+ * @style Applies to html and body for consistent layout, fixed color artifact issue.
  */
 html,
 body {
     margin: 0;
     font-family: "Orbitron", "Roboto", sans-serif;
     background-color: #2f2f2f;
-    color: #000000;
+    color: #000000; /* Hides artifact text behind MenuBar */
     height: 100vh;
     overflow: hidden;
     -webkit-user-select: none;
@@ -25,7 +24,6 @@ body {
     -ms-user-select: none;
     user-select: none;
 }
-
 /* Layout Grid */
 /**
  * Defines the main grid layout with three rows: MenuBar, Map area, and BottomMenu.
@@ -41,7 +39,6 @@ body {
     padding: 0;
     overflow: hidden;
 }
-
 /* Placeholder Styles for Containers */
 /**
  * Temporary styles for MenuBar, Map, and BottomMenu containers.
@@ -51,18 +48,15 @@ body {
     background: #1a1a1a;
     text-align: center;
 }
-
 .map-area {
     background: #222;
     position: relative;
     overflow: hidden;
 }
-
 .bottom-menu {
     background: #1a1a1a;
     text-align: center;
 }
-
 /* Responsive Design */
 /**
  * Adjusts layout for smaller screens, ensuring usability.
@@ -77,7 +71,6 @@ body {
         font-size: 14px;
     }
 }
-
 /* Error Message Style */
 /**
  * Defines the appearance of error messages displayed globally.

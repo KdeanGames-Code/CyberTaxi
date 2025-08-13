@@ -1,10 +1,9 @@
 {
     "compilerOptions": {
         "target": "ES2022",
-        "useDefineForClassFields": true,
         "module": "ESNext",
         "lib": ["ES2022", "DOM", "DOM.Iterable"],
-        "jsx": "react-jsx", // Enable JSX for React
+        "jsx": "react-jsx", // Correct for React 17+
         "skipLibCheck": true,
         "moduleResolution": "bundler",
         "allowImportingTsExtensions": true,
@@ -12,9 +11,9 @@
         "moduleDetection": "force",
         "noEmit": true,
         "strict": true,
+        "esModuleInterop": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
-        "erasableSyntaxOnly": true,
         "noFallthroughCasesInSwitch": true,
         "noUncheckedSideEffectImports": true
     },
