@@ -1,0 +1,38 @@
+@startuml
+skinparam monochrome false
+skinparam state {
+    BackgroundColor #2f2f2f
+    BorderColor #e8b923
+    ArrowColor #00a3e0
+    FontColor #d4a017  // Gold text for readability
+}
+
+[*] --> LoggedOut : Initial
+
+state LoggedOut {
+  state "isLoggedIn: false\nusername: null" as LOState
+  LOState : - setAuth(false)
+}
+
+state LoggingIn {
+  state "isLoggedIn: pending\nusername: pending" as LIState
+  LIState : - setAuth(true, username)
+}
+
+state LoggedIn {
+  state "isLoggedIn: true\nusername: set" as LInState
+  LInState : - setAuth(false) [logout]
+}
+
+state Error {
+  state "isLoggedIn: false\nerror: message" as EState
+  EState : - reset or retry
+}
+
+LoggedOut --> LoggingIn : setAuth(true, username)
+LoggingIn --> LoggedIn : localStorage success
+LoggingIn --> Error : localStorage fail
+LoggedIn --> LoggedOut : setAuth(false)
+Error --> LoggedOut : reset/retry
+
+@enduml

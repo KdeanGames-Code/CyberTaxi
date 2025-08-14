@@ -1,0 +1,64 @@
+@startuml
+!define RECTANGLE class
+skinparam monochrome true
+
+RECTANGLE CyberMain {
+  - isOpen : boolean
+  - position : { x: number; y: number }
+  - isLoggedIn : boolean
+  + handleTaxiClick(event: React.MouseEvent)
+  + handleItemSelect(action: string)
+}
+
+RECTANGLE apiConfig {
+  + API_CONFIG : { BASE_URL: string }
+}
+
+RECTANGLE CyberError {
+  - message : string
+  + constructor(message: string)
+  + toString() : string
+}
+
+RECTANGLE ErrorBoundary {
+  - hasError : boolean
+  + getDerivedStateFromError(error: Error) : { hasError: boolean }
+  + componentDidCatch(error: Error, info: React.ErrorInfo)
+}
+
+RECTANGLE CyberContext {
+  - isLoggedIn : boolean
+  - username : string | null
+  - setAuth : (loggedIn: boolean, username?: string) => void
+  + CyberProvider(props: { children: ReactNode }) : JSX.Element
+  + useCyber() : CyberState
+}
+
+RECTANGLE TestContext {
+  - value : string
+  + TestProvider(props: { children: ReactNode }) : JSX.Element
+  + useTest() : TestState
+}
+
+RECTANGLE MenuBar {
+  + onTaxiClick : (e: React.MouseEvent) => void
+}
+
+RECTANGLE TaxiMenu {
+  - isOpen : boolean
+  - position : { x: number; y: number }
+  - isLoggedIn : boolean
+  + onClose() : void
+  + onItemSelect(action: string) : void
+}
+
+CyberMain --> MenuBar : contains
+CyberMain --> TaxiMenu : contains
+CyberMain --> CyberContext : uses
+CyberMain --> TestContext : uses
+ErrorBoundary --> CyberError : uses
+CyberContext --> apiConfig : uses (future)
+TestContext --> apiConfig : uses (future)
+CyberMain --> ErrorBoundary : wrapped by
+
+@enduml
