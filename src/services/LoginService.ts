@@ -3,9 +3,9 @@
  * @file LoginService.ts
  * @description Service class for handling login and signup API calls in CyberTaxi.
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.1.1
+ * @version 0.1.3
  * @note Manages authentication requests to the backend, isolating API logic from UI components.
- * @detail Uses API_CONFIG.BASE_URL for dynamic endpoint configuration.
+ * @detail Uses API_CONFIG.BASE_URL for dynamic endpoint configuration, adjusted for correct server paths.
  */
 import { API_CONFIG } from "../config/apiConfig";
 
@@ -27,6 +27,7 @@ export class LoginService {
             });
             if (!response.ok) {
                 const errorText = await response.text();
+                console.error("Login response error:", errorText); // Debug full error
                 throw new Error(`Login failed: ${errorText}`);
             }
             const result = await response.json();
@@ -59,6 +60,7 @@ export class LoginService {
             });
             if (!response.ok) {
                 const errorText = await response.text();
+                console.error("Signup response error:", errorText); // Debug full error
                 throw new Error(`Signup failed: ${errorText}`);
             }
             const result = await response.json();
