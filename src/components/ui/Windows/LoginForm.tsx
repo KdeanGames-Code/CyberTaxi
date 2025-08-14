@@ -3,7 +3,7 @@
  * @file LoginForm.tsx
  * @description Login/registration form component for CyberTaxi onboarding.
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.2.9
+ * @version 0.2.11
  * @note Renders a non-resizable, draggable form with toggleable login/register modes, including API calls.
  * @detail Handles user signup via POST /api/auth/signup and login via POST /api/auth/login/username,
  *         stores JWT and form data in localStorage, using username for UI and mapping to player_id internally.
@@ -12,6 +12,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { BaseWindow } from "./baseWindow";
 import type { BaseWindowProps } from "./baseWindow";
 import type { FormEvent } from "react"; // Type-only import for verbatimModuleSyntax
+import { LoginService } from "../../../services/LoginService"; // New service import
 import "../../../styles/ui/LoginForm.css"; // Unique styles only
 
 /**
@@ -120,41 +121,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login" })
         setValidationMessages((prev) => ({ ...prev, [name]: message }));
     };
 
-    const attemptLogin = async (username: string, password: string) => {
-        try {
-            console.log(`Attempting login with username: ${username}`);
-            const response = await fetch("http://localhost:3000/api/auth/login/username", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password }),
-            });
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Login failed: ${errorText}`);
-            }
-            const result = await response.json();
-            console.log("Login response:", result);
-            if (result.status === "Success" && result.token) {
-                localStorage.setItem("jwt_token", result.token);
-                localStorage.setItem("username", username);
-                if (result.player_id) {
-                    localStorage.setItem("player_id", result.player_id.toString());
-                }
-                localStorage.setItem("registerData", JSON.stringify({
-                    username,
-                    email: formData.email,
-                }));
-                console.log("Login successful, token stored:", result.token);
-                onClose();
-                return true;
-            }
-            return false;
-        } catch (error) {
-            console.error("Login error:", error);
-            return false;
-        }
-    };
-
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         console.log(`Form submitted, mode: ${formMode}`);
@@ -188,30 +154,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login" })
         }
         setIsSubmitting(true);
         try {
-            const payload = {
-                username: formData.username,
-                password: formData.password,
-                ...(formMode === "register" ? { email: formData.email } : {}),
-            };
-            const endpoint = formMode === "login" ? "/api/auth/login/username" : "/api/auth/signup";
-            console.log(`Sending POST ${endpoint} with username: ${formData.username}`);
-            const response = await fetch(`http://localhost:3000${endpoint}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-            });
-            if (!response.ok) {
-                const errorText = await response.text();
-                if (response.status === 409 && formMode === "register") {
-                    const loginSuccess = await attemptLogin(formData.username, formData.password);
-                    if (loginSuccess) return;
-                    throw new Error("Username or email already exists. Try different credentials or log in.");
-                }
-                throw new Error(`HTTP error! Status: ${response.status}, Details: ${errorText}`);
+            let result: { token: string; player_id?: number } | null = null;
+            if (formMode === "login") {
+                result = await LoginService.login(formData.username, formData.password);
+            } else {
+                result = await LoginService.signup(formData.username, formData.email, formData.password);
             }
-            const result = await response.json();
-            console.log(`${formMode === "login" ? "Login" : "Signup"} response:`, result);
-            if (result.status === "Success" && result.token) {
+            if (result && result.token) {
                 localStorage.setItem("jwt_token", result.token);
                 localStorage.setItem("username", formData.username);
                 if (result.player_id) {
@@ -224,8 +173,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login" })
                 console.log(`${formMode === "login" ? "Login" : "Signup"} successful, token stored:`, result.token);
                 onClose();
             } else {
-                setFormError(result.message || "Unknown server error");
-                console.log("Form error set:", result.message || "Unknown server error");
+                setFormError("Authentication failed");
+                console.log("Form error set: Authentication failed");
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "Network issue, please try again";
