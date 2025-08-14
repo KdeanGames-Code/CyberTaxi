@@ -6,6 +6,8 @@ RECTANGLE CyberMain {
   - isOpen : boolean
   - position : { x: number; y: number }
   - isLoggedIn : boolean
+  - showLogin : boolean
+  - showTestWindow : boolean
   + handleTaxiClick(event: React.MouseEvent)
   + handleItemSelect(action: string)
 }
@@ -52,13 +54,38 @@ RECTANGLE TaxiMenu {
   + onItemSelect(action: string) : void
 }
 
+RECTANGLE BaseWindow {
+  - id : string
+  - title : ReactNode
+  - isResizable : boolean
+  - isDraggable : boolean
+  - style : CSSProperties
+  - initialPosition : { top: number; left: number }
+  - defaultWidth : number
+  - defaultHeight : number
+  - minWidth : number
+  - maxHeight : number
+  - zIndexBase : number
+  + onClose() : void
+}
+
+RECTANGLE LoginForm {
+  - formMode : "login" | "register"
+  - formData : { username: string; email: string; password: string }
+  + handleInputChange(event: React.ChangeEvent<HTMLInputElement>)
+  + toggleMode()
+}
+
 CyberMain --> MenuBar : contains
 CyberMain --> TaxiMenu : contains
+CyberMain --> LoginForm : contains
+CyberMain --> BaseWindow : contains (for test)
 CyberMain --> CyberContext : uses
 CyberMain --> TestContext : uses
 ErrorBoundary --> CyberError : uses
 CyberContext --> apiConfig : uses (future)
 TestContext --> apiConfig : uses (future)
 CyberMain --> ErrorBoundary : wrapped by
+LoginForm --> BaseWindow : extends
 
 @enduml

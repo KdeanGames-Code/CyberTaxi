@@ -3,21 +3,23 @@
  * @file windowUtils.ts
  * @description Utility functions and hooks for window drag/resize handling in CyberTaxi.
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.1.10
+ * @version 0.1.13
  * @note Provides reusable logic for draggable/resizable windows, saving positions with CyberError logging.
+ * @detail Ensures window IDs are validated and logged to track dragging and position saving.
  */
 import { useRef, useEffect } from "react";
-import { CyberError } from "../errorhandling/CyberError"; // Corrected path
+import { CyberError } from "../errorhandling/CyberError";
 
 /**
  * Custom hook for window drag handling.
- * @param id - Unique window identifier.
- * @param initialPosition - Initial position { top, left }.
- * @param defaultWidth - Default width in pixels.
- * @param defaultHeight - Default height in pixels.
- * @param isDraggable - Toggle drag functionality.
- * @param zIndexBase - Base z-index.
- * @returns RefObject<HTMLDivElement> - Reference to the window element (non-null after mount).
+ * @param {string} id - Unique window identifier (required).
+ * @param { { top: number; left: number } } initialPosition - Initial position.
+ * @param {number} defaultWidth - Default width in pixels.
+ * @param {number} defaultHeight - Default height in pixels.
+ * @param {boolean} isDraggable - Toggle drag functionality.
+ * @param {number} zIndexBase - Base z-index.
+ * @returns {React.RefObject<HTMLDivElement>} Reference to the window element.
+ * @throws {CyberError} If id is empty or invalid.
  */
 export const useWindowDrag = (
     id: string,
@@ -27,6 +29,9 @@ export const useWindowDrag = (
     isDraggable: boolean,
     zIndexBase: number
 ): React.RefObject<HTMLDivElement> => {
+    if (!id || id.trim() === "") {
+        throw new CyberError("Window ID is required", 400);
+    }
     const windowRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -101,16 +106,15 @@ export const useWindowDrag = (
         };
     }, [id, initialPosition, defaultWidth, defaultHeight, isDraggable, zIndexBase]);
 
-    // Type assertion since useEffect ensures windowEl is set before use
     return windowRef as React.RefObject<HTMLDivElement>;
 };
 
 /**
  * Custom hook for window resize handling.
- * @param windowRef - Reference to the window element.
- * @param minWidth - Minimum width in pixels.
- * @param maxHeight - Maximum height in pixels.
- * @param isResizable - Toggle resize functionality.
+ * @param {React.RefObject<HTMLDivElement>} windowRef - Reference to the window element.
+ * @param {number} minWidth - Minimum width in pixels.
+ * @param {number} maxHeight - Maximum height in pixels.
+ * @param {boolean} isResizable - Toggle resize functionality.
  */
 export const useWindowResize = (
     windowRef: React.RefObject<HTMLDivElement>,
@@ -121,7 +125,7 @@ export const useWindowResize = (
     useEffect(() => {
         const windowEl = windowRef.current;
         if (!windowEl || !isResizable) {
-            return; // Exit if null or not resizable
+            return;
         }
 
         const handleResize = () => {
@@ -139,9 +143,9 @@ export const useWindowResize = (
 
 /**
  * Utility to save window position to localStorage.
- * @param id - Unique window identifier.
- * @param x - Current x position.
- * @param y - Current y position.
+ * @param {string} id - Unique window identifier.
+ * @param {number} x - Current x position.
+ * @param {number} y - Current y position.
  */
 export const saveWindowPosition = (id: string, x: number, y: number) => {
     localStorage.setItem(`window_${id}_position`, JSON.stringify({ top: y, left: x }));
@@ -150,9 +154,9 @@ export const saveWindowPosition = (id: string, x: number, y: number) => {
 
 /**
  * Utility to get window bounds.
- * @param width - Window width.
- * @param height - Window height.
- * @returns { maxX: number, maxY: number } - Maximum allowable positions.
+ * @param {number} width - Window width.
+ * @param {number} height - Window height.
+ * @returns {{ maxX: number, maxY: number }} Maximum allowable positions.
  */
 export const getWindowBounds = (width: number, height: number) => {
     const maxX = window.innerWidth - width;
