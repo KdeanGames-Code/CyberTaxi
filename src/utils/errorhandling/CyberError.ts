@@ -3,8 +3,8 @@
  * @file CyberError.ts
  * @description Custom error class for CyberTaxi, providing structured error handling with status codes.
  * @author Kevin-Dean Livingstone & CyberTaxi Team
- * @version 0.1.1
- * @note Extends native Error to include a status property for HTTP-like error codes; tested with controlled error.
+ * @version 0.1.2
+ * @note Extends native Error to include a status property for HTTP-like error codes; adds log method for debugging.
  */
 export class CyberError extends Error {
     status: number;
@@ -19,6 +19,13 @@ export class CyberError extends Error {
         super(message);
         this.name = "CyberError";
         this.status = status;
-        console.error(`CyberError [${status}]: ${message}`); // Logs error for debugging, confirmed functional.
+        this.log(); // Log on creation
+    }
+
+    /**
+     * Logs the error to the console.
+     */
+    log(): void {
+        console.error(`CyberError [${this.status}]: ${this.message}`);
     }
 }

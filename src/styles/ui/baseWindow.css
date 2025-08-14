@@ -3,7 +3,7 @@
  * @file baseWindow.css
  * @description Base stylesheet for CyberTaxi window components.
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.1.0
+ * @version 0.1.2
  * @note Defines minimal styles for the base window, to be extended by specific window CSS.
  */
 
@@ -17,11 +17,10 @@
     font-family: "Orbitron", sans-serif;
     color: #f5f5f5;
     min-width: 200px;
-    min-height: 150px; /* Default size */
+    min-height: 150px;
     z-index: 1000;
     user-select: none;
     pointer-events: auto;
-    transition: all 0.3s; /* Smooth animations */
 }
 
 /* Resizable window styles */
@@ -66,16 +65,4 @@
 /* Window content */
 .window-content {
     padding: 10px;
-}
-
-/* Focus state for active window */
-.base-window:focus {
-    outline: none;
-    box-shadow: 0 0 10px #00a3e0;
-}
-
-/* Scrollable content */
-.window-content.scrollable {
-    overflow-y: auto;
-    max-height: 400px; /* Adjustable default */
 }

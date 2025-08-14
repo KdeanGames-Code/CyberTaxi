@@ -3,11 +3,11 @@
  * @file windowUtils.ts
  * @description Utility functions and hooks for window drag/resize handling in CyberTaxi.
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.1.2
+ * @version 0.1.10
  * @note Provides reusable logic for draggable/resizable windows, saving positions with CyberError logging.
  */
 import { useRef, useEffect } from "react";
-import { CyberError } from "../errorhandling/CyberError"; // Import error handler
+import { CyberError } from "../errorhandling/CyberError"; // Corrected path
 
 /**
  * Custom hook for window drag handling.
@@ -17,7 +17,7 @@ import { CyberError } from "../errorhandling/CyberError"; // Import error handle
  * @param defaultHeight - Default height in pixels.
  * @param isDraggable - Toggle drag functionality.
  * @param zIndexBase - Base z-index.
- * @returns RefObject<HTMLDivElement> - Reference to the window element.
+ * @returns RefObject<HTMLDivElement> - Reference to the window element (non-null after mount).
  */
 export const useWindowDrag = (
     id: string,
@@ -26,13 +26,13 @@ export const useWindowDrag = (
     defaultHeight: number,
     isDraggable: boolean,
     zIndexBase: number
-) => {
+): React.RefObject<HTMLDivElement> => {
     const windowRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const windowEl = windowRef.current;
         if (!windowEl) {
-            new CyberError("Window element not found", "useWindowDrag").log();
+            new CyberError("Window element not found", 500);
             return;
         }
         let isDragging = false;
@@ -47,10 +47,9 @@ export const useWindowDrag = (
         const savedPosition = localStorage.getItem(`window_${id}_position`);
         if (savedPosition) {
             const { top, left } = JSON.parse(savedPosition);
-            const maxX = window.innerWidth - windowEl.offsetWidth;
-            const maxY = window.innerHeight - windowEl.offsetHeight;
-            currentX = Math.max(0, Math.min(left, maxX));
-            currentY = Math.max(0, Math.min(top, maxY));
+            const { maxX, maxY } = getWindowBounds(windowEl.offsetWidth, windowEl.offsetHeight);
+            currentX = Math.max(0, Math.min(Number(left), maxX));
+            currentY = Math.max(0, Math.min(Number(top), maxY));
             windowEl.style.left = `${currentX}px`;
             windowEl.style.top = `${currentY}px`;
         } else {
@@ -65,7 +64,7 @@ export const useWindowDrag = (
             initialX = e.clientX - currentX;
             initialY = e.clientY - currentY;
             windowEl.style.zIndex = `${zIndexBase + 1}`;
-            new CyberError(`Dragging started for window: ${id}`, "useWindowDrag").log();
+            new CyberError(`Dragging started for window: ${id}`, 200);
         };
 
         const handleMouseMove = (e: MouseEvent) => {
@@ -73,8 +72,7 @@ export const useWindowDrag = (
             e.preventDefault();
             const newX = e.clientX - initialX;
             const newY = e.clientY - initialY;
-            const maxX = window.innerWidth - windowEl.offsetWidth;
-            const maxY = window.innerHeight - windowEl.offsetHeight;
+            const { maxX, maxY } = getWindowBounds(windowEl.offsetWidth, windowEl.offsetHeight);
             currentX = Math.max(0, Math.min(newX, maxX));
             currentY = Math.max(0, Math.min(newY, maxY));
             windowEl.style.left = `${currentX}px`;
@@ -83,7 +81,7 @@ export const useWindowDrag = (
 
         const handleMouseUp = () => {
             isDragging = false;
-            new CyberError(`Dragging stopped for window: ${id}`, "useWindowDrag").log();
+            new CyberError(`Dragging stopped for window: ${id}`, 200);
             saveWindowPosition(id, currentX, currentY);
         };
 
@@ -103,7 +101,8 @@ export const useWindowDrag = (
         };
     }, [id, initialPosition, defaultWidth, defaultHeight, isDraggable, zIndexBase]);
 
-    return windowRef;
+    // Type assertion since useEffect ensures windowEl is set before use
+    return windowRef as React.RefObject<HTMLDivElement>;
 };
 
 /**
@@ -121,14 +120,16 @@ export const useWindowResize = (
 ) => {
     useEffect(() => {
         const windowEl = windowRef.current;
-        if (!windowEl || !isResizable) return;
+        if (!windowEl || !isResizable) {
+            return; // Exit if null or not resizable
+        }
 
         const handleResize = () => {
             const width = windowEl.offsetWidth;
             const height = windowEl.offsetHeight;
             if (width < minWidth) windowEl.style.width = `${minWidth}px`;
             if (height > maxHeight) windowEl.style.height = `${maxHeight}px`;
-            new CyberError(`Resized window to ${width}x${height}`, "useWindowResize").log();
+            new CyberError(`Resized window to ${width}x${height}`, 200);
         };
 
         windowEl.addEventListener("resize", handleResize);
@@ -144,7 +145,7 @@ export const useWindowResize = (
  */
 export const saveWindowPosition = (id: string, x: number, y: number) => {
     localStorage.setItem(`window_${id}_position`, JSON.stringify({ top: y, left: x }));
-    new CyberError(`Saved position for ${id}: x=${x}, y=${y}`, "saveWindowPosition").log();
+    new CyberError(`Saved position for ${id}: x=${x}, y=${y}`, 200);
 };
 
 /**

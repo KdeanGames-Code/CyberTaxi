@@ -3,18 +3,18 @@
  * @file baseWindow.tsx
  * @description Base window component for CyberTaxi UI, reusable and minimal.
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.1.0
+ * @version 0.1.6
  * @note Provides a draggable/resizable window with customizable size and z-index, delegating logic to windowUtils.ts.
  */
 import React from "react";
-import { useWindowDrag, useWindowResize } from "../../../utils/ui/windowUtils"; // Split hooks
+import { useWindowDrag, useWindowResize } from "../../../utils/ui/windowUtils"; // Corrected path
 import "../../../styles/ui/baseWindow.css"; // Base styles
 
 /**
  * Props for BaseWindow component.
  * @interface BaseWindowProps
  */
-interface BaseWindowProps {
+export interface BaseWindowProps { // Ensure this export is present and saved
     id: string; // Unique identifier
     title: React.ReactNode; // Window title
     onClose: () => void; // Close callback
@@ -50,8 +50,9 @@ export const BaseWindow: React.FC<BaseWindowProps> = ({
     zIndexBase = 1000,
     children,
 }) => {
-    const windowRef = useWindowDrag(id, initialPosition, defaultWidth, defaultHeight, isDraggable, zIndexBase);
-    useWindowResize(windowRef, minWidth, maxHeight, isResizable);
+    const windowRef = useWindowDrag(id, initialPosition, defaultWidth, defaultHeight, isDraggable, zIndexBase) as React.RefObject<HTMLDivElement>;
+
+    useWindowResize(windowRef as React.RefObject<HTMLDivElement>, minWidth, maxHeight, isResizable);
 
     const handleClose = () => {
         console.log(`Closing window: ${id}`);
