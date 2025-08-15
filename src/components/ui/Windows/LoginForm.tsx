@@ -1,18 +1,19 @@
 // src/components/ui/Windows/LoginForm.tsx
 /**
  * @file LoginForm.tsx
- * @description Login/registration form component for CyberTaxi onboarding.
+ * @description Login/registration form component for CyberTaxi onboarding, focusing on username-based login.
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.2.11
+ * @version 0.2.29
  * @note Renders a non-resizable, draggable form with toggleable login/register modes, including API calls.
  * @detail Handles user signup via POST /api/auth/signup and login via POST /api/auth/login/username,
- *         stores JWT and form data in localStorage, using username for UI and mapping to player_id internally.
+ *         stores JWT and form data in localStorage. Expected credentials: username 'Kevin-Dean' with a password
+ *         set via signup (default test not confirmed); use signup to set a known password (e.g., 'newpass123').
  */
 import React, { useState, useEffect, useRef } from "react";
 import { BaseWindow } from "./baseWindow";
 import type { BaseWindowProps } from "./baseWindow";
 import type { FormEvent } from "react"; // Type-only import for verbatimModuleSyntax
-import { LoginService } from "../../../services/LoginService"; // New service import
+import { LoginService } from "../../../services/LoginService"; // Service import
 import "../../../styles/ui/LoginForm.css"; // Unique styles only
 
 /**
@@ -28,7 +29,7 @@ interface LoginFormProps extends Omit<BaseWindowProps, "children"> {
 }
 
 /**
- * Renders the login/registration form with validation and API integration.
+ * Renders the login/registration form with validation and API integration, focusing on username login.
  * @param {LoginFormProps} props - Component props including onClose and optional mode.
  * @returns {JSX.Element} The rendered form window.
  */
@@ -123,7 +124,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login" })
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        console.log(`Form submitted, mode: ${formMode}`);
+        console.log(`Form submitted, mode: ${formMode}, username: ${formData.username}`);
+        if (formData.password.length < 6) {
+            setFormError("Password must be at least 6 characters");
+            return;
+        }
         setFormError("");
         setIsSubmitted(true);
         setValidationMessages({});

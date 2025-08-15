@@ -3,9 +3,9 @@
  * @file LoginService.ts
  * @description Service class for handling login and signup API calls in CyberTaxi.
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.1.3
+ * @version 0.1.7
  * @note Manages authentication requests to the backend, isolating API logic from UI components.
- * @detail Uses API_CONFIG.BASE_URL for dynamic endpoint configuration, adjusted for correct server paths.
+ * @detail Uses API_CONFIG.BASE_URL for dynamic endpoint configuration, aligned with API documentation, with debug logging.
  */
 import { API_CONFIG } from "../config/apiConfig";
 
@@ -19,12 +19,15 @@ export class LoginService {
      */
     static async login(username: string, password: string): Promise<{ token: string; player_id?: number } | null> {
         try {
-            console.log(`Attempting login with username: ${username}`);
+            console.log(`Attempting login with username: ${username}, password: [provided]`);
+            const requestBody = { username, password };
+            console.log("Login request body:", requestBody); // Debug request payload
             const response = await fetch(`${API_CONFIG.BASE_URL}/auth/login/username`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password }),
+                body: JSON.stringify(requestBody),
             });
+            console.log(`Login response status: ${response.status}`); // Debug status
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error("Login response error:", errorText); // Debug full error
@@ -53,11 +56,14 @@ export class LoginService {
     static async signup(username: string, email: string, password: string): Promise<{ token: string; player_id?: number } | null> {
         try {
             console.log(`Attempting signup with username: ${username}`);
+            const requestBody = { username, email, password };
+            console.log("Signup request body:", requestBody); // Debug request payload
             const response = await fetch(`${API_CONFIG.BASE_URL}/auth/signup`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, email, password }),
+                body: JSON.stringify(requestBody),
             });
+            console.log(`Signup response status: ${response.status}`); // Debug status
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error("Signup response error:", errorText); // Debug full error

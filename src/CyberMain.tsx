@@ -3,7 +3,7 @@
  * @file CyberMain.tsx
  * @description Main entry point for CyberTaxi, defining the UI/UX layout with BaseWindow and LoginForm.
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.2.11
+ * @version 0.2.13
  * @note Defines a three-row structure: MenuBar, MapArea, BottomMenu, with BaseWindow and LoginForm integration.
  */
 import React, { useState } from 'react';
@@ -53,7 +53,7 @@ const CyberMain = () => {
                 isLoggedIn={isLoggedIn}
                 onItemSelect={handleItemSelect}
             />
-            {showLogin && <LoginForm onClose={() => setShowLogin(false)} />}
+            {showLogin && <LoginForm onClose={() => setShowLogin(false)} id="login-window" title={showLogin ? "CyberTaxi Login" : "Register for CyberTaxi"} />}
             {showTestWindow && (
                 <BaseWindow
                     id="test-window"
