@@ -1,0 +1,54 @@
+@startuml CyberTaxi Backend
+!define RECTANGLE class
+skinparam monochrome true
+RECTANGLE Config {
+  + API_BASE_URL : string
+  + TILE_SERVER_URL : string
+  + CORS_ORIGINS : string
+}
+RECTANGLE AuthMiddleware {
+  + authenticateJWT(req: Object, res: Object, next: Function) : void
+}
+RECTANGLE AuthRoutes {
+  + signup(req: Object, res: Object) : void
+  + login(req: Object, res: Object) : void
+  + loginByUsername(req: Object, res: Object) : void
+  + resetPassword(req: Object, res: Object) : void
+}
+RECTANGLE HealthRoutes {
+  + health(req: Object, res: Object) : void
+  + systemHealth(req: Object, res: Object) : void
+}
+RECTANGLE PlayerRoutes {
+  + getPlayer(req: Object, res: Object) : void
+  + getBalance(req: Object, res: Object) : void
+  + getSlots(req: Object, res: Object) : void
+}
+RECTANGLE VehicleRoutes {
+  + purchaseVehicle(req: Object, res: Object) : void
+  + getPlayerVehicles(req: Object, res: Object) : void
+  + getOtherVehicles(req: Object, res: Object) : void
+}
+RECTANGLE GarageRoutes {
+  + getGarages(req: Object, res: Object) : void
+  + createGarage(req: Object, res: Object) : void
+}
+RECTANGLE TileRoutes {
+  + getFonts(req: Object, res: Object) : void
+  + getTiles(req: Object, res: Object) : void
+}
+RECTANGLE Database {
+  + pool : Object
+}
+AuthRoutes --> AuthMiddleware : uses
+PlayerRoutes --> AuthMiddleware : uses
+VehicleRoutes --> AuthMiddleware : uses
+GarageRoutes --> AuthMiddleware : uses
+AuthRoutes --> Database : uses
+HealthRoutes --> Database : uses
+PlayerRoutes --> Database : uses
+VehicleRoutes --> Database : uses
+GarageRoutes --> Database : uses
+TileRoutes --> Config : uses
+HealthRoutes --> Config : uses
+@enduml
