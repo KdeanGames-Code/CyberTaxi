@@ -3,8 +3,9 @@
  * @description Main Express application for CyberTaxi backend server
  * @author CyberTaxi Team
  * @version 0.1.0
+ * @note Initializes TileServer GL subprocess and mounts API routes with CORS and error handling.
+ * @see https://kdeangames.net/CyberTaxi/MockUp/Docs/GDD.html
  */
-
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
@@ -12,6 +13,7 @@ const app = express();
 const port = 3000;
 const { spawn } = require("child_process");
 const errorHandler = require("./utils/error-utils");
+const config = require("./config");
 
 // Initialize database connection
 require("./models/db");
@@ -43,7 +45,7 @@ console.log("Started TileServer GL on port 8080");
 app.use(express.json());
 app.use(
     cors({
-        origin: "http://localhost:5173",
+        origin: config.CORS_ORIGINS,
         methods: ["GET", "POST", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization"],
         credentials: false,
@@ -64,8 +66,9 @@ try {
     console.log("Auth route mounted at /api/auth");
     const playerRouter = require("./routes/player");
     app.use("/api", playerRouter);
-    const healthRouter = require("./routes/health");
+    const healthRouter = require("./routes/health/health");
     app.use("/api", healthRouter);
+    console.log("Health route mounted at /api");
     const vehiclesRouter = require("./routes/vehicles");
     app.use("/api", vehiclesRouter);
     const tilesRouter = require("./routes/tiles");
