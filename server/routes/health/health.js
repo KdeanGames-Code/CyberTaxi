@@ -1,8 +1,8 @@
 /**
  * @file server/routes/health/health.js
  * @description Health check endpoints for CyberTaxi to verify system components.
- * @author CyberTaxi Team
- * @version 0.2.2
+ * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
+ * @version 0.2.3
  * @note Provides endpoints to check database, web server, JWT configuration, and connection pool status. Responses are PWA-friendly for frontend integration with LoginService.ts.
  * @see https://kdeangames.net/CyberTaxi/MockUp/Docs/GDD.html
  */
@@ -52,7 +52,7 @@ router.get("/health", async (req, res) => {
         const poolStatus = {
             totalConnections: stats.find(row => row.Variable_name === 'Threads_connected')?.Value || 0,
             activeConnections: stats.find(row => row.Variable_name === 'Threads_running')?.Value || 0,
-            idleConnections: (stats.find(row => row.Variable_name === 'Threads_connected')?.Value || 0) - 
+            idleConnections: (stats.find(row => row.Variable_name === 'Threads_connected')?.Value || 0) -
                              (stats.find(row => row.Variable_name === 'Threads_running')?.Value || 0)
         };
         if (poolStatus.totalConnections === 0) {
@@ -64,7 +64,7 @@ router.get("/health", async (req, res) => {
         console.log("Health check passed:", healthDetails); // Success log
         res.status(200).json({ status: "OK", details: healthDetails });
     } catch (error) {
-        console.error("Health check failed:", error.message);
+        console.error("Health check failed:", err.message);
         res.status(500).json({
             status: "Error",
             message: "System health check failed",
@@ -126,7 +126,7 @@ router.get("/system-health", async (req, res) => {
         const poolStatus = {
             totalConnections: stats.find(row => row.Variable_name === 'Threads_connected')?.Value || 0,
             activeConnections: stats.find(row => row.Variable_name === 'Threads_running')?.Value || 0,
-            idleConnections: (stats.find(row => row.Variable_name === 'Threads_connected')?.Value || 0) - 
+            idleConnections: (stats.find(row => row.Variable_name === 'Threads_connected')?.Value || 0) -
                              (stats.find(row => row.Variable_name === 'Threads_running')?.Value || 0)
         };
         if (poolStatus.totalConnections === 0) {
@@ -138,7 +138,7 @@ router.get("/system-health", async (req, res) => {
         console.log("System health check passed:", healthDetails); // Success log
         res.status(200).json({ status: "OK", details: healthDetails });
     } catch (error) {
-        console.error("System health check failed:", error.message);
+        console.error("System health check failed:", err.message);
         res.status(500).json({
             status: "Error",
             message: "System health check failed",

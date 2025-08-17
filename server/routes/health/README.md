@@ -1,6 +1,7 @@
 Health Routes
-Purpose
-Provides system health checks for CyberTaxi, verifying database connectivity, JWT configuration, connection pool status, and vehicle count.
+Version: 0.2.3 Last Updated: August 17, 2025
+Overview
+Provides system health checks for CyberTaxi, verifying database connectivity, JWT configuration, connection pool status, and vehicle count to ensure backend reliability for the PWA frontend.
 Endpoints
 
 GET /api/health: Checks database connectivity, players table access, JWT secret, and connection pool status.
