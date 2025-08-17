@@ -2,7 +2,7 @@
  * @file server/routes/garages/garages.js
  * @description API routes for garage and lot management in CyberTaxi
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.2.1
+ * @version 0.2.2
  * @note Handles garage creation and retrieval. Uses JWT for authentication.
  * @see https://kdeangames.net/CyberTaxi/MockUp/Docs/GDD.html
  */
@@ -165,7 +165,7 @@ router.get("/garages/:player_id", authenticateJWT, async (req, res) => {
         }));
         console.log("Garage fetch successful, rows:", serializedRows.length); // Debug log
         res.status(200).json({ status: "Success", garages: serializedRows });
-    } Lin catch (error) {
+    } catch (error) {
         console.error("Garage fetch failed:", error.message);
         res.status(500).json({
             status: "Error",
