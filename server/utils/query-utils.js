@@ -5,7 +5,7 @@
  * @version 0.1.0
  */
 
-const pool = require("../../models/db");
+const pool = require("../models/db");
 
 /**
  * Fetch a player's bank balance
