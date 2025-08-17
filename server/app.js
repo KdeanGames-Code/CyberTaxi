@@ -1,8 +1,8 @@
 /**
  * @file app.js
  * @description Main Express application for CyberTaxi backend server
- * @author CyberTaxi Team
- * @version 0.1.0
+ * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
+ * @version 0.1.1
  * @note Initializes TileServer GL subprocess and mounts API routes with CORS and error handling.
  * @see https://kdeangames.net/CyberTaxi/MockUp/Docs/GDD.html
  */
