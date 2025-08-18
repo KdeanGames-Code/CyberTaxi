@@ -1,5 +1,5 @@
 CyberTaxi UI Windows
-Version: 0.2.1Last Updated: August 18, 2025
+Version: 0.2.2 Last Updated: August 18, 2025
 Overview
 This directory contains React components for window-based UI elements in the CyberTaxi frontend, providing modal dialogs and forms. Aligns with GDD v1.1 (July 24, 2025) for PWA compatibility and cyberpunk styling.
 Files

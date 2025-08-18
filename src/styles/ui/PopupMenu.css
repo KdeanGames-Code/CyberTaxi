@@ -3,23 +3,23 @@
  * @file PopupMenu.css
  * @description Stylesheet for the CyberTaxi TaxiMenu (top menu context menu) component.
  * @author Kevin-Dean Livingstone & CyberTaxi Team
- * @version 0.1.2
+ * @version 0.1.3
  * @note Defines a cyberpunk-themed dropdown menu tailored for TaxiMenu interactions, including sub-menu support.
- * @detail Moved from src/styles/PopupMenu.css to src/styles/ui/ for consistency with UI styles. Sub-menu styled to match root menu.
+ * @detail Sub-menu aligns with Settings item, menu items have 3D sunken look with rounded corners.
  */
 
 /* TaxiMenu Styles */
 .context-menu.taxi-menu {
     position: fixed;
-    background: #2f2f2f;
+    background: linear-gradient(to bottom, #2f2f2f, #1a1a1a); /* Gradient for 3D effect */
     border: 2px solid #e8b923;
     border-radius: 4px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5), 0 4px 8px rgba(0, 0, 0, 0.3); /* Inset for sunken look */
     font-family: "Orbitron", sans-serif;
     color: #d4a017;
     z-index: 3000;
     padding: 5px 0;
-    min-width: 120px; /* Ensure root menu fits content */
+    min-width: 120px;
 }
 
 /* Menu Item Styles */
@@ -27,21 +27,28 @@
     padding: 8px 15px;
     cursor: pointer;
     font-size: 12px;
+    border-left: 4px solid #e8b923;
+    border-right: 4px solid #e8b923;
+    border-radius: 4px; /* Rounded corners on left/right */
+    background: linear-gradient(to right, #2f2f2f, #1a1a1a); /* Subtle gradient */
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5); /* Sunken effect */
+    margin: 2px 0;
 }
 .menu-item:hover {
     background: #d4a017;
     color: #1a1a1a;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* Sub-Menu Styles */
 .sub-menu {
     position: absolute;
-    top: 0;
+    top: 40px; /* Align with Settings item (approx height of two menu items) */
     left: 100%;
-    background: #2f2f2f;
+    background: linear-gradient(to bottom, #2f2f2f, #1a1a1a);
     border: 2px solid #e8b923;
     border-radius: 4px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5), 0 4px 8px rgba(0, 0, 0, 0.3);
     font-family: "Orbitron", sans-serif;
     color: #d4a017;
     padding: 5px 0;
@@ -51,11 +58,18 @@
 .sub-menu-item {
     padding: 8px 15px;
     cursor: pointer;
-    font-size: 12px; /* Match root menu */
+    font-size: 12px;
+    border-left: 4px solid #e8b923;
+    border-right: 4px solid #e8b923;
+    border-radius: 4px;
+    background: linear-gradient(to right, #2f2f2f, #1a1a1a);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+    margin: 2px 0;
 }
 .sub-menu-item:hover {
     background: #d4a017;
     color: #1a1a1a;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* Responsive Adjustments */
@@ -66,13 +80,18 @@
     }
     .menu-item {
         padding: 6px 10px;
+        border-left: 3px solid #e8b923;
+        border-right: 3px solid #e8b923;
     }
     .sub-menu {
+        top: 30px; /* Adjust for smaller screens */
         left: 80%;
         min-width: 120px;
     }
     .sub-menu-item {
         padding: 6px 10px;
-        font-size: 10px; /* Match root menu */
+        font-size: 10px;
+        border-left: 3px solid #e8b923;
+        border-right: 3px solid #e8b923;
     }
 }
