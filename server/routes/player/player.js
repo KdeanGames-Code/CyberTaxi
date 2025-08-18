@@ -2,8 +2,8 @@
  * @file server/routes/player/player.js
  * @description API routes for player management in CyberTaxi
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.4.1
- * @note Handles player data retrieval and balance/slot queries. Uses JWT for authentication.
+ * @version 0.4.2
+ * @note Handles player data retrieval and balance/slot/score queries. Uses JWT for authentication.
  * @see https://kdeangames.net/CyberTaxi/MockUp/Docs/GDD.html
  */
 const express = require("express");
@@ -94,6 +94,47 @@ router.get("/player/:username([a-zA-Z0-9_-]+)/balance", authenticateJWT, async (
         res.status(500).json({
             status: "Error",
             message: "Failed to fetch balance",
+            details: error.message,
+        });
+    }
+});
+
+/**
+ * Fetch a player's score by username
+ * @route GET /api/player/:username/score
+ * @param {string} req.params.username - The player's username
+ * @returns {Object} JSON response with score or error
+ */
+router.get("/player/:username([a-zA-Z0-9_-]+)/score", authenticateJWT, async (req, res) => {
+    try {
+        const { username } = req.params;
+        console.log(`Fetching score for username: ${username}`); // Debug log
+        const [playerRows] = await pool.execute(
+            "SELECT player_id, score FROM players WHERE username = ?",
+            [username]
+        );
+        if (playerRows.length === 0) {
+            console.log(`Player not found for username: ${username}`);
+            return res
+                .status(404)
+                .json({ status: "Error", message: "Player not found" });
+        }
+        const player_id = playerRows[0].player_id;
+        if (req.user.player_id !== player_id) {
+            console.log(`Unauthorized access for username: ${username}, JWT player_id: ${req.user.player_id}`);
+            return res.status(403).json({
+                status: "Error",
+                message: "Unauthorized access to player data",
+            });
+        }
+        const score = parseFloat(playerRows[0].score);
+        console.log(`Score fetch successful for username: ${username}, score: ${score}`);
+        res.status(200).json({ status: "Success", score });
+    } catch (error) {
+        console.error(`Score fetch failed for username: ${username}:`, error.message);
+        res.status(500).json({
+            status: "Error",
+            message: "Failed to fetch score",
             details: error.message,
         });
     }

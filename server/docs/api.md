@@ -1,5 +1,5 @@
 CyberTaxi Backend API Documentation
-Version: 0.2.3Last Updated: August 18, 2025
+Version: 0.2.4Last Updated: August 18, 2025
 Overview
 This document outlines the RESTful API endpoints for the CyberTaxi backend, built with Node.js and Express. All endpoints are designed to be PWA-friendly with lightweight JSON responses and support offline sync via service workers. Authentication uses JWT tokens.
 Base URL
@@ -224,6 +224,38 @@ Responses:
 "details": "string"
 }
 
+GET /api/player/:username/score
+Description: Fetch a player’s score by username, requiring JWT authentication.
+
+Method: GET
+Headers:
+Authorization: Bearer <JWT>
+
+Parameters:
+username: Player username (string, required)
+
+Responses:
+200 OK:{
+"status": "Success",
+"score": "number"
+}
+
+403 Forbidden:{
+"status": "Error",
+"message": "Unauthorized access to player data"
+}
+
+404 Not Found:{
+"status": "Error",
+"message": "Player not found"
+}
+
+500 Internal Server Error:{
+"status": "Error",
+"message": "Failed to fetch score",
+"details": "string"
+}
+
 GET /api/player/:username/slots
 Description: Fetch a player’s available parking slots by username, requiring JWT authentication.
 
@@ -268,15 +300,15 @@ cors: CORS middleware for PWA compatibility.
 
 Gotchas
 
-Username-Based Routes: Balance and slots endpoints (/api/player/:username/balance, /api/player/:username/slots) use username (VARCHAR(50), UNIQUE) to map to player_id (BIGINT UNSIGNED, UNIQUE) for JWT validation. Use username from /api/auth/login/username response.
+Username-Based Routes: Balance, score, and slots endpoints (/api/player/:username/balance, /api/player/:username/score, /api/player/:username/slots) use username (VARCHAR(50), UNIQUE) to map to player_id (BIGINT UNSIGNED, UNIQUE) for JWT validation. Use username from /api/auth/login/username response.
 Player ID Route: Only /api/player/:player_id uses numeric player_id (BIGINT UNSIGNED). Ensure player_id matches JWT player_id.
 Schema Nuances: garages and vehicles tables reference players.id (BIGINT UNSIGNED, PRIMARY KEY), not players.player_id. Username routes handle this mapping internally.
 JWT_SECRET: Ensure JWT_SECRET environment variable is set.
-Database: players table must exist with required columns (id, player_id, username, etc.).
+Database: players table must exist with required columns (id, player_id, username, score, etc.).
 PWA: Endpoints return lightweight JSON for offline sync via service workers.
 Error Logging: Errors are logged with detailed messages (e.g., Player not found for username: <username>). Check server logs for debugging.
 
 Team Notes
 
-Frontend consumes routes via src/services/LoginService.ts, src/services/PlayerService.ts (pending). Update frontend to use /api/player/:username/balance and /api/player/:username/slots instead of :player_id routes.
+Frontend consumes routes via src/services/LoginService.ts, src/services/PlayerService.ts (pending). Update frontend to use /api/player/:username/balance, /api/player/:username/score, and /api/player/:username/slots instead of :player_id routes.
 Align with Code Complete Chapters 7 (defensive programming, reduce redundancy), 10 (collaboration), 20 (testing).
