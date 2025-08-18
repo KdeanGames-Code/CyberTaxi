@@ -2,10 +2,10 @@
 /**
  * @file LoginForm.css
  * @description Stylesheet for the CyberTaxi LoginForm component, overriding baseWindow.css where needed.
- * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.2.3
+ * @author Kevin-Dean Livingstone & CyberTaxi Team
+ * @version 0.2.6
  * @note Minimal overrides for login-specific cyberpunk styling, per GDD v1.1.
- * @detail Restores essential styles from original windows.css and LoginForm.css for form layout and buttons.
+ * @detail Form reduced to ~100px width, buttons styled with sunken effect and stacked layout.
  */
 
 /* Form container styling */
@@ -14,6 +14,7 @@
     flex-direction: column;
     gap: 10px;
     padding: 10px;
+    width: 200px; /* Reduced to ~2/3 size */
 }
 
 /* Form group styling for consistent spacing and layout */
@@ -23,12 +24,10 @@
     position: relative; /* For error-fallback positioning */
     margin-bottom: 10px;
 }
-
 .form-group label {
     font-size: 12px;
     color: #d4a017;
 }
-
 .form-group input {
     padding: 5px;
     border: 1px solid #e8b923;
@@ -38,14 +37,20 @@
     font-family: "Orbitron", sans-serif;
     width: 100%;
 }
-
 .form-group input:focus {
     outline: none;
     box-shadow: 0 0 5px rgba(212, 160, 23, 0.7);
 }
-
 .login-form.submitted input:invalid {
     border-color: #ff4d4f; /* Neon red for invalid inputs after submission */
+}
+
+/* Form actions container for stacked buttons */
+.form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
 }
 
 /* Submit button styling */
@@ -57,13 +62,16 @@
     color: #1a1a1a;
     font-family: "Orbitron", sans-serif;
     font-weight: bold;
+    font-size: 12px;
     cursor: pointer;
+    width: 100%;
+    text-align: center;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.2); /* Sunken effect */
 }
-
 .submit-btn:hover {
     background: #e8b923;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
 }
-
 .submit-btn:disabled {
     background: #4a4a4a;
     cursor: not-allowed;
@@ -72,18 +80,21 @@
 /* Toggle button styling */
 .toggle-btn {
     padding: 8px;
-    background: transparent;
-    border: 1px solid #d4a017;
+    background: #d4a017;
+    border: none;
     border-radius: 4px;
-    color: #d4a017;
+    color: #1a1a1a;
     font-family: "Orbitron", sans-serif;
+    font-weight: bold;
     font-size: 12px;
     cursor: pointer;
+    width: 100%;
+    text-align: center;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.2); /* Match submit-btn */
 }
-
 .toggle-btn:hover {
-    background: #d4a017;
-    color: #1a1a1a;
+    background: #e8b923;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 /* Error message styling */
@@ -118,11 +129,9 @@
     max-width: 120px;
     text-align: left;
 }
-
 .error-fallback:not(:empty) {
     display: block !important; /* Show when validationMessages exists */
 }
-
 .error-fallback::before {
     content: "";
     position: absolute;
@@ -144,28 +153,23 @@ input:invalid::-webkit-validation-bubble-arrow {
     .login-form {
         padding: 10px;
         gap: 10px;
+        width: 80px; /* Adjust for smaller screens */
     }
-
-    .toggle-btn {
-        padding: 6px;
+    .submit-btn, .toggle-btn {
         font-size: 10px;
     }
-
     .form-group input {
-        min-width: 150px;
+        min-width: 80px; /* Match form width */
     }
-
     .error-message.form-error {
         font-size: 10px;
         padding: 3px 6px;
     }
-
     .error-fallback {
         font-size: 10px;
         padding: 3px 6px;
         max-width: 100px;
     }
-
     .error-fallback::before {
         left: 8px;
         border-left: 5px solid transparent;

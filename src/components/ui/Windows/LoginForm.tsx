@@ -228,6 +228,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login", o
             isDraggable={true}
             style={{ zIndex: 1000 }}
             initialPosition={{ top: 200, left: 200 }}
+            defaultWidth={250}
         >
             <form
                 className={`login-form ${isSubmitted ? "submitted" : ""}`}
