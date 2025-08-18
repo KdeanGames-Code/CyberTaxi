@@ -8,9 +8,9 @@
  */
 const express = require("express");
 const router = express.Router();
-const pool = require("../../../models/db");
-const { authenticateJWT } = require("../../../middleware/authMiddleware");
-const { getUserBalance } = require("../../../utils/query-utils");
+const pool = require("../../models/db");
+const { authenticateJWT } = require("../../middleware/authMiddleware");
+const { getUserBalance } = require("../../utils/query-utils");
 
 /**
  * Fetch all vehicles except those of the authenticated player

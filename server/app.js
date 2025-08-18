@@ -2,7 +2,7 @@
  * @file app.js
  * @description Main Express application for CyberTaxi backend server
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.1.3
+ * @version 0.1.12
  * @note Initializes TileServer GL subprocess and mounts API routes with CORS and error handling.
  * @see https://kdeangames.net/CyberTaxi/MockUp/Docs/GDD.html
  */
@@ -61,22 +61,11 @@ app.use((req, res, next) => {
  * @type {express.Router}
  */
 try {
-    const authRouter = require("./routes/auth/authRoutes");
-    app.use("/api/auth", authRouter);
+    app.use("/api/auth", require("./routes/auth/authRoutes"));
     console.log("Auth route mounted at /api/auth");
-    const playerRouter = require("./routes/player/player");
-    app.use("/api", playerRouter);
-    const healthRouter = require("./routes/health/health");
-    app.use("/api", healthRouter);
+    app.use("/api", require("./routes/health/health"));
     console.log("Health route mounted at /api");
-    const vehiclesRouter = require("./routes/vehicles/vehicles");
-    app.use("/api", vehiclesRouter);
-    const tilesRouter = require("./routes/tiles/tiles");
-    app.use("/api", tilesRouter);
-    const garagesRouter = require("./routes/garages/garages");
-    app.use("/api", garagesRouter);
-    const mainRouter = require("./routes/main/main");
-    app.use("/api", mainRouter);
+    app.use("/api", require("./routes/main/main"));
     console.log("Main route mounted at /api");
     console.log("API routes mounted successfully");
 } catch (error) {

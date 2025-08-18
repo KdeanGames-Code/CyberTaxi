@@ -9,8 +9,8 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
-const pool = require("../../../models/db");
-const { authenticateJWT, generateToken } = require("../../../middleware/authMiddleware");
+const pool = require("../../models/db");
+const { authenticateJWT, generateToken } = require("../../middleware/authMiddleware");
 
 /**
  * Register a new player
