@@ -3,11 +3,10 @@
  * @file LoginForm.tsx
  * @description Login/registration form component for CyberTaxi onboarding, focusing on username-based login.
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.2.29
+ * @version 0.2.37
  * @note Renders a non-resizable, draggable form with toggleable login/register modes, including API calls.
- * @detail Handles user signup via POST /api/auth/signup and login via POST /api/auth/login/username,
- *         stores JWT and form data in localStorage. Expected credentials: username 'Kevin-Dean' with a password
- *         set via signup (default test not confirmed); use signup to set a known password (e.g., 'newpass123').
+ * @detail Handles user signup via POST /api/auth/signup and login via POST /api/auth/login/username.
+ *         Uses 'newpass123' for testing. Previous 500 errors resolved by starting server and DB.
  */
 import React, { useState, useEffect, useRef } from "react";
 import { BaseWindow } from "./baseWindow";
@@ -22,25 +21,27 @@ import "../../../styles/ui/LoginForm.css"; // Unique styles only
  * @extends {Omit<BaseWindowProps, "children">}
  * @property {() => void} onClose - Callback to close the form window.
  * @property {"login" | "register"} [mode] - Optional initial mode, defaults to 'login'.
+ * @property {() => void} [onLoginSuccess] - Callback for successful login.
  */
 interface LoginFormProps extends Omit<BaseWindowProps, "children"> {
     onClose: () => void;
     mode?: "login" | "register";
+    onLoginSuccess?: () => void;
 }
 
 /**
- * Renders the login/registration form with validation and API integration, focusing on username login.
- * @param {LoginFormProps} props - Component props including onClose and optional mode.
+ * Renders the login/registration form with validation and API integration.
+ * @param {LoginFormProps} props - Component props including onClose, mode, and onLoginSuccess.
  * @returns {JSX.Element} The rendered form window.
  */
-export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login" }) => {
+export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login", onLoginSuccess }) => {
     const [formMode, setFormMode] = useState<"login" | "register">(mode);
     const [formData, setFormData] = useState({
         username: localStorage.getItem("username") || "",
         email: localStorage.getItem("registerData")
             ? JSON.parse(localStorage.getItem("registerData")!).email
             : "test@example.com",
-        password: "test123",
+        password: "newpass123", // Consistent password for testing
     });
     const [formError, setFormError] = useState<string>("");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -64,6 +65,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login" })
             setFormData((prev) => ({
                 ...prev,
                 username: localStorage.getItem("username") || "",
+                password: "newpass123",
             }));
         } else if (savedData) {
             try {
@@ -73,6 +75,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login" })
                     ...prev,
                     username: parsedData.username || "",
                     email: parsedData.email || "test@example.com",
+                    password: "newpass123",
                 }));
             } catch (error) {
                 console.error("Failed to parse registerData:", error);
@@ -114,7 +117,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login" })
             message = `Please enter a ${name}`;
         } else if (name === "email") {
             const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
-            if (!emailRegex.test(input.value)) {
+            if (!input.value.match(emailRegex)) {
                 message = "Please enter a valid email (e.g., user@example.com)";
             }
         }
@@ -145,7 +148,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login" })
                     message = `Please enter a ${name}`;
                 } else if (name === "email") {
                     const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
-                    if (!emailRegex.test(ref.current.value)) {
+                    if (!ref.current.value.match(emailRegex)) {
                         message = "Please enter a valid email (e.g., user@example.com)";
                     }
                 }
@@ -176,6 +179,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login" })
                     email: formData.email,
                 }));
                 console.log(`${formMode === "login" ? "Login" : "Signup"} successful, token stored:`, result.token);
+                if (formMode === "login" && onLoginSuccess) {
+                    onLoginSuccess();
+                }
                 onClose();
             } else {
                 setFormError("Authentication failed");
@@ -201,7 +207,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login" })
             email: localStorage.getItem("registerData")
                 ? JSON.parse(localStorage.getItem("registerData")!).email
                 : "test@example.com",
-            password: "test123",
+            password: "newpass123",
         });
         [usernameRef, emailRef, passwordRef].forEach((ref) => {
             ref.current?.setCustomValidity("");
@@ -285,6 +291,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login" })
                             ref={emailRef}
                             aria-required="true"
                             autoComplete="email"
+                            pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}"
                         />
                         {validationMessages.email && (
                             <span className="error-fallback" role="alert" aria-live="polite">

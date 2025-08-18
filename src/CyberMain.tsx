@@ -3,11 +3,13 @@
  * @file CyberMain.tsx
  * @description Main entry point for CyberTaxi, defining the UI/UX layout with BaseWindow and LoginForm.
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.2.13
+ * @version 0.2.17
  * @note Defines a three-row structure: MenuBar, MapArea, BottomMenu, with BaseWindow and LoginForm integration.
+ * @detail Persists login state via localStorage and ensures logout updates TaxiMenu in one click with error handling.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
+import { CyberError } from './utils/errorhandling/CyberError';
 import './CyberGlobal.css'; // Base layout stylesheet
 import MenuBar from './components/ui/controls/MenuBar';
 import { TaxiMenu } from './components/ui/controls/TaxiMenu';
@@ -19,9 +21,28 @@ const BottomMenu = () => <div className="bottom-menu">Bottom Menu Placeholder</d
 const CyberMain = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [position, setPosition] = useState({ x: 0, y: 0 });
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("jwt_token"));
     const [showLogin, setShowLogin] = useState(false);
     const [showTestWindow, setShowTestWindow] = useState(false);
+
+    // Sync isLoggedIn with localStorage on mount and storage changes
+    useEffect(() => {
+        const syncLoginState = () => {
+            try {
+                const token = localStorage.getItem("jwt_token");
+                console.log("CyberMain: Syncing isLoggedIn, token:", !!token);
+                setIsLoggedIn(!!token);
+            } catch (error) {
+                const cyberError = new CyberError("Failed to sync login state", 500);
+                cyberError.log();
+            }
+        };
+        syncLoginState();
+        window.addEventListener("storage", syncLoginState);
+        return () => {
+            window.removeEventListener("storage", syncLoginState);
+        };
+    }, []);
 
     const handleTaxiClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -30,15 +51,36 @@ const CyberMain = () => {
     };
 
     const handleItemSelect = (action: string) => {
-        console.log(`Action selected: ${action}`);
-        if (action === 'logout') setIsLoggedIn(false);
-        else if (action === 'login') {
-            setIsLoggedIn(true);
-            setShowLogin(true);
-        } else if (action === 'test') {
-            setShowTestWindow(true);
+        try {
+            console.log(`Action selected: ${action}`);
+            if (action === 'logout') {
+                localStorage.removeItem("jwt_token");
+                localStorage.removeItem("player_id");
+                localStorage.removeItem("username");
+                localStorage.removeItem("registerData");
+                setIsLoggedIn(false);
+                setShowLogin(false);
+                console.log("CyberMain: Logged out, cleared localStorage");
+            } else if (action === 'login') {
+                setShowLogin(true);
+            } else if (action === 'test') {
+                setShowTestWindow(true);
+            }
+        } catch (error) {
+            const cyberError = new CyberError(`Failed to handle action: ${action}`, 500);
+            cyberError.log();
         }
         setIsOpen(false);
+    };
+
+    const handleLoginSuccess = () => {
+        try {
+            setIsLoggedIn(true);
+            console.log("CyberMain: Login successful, isLoggedIn set to true");
+        } catch (error) {
+            const cyberError = new CyberError("Failed to handle login success", 500);
+            cyberError.log();
+        }
     };
 
     return (
@@ -53,7 +95,14 @@ const CyberMain = () => {
                 isLoggedIn={isLoggedIn}
                 onItemSelect={handleItemSelect}
             />
-            {showLogin && <LoginForm onClose={() => setShowLogin(false)} id="login-window" title={showLogin ? "CyberTaxi Login" : "Register for CyberTaxi"} />}
+            {showLogin && (
+                <LoginForm
+                    onClose={() => setShowLogin(false)}
+                    onLoginSuccess={handleLoginSuccess}
+                    id="login-window"
+                    title={showLogin ? "CyberTaxi Login" : "Register for CyberTaxi"}
+                />
+            )}
             {showTestWindow && (
                 <BaseWindow
                     id="test-window"

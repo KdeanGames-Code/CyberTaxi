@@ -1,0 +1,78 @@
+/* src/styles/ui/PopupMenu.css */
+/**
+ * @file PopupMenu.css
+ * @description Stylesheet for the CyberTaxi TaxiMenu (top menu context menu) component.
+ * @author Kevin-Dean Livingstone & CyberTaxi Team
+ * @version 0.1.2
+ * @note Defines a cyberpunk-themed dropdown menu tailored for TaxiMenu interactions, including sub-menu support.
+ * @detail Moved from src/styles/PopupMenu.css to src/styles/ui/ for consistency with UI styles. Sub-menu styled to match root menu.
+ */
+
+/* TaxiMenu Styles */
+.context-menu.taxi-menu {
+    position: fixed;
+    background: #2f2f2f;
+    border: 2px solid #e8b923;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    font-family: "Orbitron", sans-serif;
+    color: #d4a017;
+    z-index: 3000;
+    padding: 5px 0;
+    min-width: 120px; /* Ensure root menu fits content */
+}
+
+/* Menu Item Styles */
+.menu-item {
+    padding: 8px 15px;
+    cursor: pointer;
+    font-size: 12px;
+}
+.menu-item:hover {
+    background: #d4a017;
+    color: #1a1a1a;
+}
+
+/* Sub-Menu Styles */
+.sub-menu {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    background: #2f2f2f;
+    border: 2px solid #e8b923;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    font-family: "Orbitron", sans-serif;
+    color: #d4a017;
+    padding: 5px 0;
+    z-index: 3100;
+    min-width: 150px; /* Wider for multi-line Reset Password */
+}
+.sub-menu-item {
+    padding: 8px 15px;
+    cursor: pointer;
+    font-size: 12px; /* Match root menu */
+}
+.sub-menu-item:hover {
+    background: #d4a017;
+    color: #1a1a1a;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .context-menu.taxi-menu {
+        font-size: 10px;
+        min-width: 100px;
+    }
+    .menu-item {
+        padding: 6px 10px;
+    }
+    .sub-menu {
+        left: 80%;
+        min-width: 120px;
+    }
+    .sub-menu-item {
+        padding: 6px 10px;
+        font-size: 10px; /* Match root menu */
+    }
+}
