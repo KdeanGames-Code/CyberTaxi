@@ -2,7 +2,7 @@
  * @file app.js
  * @description Main Express application for CyberTaxi backend server
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.1.12
+ * @version 0.1.14
  * @note Initializes TileServer GL subprocess and mounts API routes with CORS and error handling.
  * @see https://kdeangames.net/CyberTaxi/MockUp/Docs/GDD.html
  */
@@ -63,6 +63,8 @@ app.use((req, res, next) => {
 try {
     app.use("/api/auth", require("./routes/auth/authRoutes"));
     console.log("Auth route mounted at /api/auth");
+    app.use("/api", require("./routes/player/player"));
+    console.log("Player route mounted at /api");
     app.use("/api", require("./routes/health/health"));
     console.log("Health route mounted at /api");
     app.use("/api", require("./routes/main/main"));

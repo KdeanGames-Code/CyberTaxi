@@ -1,5 +1,5 @@
 CyberTaxi Backend API Documentation
-Version: 0.2.0 Last Updated: August 18, 2025
+Version: 0.2.1Last Updated: August 18, 2025
 Overview
 This document outlines the RESTful API endpoints for the CyberTaxi backend, built with Node.js and Express. All endpoints are designed to be PWA-friendly with lightweight JSON responses and support offline sync via service workers. Authentication uses JWT tokens.
 Base URL
@@ -149,6 +149,176 @@ Responses:
 "details": "string"
 }
 
+Player Routes
+GET /api/player/:player_id
+Description: Fetch a player’s details by player_id, requiring JWT authentication.
+
+Method: GET
+Headers:
+Authorization: Bearer <JWT>
+
+Parameters:
+player_id: Player ID (number, required)
+
+Responses:
+200 OK:{
+"status": "Success",
+"player": {
+"username": "string",
+"email": "string",
+"bank_balance": "number",
+"score": "number"
+}
+}
+
+403 Forbidden:{
+"status": "Error",
+"message": "Unauthorized access to player data"
+}
+
+404 Not Found:{
+"status": "Error",
+"message": "Player not found"
+}
+
+500 Internal Server Error:{
+"status": "Error",
+"message": "Failed to fetch player details",
+"details": "string"
+}
+
+GET /api/player/:player_id/balance
+Description: Fetch a player’s bank balance by player_id, requiring JWT authentication.
+
+Method: GET
+Headers:
+Authorization: Bearer <JWT>
+
+Parameters:
+player_id: Player ID (number, required)
+
+Responses:
+200 OK:{
+"status": "Success",
+"bank_balance": "number"
+}
+
+403 Forbidden:{
+"status": "Error",
+"message": "Unauthorized access to player data"
+}
+
+404 Not Found:{
+"status": "Error",
+"message": "Player not found"
+}
+
+500 Internal Server Error:{
+"status": "Error",
+"message": "Failed to fetch balance",
+"details": "string"
+}
+
+GET /api/player/:username/balance
+Description: Fetch a player’s bank balance by username, requiring JWT authentication.
+
+Method: GET
+Headers:
+Authorization: Bearer <JWT>
+
+Parameters:
+username: Player username (string, required)
+
+Responses:
+200 OK:{
+"status": "Success",
+"bank_balance": "number"
+}
+
+403 Forbidden:{
+"status": "Error",
+"message": "Unauthorized access to player data"
+}
+
+404 Not Found:{
+"status": "Error",
+"message": "Player not found"
+}
+
+500 Internal Server Error:{
+"status": "Error",
+"message": "Failed to fetch balance",
+"details": "string"
+}
+
+GET /api/player/:player_id/slots
+Description: Fetch a player’s available parking slots by player_id, requiring JWT authentication.
+
+Method: GET
+Headers:
+Authorization: Bearer <JWT>
+
+Parameters:
+player_id: Player ID (number, required)
+
+Responses:
+200 OK:{
+"status": "Success",
+"total_slots": "number",
+"used_slots": "number",
+"available_slots": "number"
+}
+
+403 Forbidden:{
+"status": "Error",
+"message": "Unauthorized access to player data"
+}
+
+404 Not Found:{
+"status": "Error",
+"message": "Player not found"
+}
+
+500 Internal Server Error:{
+"status": "Error",
+"message": "Failed to fetch slots",
+"details": "string"
+}
+
+GET /api/player/:username/slots
+Description: Fetch a player’s available parking slots by username, requiring JWT authentication.
+
+Method: GET
+Headers:
+Authorization: Bearer <JWT>
+
+Parameters:
+username: Player username (string, required)
+
+Responses:
+200 OK:{
+"status": "Success",
+"total_slots": "number",
+"used_slots": "number",
+"available_slots": "number"
+}
+
+403 Forbidden:{
+"status": "Error",
+"message": "Unauthorized access to player data"
+}
+
+404 Not Found:{
+"status": "Error",
+"message": "Player not found"
+}
+
+500 Internal Server Error:{
+"status": "Error",
+"message": "Failed to fetch slots",
+"details": "string"
+}
+
 Dependencies
 
 express: Routing framework.
@@ -166,5 +336,5 @@ Use GET /api/health to verify server status before critical requests.
 
 Team Notes
 
-Frontend consumes these endpoints via src/services/LoginService.ts.
+Frontend consumes routes via src/services/LoginService.ts, src/services/PlayerService.ts (pending).
 Align with Code Complete Chapters 7 (defensive programming), 10 (collaboration), 20 (testing).
