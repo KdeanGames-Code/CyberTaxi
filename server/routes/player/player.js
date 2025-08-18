@@ -2,7 +2,7 @@
  * @file server/routes/player/player.js
  * @description API routes for player management in CyberTaxi
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.4.0
+ * @version 0.4.1
  * @note Handles player data retrieval and balance/slot queries. Uses JWT for authentication.
  * @see https://kdeangames.net/CyberTaxi/MockUp/Docs/GDD.html
  */
@@ -46,7 +46,7 @@ router.get("/player/:player_id(\\d+)", authenticateJWT, async (req, res) => {
             bank_balance: parseFloat(rows[0].bank_balance),
             score: parseFloat(rows[0].score),
         };
-        console.log(`Player details fetched successfully for player_id: ${player_id}`); // Success log
+        console.log(`Player details fetched successfully for player_id: ${player_id}`);
         res.status(200).json({ status: "Success", player });
     } catch (error) {
         console.error(`Player fetch failed for player_id: ${player_id}:`, error.message);
@@ -87,7 +87,7 @@ router.get("/player/:username([a-zA-Z0-9_-]+)/balance", authenticateJWT, async (
             });
         }
         const balance = await getUserBalance(player_id);
-        console.log(`Balance fetch successful for username: ${username}, balance: ${balance}`); // Success log
+        console.log(`Balance fetch successful for username: ${username}, balance: ${balance}`);
         res.status(200).json({ status: "Success", bank_balance: balance });
     } catch (error) {
         console.error(`Balance fetch failed for username: ${username}:`, error.message);
@@ -132,18 +132,18 @@ router.get("/player/:username([a-zA-Z0-9_-]+)/slots", authenticateJWT, async (re
             "SELECT SUM(capacity) AS total_slots FROM garages WHERE player_id = ?",
             [playerTableId]
         );
-        console.log(`Garage query result for username: ${username}: ${JSON.stringify(garageRows)}`); // Debug log
+        console.log(`Garage query result for username: ${username}: ${JSON.stringify(garageRows)}`);
         const total_slots = parseInt(garageRows[0].total_slots) || 0;
         const [vehicleRows] = await pool.execute(
             "SELECT COUNT(*) AS used_slots FROM vehicles WHERE player_id = ?",
             [playerTableId]
         );
-        console.log(`Vehicle query result for username: ${username}: ${JSON.stringify(vehicleRows)}`); // Debug log
+        console.log(`Vehicle query result for username: ${username}: ${JSON.stringify(vehicleRows)}`);
         const used_slots = parseInt(vehicleRows[0].used_slots) || 0;
         const available_slots = total_slots - used_slots;
         console.log(
             `Slots fetch successful for username: ${username}: total_slots=${total_slots}, used_slots=${used_slots}, available_slots=${available_slots}`
-        ); // Success log
+        );
         res.status(200).json({
             status: "Success",
             total_slots,

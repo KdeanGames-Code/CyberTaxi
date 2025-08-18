@@ -1,5 +1,5 @@
 CyberTaxi Backend API Documentation
-Version: 0.2.1Last Updated: August 18, 2025
+Version: 0.2.3Last Updated: August 18, 2025
 Overview
 This document outlines the RESTful API endpoints for the CyberTaxi backend, built with Node.js and Express. All endpoints are designed to be PWA-friendly with lightweight JSON responses and support offline sync via service workers. Authentication uses JWT tokens.
 Base URL
@@ -171,6 +171,11 @@ Responses:
 }
 }
 
+400 Bad Request:{
+"status": "Error",
+"message": "Invalid player_id format"
+}
+
 403 Forbidden:{
 "status": "Error",
 "message": "Unauthorized access to player data"
@@ -184,38 +189,6 @@ Responses:
 500 Internal Server Error:{
 "status": "Error",
 "message": "Failed to fetch player details",
-"details": "string"
-}
-
-GET /api/player/:player_id/balance
-Description: Fetch a player’s bank balance by player_id, requiring JWT authentication.
-
-Method: GET
-Headers:
-Authorization: Bearer <JWT>
-
-Parameters:
-player_id: Player ID (number, required)
-
-Responses:
-200 OK:{
-"status": "Success",
-"bank_balance": "number"
-}
-
-403 Forbidden:{
-"status": "Error",
-"message": "Unauthorized access to player data"
-}
-
-404 Not Found:{
-"status": "Error",
-"message": "Player not found"
-}
-
-500 Internal Server Error:{
-"status": "Error",
-"message": "Failed to fetch balance",
 "details": "string"
 }
 
@@ -248,40 +221,6 @@ Responses:
 500 Internal Server Error:{
 "status": "Error",
 "message": "Failed to fetch balance",
-"details": "string"
-}
-
-GET /api/player/:player_id/slots
-Description: Fetch a player’s available parking slots by player_id, requiring JWT authentication.
-
-Method: GET
-Headers:
-Authorization: Bearer <JWT>
-
-Parameters:
-player_id: Player ID (number, required)
-
-Responses:
-200 OK:{
-"status": "Success",
-"total_slots": "number",
-"used_slots": "number",
-"available_slots": "number"
-}
-
-403 Forbidden:{
-"status": "Error",
-"message": "Unauthorized access to player data"
-}
-
-404 Not Found:{
-"status": "Error",
-"message": "Player not found"
-}
-
-500 Internal Server Error:{
-"status": "Error",
-"message": "Failed to fetch slots",
 "details": "string"
 }
 
@@ -329,12 +268,15 @@ cors: CORS middleware for PWA compatibility.
 
 Gotchas
 
-Ensure JWT_SECRET environment variable is set.
-Database players table must exist with required columns.
-All endpoints return JSON responses optimized for PWA offline sync.
-Use GET /api/health to verify server status before critical requests.
+Username-Based Routes: Balance and slots endpoints (/api/player/:username/balance, /api/player/:username/slots) use username (VARCHAR(50), UNIQUE) to map to player_id (BIGINT UNSIGNED, UNIQUE) for JWT validation. Use username from /api/auth/login/username response.
+Player ID Route: Only /api/player/:player_id uses numeric player_id (BIGINT UNSIGNED). Ensure player_id matches JWT player_id.
+Schema Nuances: garages and vehicles tables reference players.id (BIGINT UNSIGNED, PRIMARY KEY), not players.player_id. Username routes handle this mapping internally.
+JWT_SECRET: Ensure JWT_SECRET environment variable is set.
+Database: players table must exist with required columns (id, player_id, username, etc.).
+PWA: Endpoints return lightweight JSON for offline sync via service workers.
+Error Logging: Errors are logged with detailed messages (e.g., Player not found for username: <username>). Check server logs for debugging.
 
 Team Notes
 
-Frontend consumes routes via src/services/LoginService.ts, src/services/PlayerService.ts (pending).
-Align with Code Complete Chapters 7 (defensive programming), 10 (collaboration), 20 (testing).
+Frontend consumes routes via src/services/LoginService.ts, src/services/PlayerService.ts (pending). Update frontend to use /api/player/:username/balance and /api/player/:username/slots instead of :player_id routes.
+Align with Code Complete Chapters 7 (defensive programming, reduce redundancy), 10 (collaboration), 20 (testing).
