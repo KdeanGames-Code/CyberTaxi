@@ -1,11 +1,11 @@
 CyberTaxi UI Windows
-Version: 0.2.25Last Updated: August 19, 2025
+Version: 0.2.27 Last Updated: August 19, 2025
 Overview
 This directory contains React components for window-based UI elements in the CyberTaxi frontend, providing modal dialogs and forms. Aligns with GDD v1.1 (July 24, 2025) for PWA compatibility and cyberpunk styling.
 Files
 
 baseWindow.tsx (@version 0.1.6): Base component for draggable/resizable windows, used by other window components.
-LoginForm.tsx (@version 0.2.39): Form for login, registration, and password reset, interacting with LoginService for API calls. Buttons styled with stacked text and width set to 200px with dynamic height (270px login, 330px register/reset).
+LoginForm.tsx (@version 0.2.40): Form for login, registration, and password reset, interacting with LoginService for API calls. Buttons styled with stacked text and width set to 250px with dynamic height (270px login, 330px register/reset).
 AboutWindow.tsx (@version 0.2.6): About window displaying game credits, rendered via AboutPortal, triggered by MenuBar help button, using BaseWindow.
 AboutPortal.tsx (@version 0.3.11): Portal for rendering AboutWindow below top menu, toggled globally via MenuBar.
 
@@ -15,7 +15,7 @@ react: For component rendering and state management.
 react-dom: For portal rendering in AboutPortal.
 ../../services/LoginService.ts: For authentication API calls in LoginForm.
 ../../styles/ui/baseWindow.css: Styles for baseWindow.
-../../styles/ui/LoginForm.css: Styles for LoginForm with stacked button layout and dynamic sizing (200px width, 270px login, 330px register/reset).
+../../styles/ui/LoginForm.css: Styles for LoginForm with stacked button layout and dynamic sizing (250px width, 270px login, 330px register/reset).
 ../../styles/ui/About.css: Styles for AboutWindow with cyberpunk-themed content.
 
 Gotchas
@@ -26,7 +26,7 @@ AboutWindow uses BaseWindow with fixed sizing (300px width, 380px height set by 
 Ensure #about-portal div exists in index.html and AboutPortal is mounted in CyberMain.tsx for toggleAboutWindow.
 AboutPortal uses named import { AboutWindow } from AboutWindow.tsx.
 AboutWindow uses type-only import type { BaseWindowProps } for verbatimModuleSyntax.
-LoginForm sizes must be 200px width, 270px height for login, 330px for register/reset to fit content.
+LoginForm sizes must be 250px width, 270px height for login, 330px for register/reset to fit content.
 
 Team Notes
 
