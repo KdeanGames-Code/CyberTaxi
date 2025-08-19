@@ -3,9 +3,9 @@
  * @file CyberMain.tsx
  * @description Main entry point for CyberTaxi, defining the UI/UX layout with MenuBar, MapArea, and BottomMenu.
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.2.24
+ * @version 0.2.25
  * @note Defines a three-row structure: MenuBar, MapArea, BottomMenu, with TaxiMenu and AboutPortal integration.
- * @detail Persists login state via localStorage, passes onTaxiClick and isLoggedIn to MenuBar.
+ * @detail Persists login state via localStorage, passes onTaxiClick and isLoggedIn to MenuBar and MapArea.
  */
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
@@ -95,7 +95,7 @@ const CyberMain = () => {
     return (
         <div id="app" onClick={() => setIsOpen(false)}>
             <MenuBar onTaxiClick={handleTaxiClick} isLoggedIn={isLoggedIn} />
-            <MapArea />
+            <MapArea isLoggedIn={isLoggedIn} />
             <BottomMenu />
             <TaxiMenu
                 isOpen={isOpen}

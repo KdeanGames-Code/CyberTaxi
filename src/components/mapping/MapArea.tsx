@@ -3,8 +3,8 @@
  * @file MapArea.tsx
  * @description Leaflet map component for CyberTaxi, displaying a map centered on Austin, TX.
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.1.1
- * @note Renders a Leaflet map with dark tiles from backend or OpenStreetMap fallback, per GDD v1.1.
+ * @version 0.1.2
+ * @note Renders a Leaflet map with dark tiles from backend or OpenStreetMap fallback, zooms on login, per GDD v1.1.
  * @detail Centers on Austin (lat: 30.2672, lng: -97.7431, zoom: 12), uses mapping-tiles.ts.
  */
 import React, { useEffect, useRef } from "react";
@@ -14,16 +14,19 @@ import { createTileLayer } from "./mapping-tiles";
 import "../../styles/mapping/MapArea.css";
 
 /**
- * Props for MapArea component (none required).
+ * Props for MapArea component.
  * @interface MapAreaProps
  */
-interface MapAreaProps {}
+interface MapAreaProps {
+    isLoggedIn: boolean; // Login state to trigger zoom
+}
 
 /**
- * Renders a Leaflet map centered on Austin, TX.
+ * Renders a Leaflet map centered on Austin, TX, with zoom on login.
+ * @param {MapAreaProps} props - Component props.
  * @returns {JSX.Element} Map container element.
  */
-export const MapArea: React.FC<MapAreaProps> = () => {
+export const MapArea: React.FC<MapAreaProps> = ({ isLoggedIn }) => {
     const mapRef = useRef<L.Map | null>(null);
     const mapContainerRef = useRef<HTMLDivElement>(null);
 
@@ -58,6 +61,18 @@ export const MapArea: React.FC<MapAreaProps> = () => {
             }
         };
     }, []);
+
+    // Zoom to Austin on isLoggedIn change
+    useEffect(() => {
+        if (mapRef.current && isLoggedIn) {
+            try {
+                mapRef.current.setView([30.2672, -97.7431], 12, { animate: true });
+                console.log("MapArea: Zoomed to Austin on login");
+            } catch (error) {
+                console.error("MapArea: Failed to zoom on login:", error);
+            }
+        }
+    }, [isLoggedIn]);
 
     return (
         <div
