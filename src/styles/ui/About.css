@@ -1,9 +1,9 @@
 /* src/styles/ui/About.css */
 /**
  * @file About.css
- * @description Stylesheet for the CyberTaxi About component.
+ * @description Stylesheet for the CyberTaxi AboutWindow component.
  * @author Kevin-Dean Livingstone & CyberTaxi Team
- * @version 0.1.0
+ * @version 0.2.0
  * @note Defines cyberpunk-themed styling for the About window, per GDD v1.1.
  * @detail Styles content within BaseWindow for consistent look.
  */
@@ -17,9 +17,27 @@
     border-radius: 4px;
     text-align: center;
 }
+.about-content .about-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.about-content .fas.fa-taxi {
+    font-size: 24px;
+    color: #e8b923;
+}
 .about-content h2 {
     font-size: 16px;
-    margin: 0 0 10px;
+    margin: 0;
+}
+.about-content .about-vehicle {
+    width: 100%;
+    max-width: 200px;
+    margin: 10px auto;
+    border: 2px solid #e8b923;
+    border-radius: 4px;
 }
 .about-content p {
     font-size: 12px;
@@ -31,8 +49,17 @@
     .about-content {
         padding: 8px;
     }
+    .about-content .about-header {
+        gap: 8px;
+    }
+    .about-content .fas.fa-taxi {
+        font-size: 20px;
+    }
     .about-content h2 {
         font-size: 14px;
+    }
+    .about-content .about-vehicle {
+        max-width: 150px;
     }
     .about-content p {
         font-size: 10px;

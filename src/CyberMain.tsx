@@ -1,18 +1,19 @@
 // src/CyberMain.tsx
 /**
  * @file CyberMain.tsx
- * @description Main entry point for CyberTaxi, defining the UI/UX layout with BaseWindow and LoginForm.
+ * @description Main entry point for CyberTaxi, defining the UI/UX layout with MenuBar, MapArea, and BottomMenu.
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.2.17
- * @note Defines a three-row structure: MenuBar, MapArea, BottomMenu, with BaseWindow and LoginForm integration.
- * @detail Persists login state via localStorage and ensures logout updates TaxiMenu in one click with error handling.
+ * @version 0.2.21
+ * @note Defines a three-row structure: MenuBar, MapArea, BottomMenu, with TaxiMenu and AboutPortal integration.
+ * @detail Persists login state via localStorage, passes onTaxiClick to MenuBar.
  */
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import { CyberError } from './utils/errorhandling/CyberError';
 import './CyberGlobal.css'; // Base layout stylesheet
-import MenuBar from './components/ui/controls/MenuBar';
+import MenuBar from './components/ui/controls/MenuBar'; // Default import
 import { TaxiMenu } from './components/ui/controls/TaxiMenu';
+import { AboutPortal } from './components/ui/Windows/AboutPortal';
 import { LoginForm } from './components/ui/Windows/LoginForm';
 import { BaseWindow } from './components/ui/Windows/baseWindow';
 const MapArea = () => <div className="map-area">Map Area Placeholder</div>;
@@ -24,6 +25,7 @@ const CyberMain = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("jwt_token"));
     const [showLogin, setShowLogin] = useState(false);
     const [showTestWindow, setShowTestWindow] = useState(false);
+    const [formMode, setFormMode] = useState<"login" | "register" | "reset">("login");
 
     // Sync isLoggedIn with localStorage on mount and storage changes
     useEffect(() => {
@@ -63,6 +65,13 @@ const CyberMain = () => {
                 console.log("CyberMain: Logged out, cleared localStorage");
             } else if (action === 'login') {
                 setShowLogin(true);
+                setFormMode('login');
+            } else if (action === 'register') {
+                setShowLogin(true);
+                setFormMode('register');
+            } else if (action === 'reset-password') {
+                setShowLogin(true);
+                setFormMode('reset');
             } else if (action === 'test') {
                 setShowTestWindow(true);
             }
@@ -95,12 +104,14 @@ const CyberMain = () => {
                 isLoggedIn={isLoggedIn}
                 onItemSelect={handleItemSelect}
             />
+            <AboutPortal />
             {showLogin && (
                 <LoginForm
                     onClose={() => setShowLogin(false)}
                     onLoginSuccess={handleLoginSuccess}
                     id="login-window"
-                    title={showLogin ? "CyberTaxi Login" : "Register for CyberTaxi"}
+                    title={formMode === "login" ? "CyberTaxi Login" : formMode === "register" ? "Register for CyberTaxi" : "Reset Password"}
+                    mode={formMode}
                 />
             )}
             {showTestWindow && (

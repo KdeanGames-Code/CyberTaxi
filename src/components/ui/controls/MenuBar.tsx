@@ -3,9 +3,9 @@
  * @file MenuBar.tsx
  * @description Top navigation bar component for CyberTaxi UI.
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.1.4
+ * @version 0.1.8
  * @note Provides a fixed header with logo, stats (Bank before Score), energy bar, and help button.
- * @detail Fetches bankBalance and score from PlayerService, supports future energy/help props.
+ * @detail Fetches bankBalance and score from PlayerService, displays energy percentage, toggles AboutPortal.
  */
 import React, { useState, useEffect } from "react";
 import { PlayerService } from "../../../services/PlayerService";
@@ -25,6 +25,7 @@ const MenuBar = ({
 }) => {
     const [bankBalance, setBankBalance] = useState(50000); // Default placeholder
     const [score, setScore] = useState(1000); // Default placeholder
+    const energy = 75; // Static placeholder energy percentage
 
     // Fetch player stats on mount
     useEffect(() => {
@@ -40,6 +41,16 @@ const MenuBar = ({
         };
         fetchPlayerStats();
     }, []);
+
+    const handleHelpClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if ((window as any).toggleAboutWindow) {
+            (window as any).toggleAboutWindow();
+            console.log("MenuBar: Help button clicked to toggle AboutPortal");
+        } else {
+            console.error("toggleAboutWindow not defined");
+        }
+    };
 
     return (
         <div className="menu-bar">
@@ -59,11 +70,12 @@ const MenuBar = ({
             <div className="energy-help">
                 <div className="energy">
                     <span>Energy</span>
-                    <div className="energy-bar">
-                        <div className="energy-fill" />
+                    <div className="energy-bar" role="progressbar" aria-valuenow={energy} aria-valuemin={0} aria-valuemax={100} aria-label="Energy level">
+                        <div className="energy-fill" style={{ width: `${energy}%` }} />
+                        <span className="energy-percentage">{energy}%</span>
                     </div>
                 </div>
-                <i className="fas fa-question help" />
+                <i className="fas fa-question help" onClick={handleHelpClick} />
             </div>
         </div>
     );
