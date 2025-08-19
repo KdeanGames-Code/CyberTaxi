@@ -1,16 +1,16 @@
 /**
- * @file app.js
- * @description Main Express application for CyberTaxi backend server
+ * @file server/app.js
+ * @description Main entry point for CyberTaxi backend
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.1.14
- * @note Initializes TileServer GL subprocess and mounts API routes with CORS and error handling.
+ * @version 0.1.16
+ * @note Initializes Express server, middleware, and routes
  * @see https://kdeangames.net/CyberTaxi/MockUp/Docs/GDD.html
  */
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 const { spawn } = require("child_process");
 const errorHandler = require("./utils/error-utils");
 const config = require("./config");
@@ -18,7 +18,8 @@ const config = require("./config");
 // Initialize database connection
 require("./models/db");
 
-// Start TileServer GL as subprocess on port 8080
+// Start TileServer GL as subprocess using config.TILE_SERVER_URL
+const tileServerPort = new URL(config.TILE_SERVER_URL).port || "8080";
 const tileServer = spawn("cmd", [
     "/c",
     "npx",
@@ -26,7 +27,7 @@ const tileServer = spawn("cmd", [
     "--config",
     "config.json",
     "--port",
-    "8080",
+    tileServerPort,
     "--no-cors",
 ]);
 tileServer.on("error", (err) =>
@@ -36,7 +37,7 @@ tileServer.on("close", (code) =>
     console.log(`TileServer GL exited with code ${code}`)
 );
 tileServer.stdout.on("data", (data) => console.log(`TileServer GL: ${data}`));
-console.log("Started TileServer GL on port 8080");
+console.log(`Started TileServer GL on port ${tileServerPort}`);
 
 /**
  * Middleware to parse JSON request bodies and handle CORS
@@ -65,6 +66,8 @@ try {
     console.log("Auth route mounted at /api/auth");
     app.use("/api", require("./routes/player/player"));
     console.log("Player route mounted at /api");
+    app.use("/api", require("./routes/tiles/tiles"));
+    console.log("Tiles route mounted at /api");
     app.use("/api", require("./routes/health/health"));
     console.log("Health route mounted at /api");
     app.use("/api", require("./routes/main/main"));
