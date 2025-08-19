@@ -3,13 +3,13 @@
  * @file AboutPortal.tsx
  * @description Manages React portal for rendering AboutWindow below top menu.
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.3.8
+ * @version 0.3.11
  * @note Toggles visibility and positions window with draggable support, per GDD v1.1.
  * @detail Ensures portal container exists before rendering.
  */
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import AboutWindow from "./AboutWindow"; // Try default import to match potential codebase
+import { AboutWindow } from "./AboutWindow"; // Fixed to named import
 
 /**
  * Props for the AboutPortal component (none required).
@@ -79,6 +79,8 @@ export const AboutPortal: React.FC<AboutPortalProps> = () => {
             }}
             style={{ zIndex: 2000 }}
             initialPosition={{ top: 40, left: 400 }}
+            defaultWidth={300}
+            defaultHeight={410}
         />,
         container
     );

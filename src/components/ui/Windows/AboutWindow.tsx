@@ -3,13 +3,13 @@
  * @file AboutWindow.tsx
  * @description About window component for CyberTaxi, displaying game credits.
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.2.4
+ * @version 0.2.6
  * @note Renders a non-resizable, draggable window with game details, triggered by AboutPortal.
  * @detail Uses BaseWindow and About.css for consistent styling, per GDD v1.1.
  */
 import React from "react";
 import { BaseWindow } from "./baseWindow";
-import type { BaseWindowProps } from "./baseWindow";
+import type { BaseWindowProps } from "./baseWindow"; // Type-only import for verbatimModuleSyntax
 import "../../../styles/ui/About.css";
 
 /**
@@ -24,7 +24,7 @@ interface AboutWindowProps extends Omit<BaseWindowProps, "children"> {}
  * @param {AboutWindowProps} props - Component props.
  * @returns {JSX.Element} Draggable window with About content.
  */
-const AboutWindow: React.FC<AboutWindowProps> = (props) => {
+export const AboutWindow: React.FC<AboutWindowProps> = (props) => {
     return (
         <BaseWindow {...props} isResizable={false} isDraggable={true} zIndexBase={2000}>
             <div className="about-content">
@@ -52,5 +52,3 @@ const AboutWindow: React.FC<AboutWindowProps> = (props) => {
         </BaseWindow>
     );
 };
-
-export default AboutWindow; // Changed to default export to align with error
