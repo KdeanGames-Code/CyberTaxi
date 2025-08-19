@@ -1,12 +1,12 @@
 // src/components/ui/Windows/LoginForm.tsx
 /**
  * @file LoginForm.tsx
- * @description Login/registration form component for CyberTaxi onboarding, focusing on username-based login.
+ * @description Login/registration/reset form component for CyberTaxi onboarding, focusing on username-based login.
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.2.37
- * @note Renders a non-resizable, draggable form with toggleable login/register modes, including API calls.
- * @detail Handles user signup via POST /api/auth/signup and login via POST /api/auth/login/username.
- *         Uses 'newpass123' for testing. Previous 500 errors resolved by starting server and DB.
+ * @version 0.2.38
+ * @note Renders a non-resizable, draggable form with toggleable login/register/reset modes, including API calls.
+ * @detail Handles user signup via POST /api/auth/signup, login via POST /api/auth/login/username, and placeholder reset logic.
+ *         Stores JWT and form data in localStorage. Uses 'newpass123' for testing.
  */
 import React, { useState, useEffect, useRef } from "react";
 import { BaseWindow } from "./baseWindow";
@@ -20,28 +20,29 @@ import "../../../styles/ui/LoginForm.css"; // Unique styles only
  * @interface LoginFormProps
  * @extends {Omit<BaseWindowProps, "children">}
  * @property {() => void} onClose - Callback to close the form window.
- * @property {"login" | "register"} [mode] - Optional initial mode, defaults to 'login'.
+ * @property {"login" | "register" | "reset"} [mode] - Optional initial mode, defaults to 'login'.
  * @property {() => void} [onLoginSuccess] - Callback for successful login.
  */
 interface LoginFormProps extends Omit<BaseWindowProps, "children"> {
     onClose: () => void;
-    mode?: "login" | "register";
+    mode?: "login" | "register" | "reset";
     onLoginSuccess?: () => void;
 }
 
 /**
- * Renders the login/registration form with validation and API integration.
+ * Renders the login/registration/reset form with validation and API integration.
  * @param {LoginFormProps} props - Component props including onClose, mode, and onLoginSuccess.
  * @returns {JSX.Element} The rendered form window.
  */
 export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login", onLoginSuccess }) => {
-    const [formMode, setFormMode] = useState<"login" | "register">(mode);
+    const [formMode, setFormMode] = useState<"login" | "register" | "reset">(mode);
     const [formData, setFormData] = useState({
         username: localStorage.getItem("username") || "",
         email: localStorage.getItem("registerData")
             ? JSON.parse(localStorage.getItem("registerData")!).email
             : "test@example.com",
         password: "newpass123", // Consistent password for testing
+        new_password: "", // For reset mode
     });
     const [formError, setFormError] = useState<string>("");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,11 +51,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login", o
         username?: string;
         email?: string;
         password?: string;
+        new_password?: string;
     }>({});
     const formRef = useRef<HTMLFormElement>(null);
     const usernameRef = useRef<HTMLInputElement>(null);
     const emailRef = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
+    const newPasswordRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         console.log("Checking localStorage for username pre-fill");
@@ -89,7 +92,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login", o
         setIsSubmitted(false);
         setValidationMessages({});
         console.log(`Form mode set to: ${mode}`);
-        [usernameRef, emailRef, passwordRef].forEach((ref) => {
+        [usernameRef, emailRef, passwordRef, newPasswordRef].forEach((ref) => {
             ref.current?.setCustomValidity("");
         });
     }, [mode]);
@@ -128,8 +131,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login", o
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         console.log(`Form submitted, mode: ${formMode}, username: ${formData.username}`);
-        if (formData.password.length < 6) {
+        if (formMode !== "reset" && formData.password.length < 6) {
             setFormError("Password must be at least 6 characters");
+            return;
+        }
+        if (formMode === "reset" && formData.new_password.length < 6) {
+            setFormError("New password must be at least 6 characters");
             return;
         }
         setFormError("");
@@ -140,7 +147,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login", o
             console.log("Form ref not found");
             return;
         }
-        [usernameRef, emailRef, passwordRef].forEach((ref) => {
+        [usernameRef, emailRef, passwordRef, newPasswordRef].forEach((ref) => {
             if (ref.current && !ref.current.validity.valid && ref.current.name) {
                 const name = ref.current.name as string;
                 let message = "";
@@ -162,43 +169,52 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login", o
         }
         setIsSubmitting(true);
         try {
-            let result: { token: string; player_id?: number } | null = null;
+            let result: { token: string; player_id?: number } | { status: string; message: string } | null = null;
             if (formMode === "login") {
                 result = await LoginService.login(formData.username, formData.password);
-            } else {
+            } else if (formMode === "register") {
                 result = await LoginService.signup(formData.username, formData.email, formData.password);
+            } else {
+                // Placeholder for reset password logic (pending LoginService.resetPassword)
+                console.log("Reset password attempted, username:", formData.username, "new_password:", formData.new_password);
+                result = { status: "Success", message: "Password reset successful (placeholder)" };
             }
-            if (result && result.token) {
-                localStorage.setItem("jwt_token", result.token);
-                localStorage.setItem("username", formData.username);
-                if (result.player_id) {
-                    localStorage.setItem("player_id", result.player_id.toString());
-                }
-                localStorage.setItem("registerData", JSON.stringify({
-                    username: formData.username,
-                    email: formData.email,
-                }));
-                console.log(`${formMode === "login" ? "Login" : "Signup"} successful, token stored:`, result.token);
-                if (formMode === "login" && onLoginSuccess) {
-                    onLoginSuccess();
+            if (result && ("token" in result || result.status === "Success")) {
+                if ("token" in result) {
+                    localStorage.setItem("jwt_token", result.token);
+                    localStorage.setItem("username", formData.username);
+                    if (result.player_id) {
+                        localStorage.setItem("player_id", result.player_id.toString());
+                    }
+                    localStorage.setItem("registerData", JSON.stringify({
+                        username: formData.username,
+                        email: formData.email,
+                    }));
+                    console.log(`${formMode === "login" ? "Login" : "Signup"} successful, token stored:`, result.token);
+                    if (formMode === "login" && onLoginSuccess) {
+                        onLoginSuccess();
+                    }
+                } else {
+                    console.log("Password reset successful:", result.message);
                 }
                 onClose();
             } else {
-                setFormError("Authentication failed");
-                console.log("Form error set: Authentication failed");
+                setFormError("Operation failed");
+                console.log("Form error set: Operation failed");
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "Network issue, please try again";
             setFormError(errorMessage);
-            console.error(`${formMode === "login" ? "Login" : "Signup"} error:`, errorMessage);
+            console.error(`${formMode === "login" ? "Login" : formMode === "register" ? "Signup" : "Reset"} error:`, errorMessage);
         } finally {
             setIsSubmitting(false);
         }
     };
 
     const toggleMode = () => {
-        console.log("Toggling to mode:", formMode === "login" ? "register" : "login");
-        setFormMode(formMode === "login" ? "register" : "login");
+        const nextMode = formMode === "login" ? "register" : "login";
+        console.log("Toggling to mode:", nextMode);
+        setFormMode(nextMode);
         setFormError("");
         setIsSubmitted(false);
         setValidationMessages({});
@@ -208,8 +224,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login", o
                 ? JSON.parse(localStorage.getItem("registerData")!).email
                 : "test@example.com",
             password: "newpass123",
+            new_password: "",
         });
-        [usernameRef, emailRef, passwordRef].forEach((ref) => {
+        [usernameRef, emailRef, passwordRef, newPasswordRef].forEach((ref) => {
             ref.current?.setCustomValidity("");
         });
     };
@@ -222,21 +239,22 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login", o
     return (
         <BaseWindow
             id="login-window"
-            title={formMode === "login" ? "CyberTaxi Login" : "Register for CyberTaxi"}
+            title={formMode === "login" ? "CyberTaxi Login" : formMode === "register" ? "Register for CyberTaxi" : "Reset Password"}
             onClose={handleWindowClose}
             isResizable={false}
             isDraggable={true}
             style={{ zIndex: 1000 }}
             initialPosition={{ top: 200, left: 200 }}
             defaultWidth={250}
+            defaultHeight={330}
         >
             <form
-                className={`login-form ${isSubmitted ? "submitted" : ""}`}
+                className={`login-form ${formMode} ${isSubmitted ? "submitted" : ""}`}
                 ref={formRef}
                 onSubmit={handleSubmit}
                 noValidate
                 role="form"
-                aria-label={formMode === "login" ? "Login form" : "Registration form"}
+                aria-label={formMode === "login" ? "Login form" : formMode === "register" ? "Registration form" : "Reset password form"}
             >
                 {formError && (
                     <p className="error-message form-error" role="alert" aria-live="assertive">
@@ -301,35 +319,60 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login", o
                         )}
                     </div>
                 )}
-                <div className="form-group">
-                    <label htmlFor="password">Password</label>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        onInvalid={handleInvalid}
-                        placeholder="Enter Password"
-                        required
-                        ref={passwordRef}
-                        aria-required="true"
-                        autoComplete="current-password"
-                    />
-                    {validationMessages.password && (
-                        <span className="error-fallback" role="alert" aria-live="polite">
-                            {validationMessages.password}
-                        </span>
-                    )}
-                </div>
+                {formMode !== "reset" && (
+                    <div className="form-group">
+                        <label htmlFor="password">Password</label>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            value={formData.password}
+                            onChange={handleInputChange}
+                            onInvalid={handleInvalid}
+                            placeholder="Enter Password"
+                            required
+                            ref={passwordRef}
+                            aria-required="true"
+                            autoComplete="current-password"
+                        />
+                        {validationMessages.password && (
+                            <span className="error-fallback" role="alert" aria-live="polite">
+                                {validationMessages.password}
+                            </span>
+                        )}
+                    </div>
+                )}
+                {formMode === "reset" && (
+                    <div className="form-group">
+                        <label htmlFor="new_password">New Password</label>
+                        <input
+                            type="password"
+                            id="new_password"
+                            name="new_password"
+                            value={formData.new_password}
+                            onChange={handleInputChange}
+                            onInvalid={handleInvalid}
+                            placeholder="Enter New Password"
+                            required
+                            ref={newPasswordRef}
+                            aria-required="true"
+                            autoComplete="new-password"
+                        />
+                        {validationMessages.new_password && (
+                            <span className="error-fallback" role="alert" aria-live="polite">
+                                {validationMessages.new_password}
+                            </span>
+                        )}
+                    </div>
+                )}
                 <div className="form-actions">
                     <button
                         type="submit"
                         className="submit-btn"
                         disabled={isSubmitting}
-                        aria-label={formMode === "login" ? "Submit login" : "Submit registration"}
+                        aria-label={formMode === "login" ? "Submit login" : formMode === "register" ? "Submit registration" : "Submit password reset"}
                     >
-                        {isSubmitting ? "Submitting..." : formMode === "login" ? "Login" : "Register"}
+                        {isSubmitting ? "Submitting..." : formMode === "login" ? "Login" : formMode === "register" ? "Register" : "Reset Password"}
                     </button>
                     <button
                         type="button"
@@ -337,7 +380,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login", o
                         onClick={toggleMode}
                         aria-label={formMode === "login" ? "Switch to registration" : "Switch to login"}
                     >
-                        {formMode === "login" ? "Need to Register?" : "Already have an account?"}
+                        {formMode === "login" ? "Need to Register?" : formMode === "register" ? "Already have an account?" : "Back to Login"}
                     </button>
                 </div>
             </form>
