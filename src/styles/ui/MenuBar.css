@@ -1,17 +1,14 @@
-/* src/styles/MenuBar.css */
+/* src/styles/ui/MenuBar.css */
 /**
  * @file MenuBar.css
- * @description Stylesheet for the CyberTaxi MenuBar component.
+ * @description Stylesheet for the CyberTaxi MenuBar component, defining top menu styling.
  * @author Kevin-Dean Livingstone & CyberTaxi Team
  * @version 0.1.0
- * @note Defines a cyberpunk-themed top bar with grid layout and interactive elements.
+ * @note Migrated from global.css, defines cyberpunk-themed top menu bar, per GDD v1.1.
+ * @detail Styles logo, stats, energy bar, and help button with responsive design.
  */
 
 /* MenuBar Styles */
-/**
- * Sets up the top menu with a gradient background and fixed positioning.
- * @style Uses grid for layout, matching the original top-menu design.
- */
 .menu-bar {
     height: 40px;
     background: linear-gradient(to bottom right, #2f2f2f, #1a1a1a);
@@ -22,8 +19,7 @@
     grid-template-rows: 1fr;
     gap: 2px;
     padding: 0;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6),
-        inset 0 2px 4px rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.1);
     align-items: center;
     position: fixed;
     width: calc(100% - 10px);
@@ -34,10 +30,6 @@
 }
 
 /* Logo Style */
-/**
- * Styles the taxi logo icon in the menu bar.
- * @style Centers the icon with a gold color.
- */
 .fas.fa-taxi.logo {
     grid-column: 1 / 2;
     font-size: 24px;
@@ -51,10 +43,6 @@
 }
 
 /* Stats Container */
-/**
- * Holds the stats display within the menu bar.
- * @style Aligns stats horizontally with spacing.
- */
 .stats-container {
     grid-column: 2 / 3;
     display: flex;
@@ -62,11 +50,11 @@
     justify-content: flex-start;
 }
 
+/* Stats Styles */
 .stats {
     display: flex;
     gap: 20px;
 }
-
 .stat-item {
     display: flex;
     flex-direction: column;
@@ -76,16 +64,11 @@
     font-weight: 700;
     font-size: 10px;
 }
-
 .stat-item span {
     line-height: 1;
 }
 
-/* Energy and Help Section */
-/**
- * Groups energy bar and help icon on the right.
- * @style Aligns elements with a gap for spacing.
- */
+/* Energy and Help Container */
 .energy-help {
     grid-column: 3 / 4;
     display: flex;
@@ -97,6 +80,7 @@
     margin: 0;
 }
 
+/* Energy Bar Styles */
 .energy {
     display: flex;
     flex-direction: column;
@@ -107,7 +91,6 @@
     font-size: 10px;
     margin: 0 20px 0 0;
 }
-
 .energy-bar {
     width: 80px;
     height: 8px;
@@ -117,7 +100,6 @@
     overflow: hidden;
     margin-top: 2px;
 }
-
 .energy-fill {
     height: 100%;
     width: 75%;
@@ -125,6 +107,7 @@
     transition: width 0.3s;
 }
 
+/* Help Button Styles */
 .help {
     font-size: 20px;
     color: #cfd8d3;
@@ -140,10 +123,6 @@
 }
 
 /* Responsive Design */
-/**
- * Adjusts layout for smaller screens, ensuring readability.
- * @media Targets devices below 768px width.
- */
 @media (max-width: 768px) {
     .menu-bar {
         grid-template-columns: 1fr;
