@@ -1,0 +1,30 @@
+/* src/styles/mapping/MapArea.css */
+/**
+ * @file MapArea.css
+ * @description Stylesheet for the CyberTaxi MapArea component.
+ * @author Kevin-Dean Livingstone & CyberTaxi Team
+ * @version 0.1.1
+ * @note Defines cyberpunk-themed styling for the map, per GDD v1.1.
+ * @detail Centers map in the layout, below MenuBar (40px), above BottomMenu (40px).
+ */
+
+/* Map Area Styles */
+.map-area {
+    width: calc(100% - 6px);
+    height: calc(100vh - 80px); /* Full height minus MenuBar and BottomMenu */
+    position: relative;
+    top: 47px; /* Below MenuBar */
+    background: #1a1a1a; /* Cyberpunk dark background */
+    border: 2px solid #e8b923; /* Cyberpunk yellow border */
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+    z-index: 500; /* Below MenuBar (1000), above background */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .map-area {
+        height: calc(100vh - 100px); /* Adjust for smaller screens */
+        top: 50px;
+    }
+}
