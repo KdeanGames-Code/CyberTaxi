@@ -3,10 +3,12 @@
  * @file PlayerService.ts
  * @description Service for fetching player statistics in CyberTaxi, such as bank balance and score.
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.1.1
+ * @version 0.1.5
  * @note Provides API integration for player stats, aligns with GDD v1.1.
- * @detail Placeholder logic until backend API is implemented.
+ * @detail Fetches data from /api/player/:username/balance and /api/player/:username/score, falls back to placeholders on error.
  */
+import { API_CONFIG } from "../config/apiConfig";
+
 export class PlayerService {
     /**
      * Fetches player statistics (bank balance and score).
@@ -15,27 +17,44 @@ export class PlayerService {
      */
     static async getPlayerStats(): Promise<{ bankBalance: number; score: number }> {
         try {
-            // Placeholder until backend API is implemented
-            console.log("PlayerService: Fetching player stats (placeholder)");
-            return { bankBalance: 50000, score: 1000 };
-            // Example API call (uncomment when backend is ready):
-            /*
-            const response = await fetch(`${API_CONFIG.BASE_URL}/api/player/stats`, {
+            const token = localStorage.getItem("jwt_token");
+            const username = localStorage.getItem("username");
+            if (!token || !username) {
+                throw new Error("Missing JWT token or username");
+            }
+            console.log("PlayerService: Fetching player stats for", username);
+
+            // Fetch bank balance
+            const balanceResponse = await fetch(`${API_CONFIG.BASE_URL}/player/${username}/balance`, {
                 method: "GET",
                 headers: {
-                    "Authorization": `Bearer ${localStorage.getItem("jwt_token")}`,
+                    "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json",
                 },
             });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            if (!balanceResponse.ok) {
+                throw new Error(`Balance HTTP error! status: ${balanceResponse.status}`);
             }
-            const data = await response.json();
-            return { bankBalance: data.bankBalance, score: data.score };
-            */
+            const balanceData = await balanceResponse.json();
+
+            // Fetch score
+            const scoreResponse = await fetch(`${API_CONFIG.BASE_URL}/player/${username}/score`, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            });
+            if (!scoreResponse.ok) {
+                throw new Error(`Score HTTP error! status: ${scoreResponse.status}`);
+            }
+            const scoreData = await scoreResponse.json();
+
+            return { bankBalance: balanceData.bank_balance, score: scoreData.score };
         } catch (error) {
-            console.error("PlayerService: Error fetching player stats:", error);
-            throw error;
+            console.error("PlayerService: Error fetching player stats, using fallback:", error);
+            // Fallback to placeholder values on error
+            return { bankBalance: 50000, score: 1000 };
         }
     }
 }

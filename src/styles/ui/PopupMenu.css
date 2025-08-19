@@ -81,7 +81,7 @@
     }
     .sub-menu {
         top: 0;
-        left: calc(80% + 3px); /* Maintain 3px shift */
+        left: -30px; /* Maintain 3px shift */
         min-width: 120px;
     }
     .sub-menu-item {
