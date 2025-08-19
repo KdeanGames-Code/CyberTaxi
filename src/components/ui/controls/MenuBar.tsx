@@ -3,7 +3,7 @@
  * @file MenuBar.tsx
  * @description Top navigation bar component for CyberTaxi UI.
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.1.8
+ * @version 0.1.9
  * @note Provides a fixed header with logo, stats (Bank before Score), energy bar, and help button.
  * @detail Fetches bankBalance and score from PlayerService, displays energy percentage, toggles AboutPortal.
  */
@@ -15,19 +15,22 @@ import "../../../styles/ui/MenuBar.css";
  * MenuBar component rendering the top navigation.
  * @param {Object} props - Component props.
  * @param {function} props.onTaxiClick - Handler for taxi icon click to open TaxiMenu.
+ * @param {boolean} props.isLoggedIn - Login state from CyberMain.
  * @returns {JSX.Element} The rendered menu bar.
  * @description Uses a grid layout for logo, stats, and energy/help sections.
  */
 const MenuBar = ({
     onTaxiClick,
+    isLoggedIn,
 }: {
     onTaxiClick: (e: React.MouseEvent) => void;
+    isLoggedIn: boolean;
 }) => {
     const [bankBalance, setBankBalance] = useState(50000); // Default placeholder
     const [score, setScore] = useState(1000); // Default placeholder
     const energy = 75; // Static placeholder energy percentage
 
-    // Fetch player stats on mount
+    // Fetch player stats on mount and isLoggedIn change
     useEffect(() => {
         const fetchPlayerStats = async () => {
             try {
@@ -40,7 +43,7 @@ const MenuBar = ({
             }
         };
         fetchPlayerStats();
-    }, []);
+    }, [isLoggedIn]);
 
     const handleHelpClick = (e: React.MouseEvent) => {
         e.stopPropagation();

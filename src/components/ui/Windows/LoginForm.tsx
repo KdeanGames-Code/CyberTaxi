@@ -3,10 +3,10 @@
  * @file LoginForm.tsx
  * @description Login/registration/reset form component for CyberTaxi onboarding, focusing on username-based login.
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.2.38
+ * @version 0.2.39
  * @note Renders a non-resizable, draggable form with toggleable login/register/reset modes, including API calls.
  * @detail Handles user signup via POST /api/auth/signup, login via POST /api/auth/login/username, and placeholder reset logic.
- *         Stores JWT and form data in localStorage. Uses 'newpass123' for testing.
+ * Stores JWT and form data in localStorage. Uses 'newpass123' for testing.
  */
 import React, { useState, useEffect, useRef } from "react";
 import { BaseWindow } from "./baseWindow";
@@ -211,26 +211,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login", o
         }
     };
 
-    const toggleMode = () => {
-        const nextMode = formMode === "login" ? "register" : "login";
-        console.log("Toggling to mode:", nextMode);
-        setFormMode(nextMode);
-        setFormError("");
-        setIsSubmitted(false);
-        setValidationMessages({});
-        setFormData({
-            username: localStorage.getItem("username") || "",
-            email: localStorage.getItem("registerData")
-                ? JSON.parse(localStorage.getItem("registerData")!).email
-                : "test@example.com",
-            password: "newpass123",
-            new_password: "",
-        });
-        [usernameRef, emailRef, passwordRef, newPasswordRef].forEach((ref) => {
-            ref.current?.setCustomValidity("");
-        });
-    };
-
     const handleWindowClose = () => {
         console.log("LoginForm close button triggered");
         onClose();
@@ -245,8 +225,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login", o
             isDraggable={true}
             style={{ zIndex: 1000 }}
             initialPosition={{ top: 200, left: 200 }}
-            defaultWidth={250}
-            defaultHeight={330}
+            defaultWidth={250} // Per README
+            defaultHeight={formMode === "login" ? 270 : 330} // Per README: 270px login, 330px register/reset
         >
             <form
                 className={`login-form ${formMode} ${isSubmitted ? "submitted" : ""}`}
@@ -265,7 +245,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login", o
                                 <button
                                     type="button"
                                     className="toggle-btn"
-                                    onClick={toggleMode}
+                                    onClick={() => setFormMode("login")}
                                     aria-label="Switch to login"
                                 >
                                     Try logging in
@@ -377,7 +357,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, mode = "login", o
                     <button
                         type="button"
                         className="toggle-btn"
-                        onClick={toggleMode}
+                        onClick={() => setFormMode(formMode === "login" ? "register" : "login")}
                         aria-label={formMode === "login" ? "Switch to registration" : "Switch to login"}
                     >
                         {formMode === "login" ? "Need to Register?" : formMode === "register" ? "Already have an account?" : "Back to Login"}
