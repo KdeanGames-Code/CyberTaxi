@@ -3,9 +3,9 @@
  * @file MenuBar.css
  * @description Stylesheet for the CyberTaxi MenuBar component, defining top menu styling.
  * @author Kevin-Dean Livingstone & CyberTaxi Team
- * @version 0.1.0
+ * @version 0.1.2
  * @note Migrated from global.css, defines cyberpunk-themed top menu bar, per GDD v1.1.
- * @detail Styles logo, stats, energy bar, and help button with responsive design.
+ * @detail Styles logo, stats, energy bar with percentage, and help button with responsive design.
  */
 
 /* MenuBar Styles */
@@ -32,7 +32,7 @@
 /* Logo Style */
 .fas.fa-taxi.logo {
     grid-column: 1 / 2;
-    font-size: 24px;
+    font-size: 20px;
     color: #d4a017;
     display: flex;
     align-items: center;
@@ -40,6 +40,7 @@
     width: 36px;
     height: 100%;
     margin: 0;
+    cursor: pointer;
 }
 
 /* Stats Container */
@@ -61,7 +62,7 @@
     text-align: center;
     font-family: "Orbitron", sans-serif;
     color: #d4a017;
-    font-weight: 700;
+    font-weight: 400;
     font-size: 10px;
 }
 .stat-item span {
@@ -87,7 +88,7 @@
     align-items: center;
     color: #d4a017;
     font-family: "Orbitron", sans-serif;
-    font-weight: 700;
+    font-weight: 400;
     font-size: 10px;
     margin: 0 20px 0 0;
 }
@@ -99,6 +100,7 @@
     border-radius: 8px;
     overflow: hidden;
     margin-top: 2px;
+    position: relative;
 }
 .energy-fill {
     height: 100%;
@@ -106,17 +108,25 @@
     background-color: #00a3e0;
     transition: width 0.3s;
 }
+.energy-percentage {
+    position: absolute;
+    top: -16px;
+    right: 0;
+    font-size: 8px;
+    color: #d4a017;
+    font-family: "Orbitron", sans-serif;
+}
 
 /* Help Button Styles */
 .help {
-    font-size: 20px;
+    font-size: 16px;
     color: #cfd8d3;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
-    margin: 0;
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
     cursor: pointer;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.1);
@@ -138,5 +148,9 @@
     }
     .energy-bar {
         width: 60px;
+    }
+    .energy-percentage {
+        font-size: 7px;
+        top: -14px;
     }
 }

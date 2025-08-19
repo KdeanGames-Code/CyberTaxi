@@ -1,33 +1,30 @@
-@startuml
+@startuml CyberTaxi Frontend
 !define RECTANGLE class
 skinparam monochrome true
-
 RECTANGLE CyberMain {
   - isOpen : boolean
   - position : { x: number; y: number }
   - isLoggedIn : boolean
   - showLogin : boolean
   - showTestWindow : boolean
+  - formMode : "login" | "register" | "reset"
   + handleTaxiClick(event: React.MouseEvent)
   + handleItemSelect(action: string)
+  + handleLoginSuccess()
 }
-
 RECTANGLE apiConfig {
   + API_CONFIG : { BASE_URL: string }
 }
-
 RECTANGLE CyberError {
   - message : string
   + constructor(message: string)
   + toString() : string
 }
-
 RECTANGLE ErrorBoundary {
   - hasError : boolean
   + getDerivedStateFromError(error: Error) : { hasError: boolean }
   + componentDidCatch(error: Error, info: React.ErrorInfo)
 }
-
 RECTANGLE CyberContext {
   - isLoggedIn : boolean
   - username : string | null
@@ -35,17 +32,22 @@ RECTANGLE CyberContext {
   + CyberProvider(props: { children: ReactNode }) : JSX.Element
   + useCyber() : CyberState
 }
-
 RECTANGLE TestContext {
   - value : string
   + TestProvider(props: { children: ReactNode }) : JSX.Element
   + useTest() : TestState
 }
-
-RECTANGLE MenuBar {
-  + onTaxiClick : (e: React.MouseEvent) => void
+RECTANGLE PlayerService {
+  + getPlayerStats() : Promise<{ bankBalance: number; score: number }>
 }
-
+RECTANGLE MenuBar {
+  - bankBalance : number
+  - score : number
+  - energy : number
+  - showAbout : boolean
+  + onTaxiClick : (e: React.MouseEvent) => void
+  + handleHelpClick(event: React.MouseEvent)
+}
 RECTANGLE TaxiMenu {
   - isOpen : boolean
   - position : { x: number; y: number }
@@ -53,7 +55,6 @@ RECTANGLE TaxiMenu {
   + onClose() : void
   + onItemSelect(action: string) : void
 }
-
 RECTANGLE BaseWindow {
   - id : string
   - title : ReactNode
@@ -68,24 +69,41 @@ RECTANGLE BaseWindow {
   - zIndexBase : number
   + onClose() : void
 }
-
 RECTANGLE LoginForm {
-  - formMode : "login" | "register"
-  - formData : { username: string; email: string; password: string }
+  - formMode : "login" | "register" | "reset"
+  - formData : { username: string; email: string; password: string; new_password: string }
   + handleInputChange(event: React.ChangeEvent<HTMLInputElement>)
+  + handleInvalid(event: React.InvalidEvent<HTMLInputElement>)
+  + handleSubmit(event: FormEvent)
   + toggleMode()
+  + handleWindowClose()
 }
-
+RECTANGLE AboutWindow {
+  + id : string
+  + title : ReactNode
+  + isResizable : boolean
+  + isDraggable : boolean
+  + style : CSSProperties
+  + initialPosition : { top: number; left: number }
+  + onClose : () => void
+}
+RECTANGLE AboutPortal {
+  - isOpen : boolean
+  + handleToggle() : void
+}
 CyberMain --> MenuBar : contains
 CyberMain --> TaxiMenu : contains
 CyberMain --> LoginForm : contains
 CyberMain --> BaseWindow : contains (for test)
 CyberMain --> CyberContext : uses
 CyberMain --> TestContext : uses
+CyberMain --> ErrorBoundary : wrapped by
 ErrorBoundary --> CyberError : uses
 CyberContext --> apiConfig : uses (future)
 TestContext --> apiConfig : uses (future)
-CyberMain --> ErrorBoundary : wrapped by
+MenuBar --> PlayerService : uses
+MenuBar --> AboutPortal : uses
 LoginForm --> BaseWindow : extends
-
+AboutWindow --> BaseWindow : extends
+AboutPortal --> AboutWindow : renders
 @enduml
