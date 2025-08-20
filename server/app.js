@@ -2,7 +2,7 @@
  * @file server/app.js
  * @description Main entry point for CyberTaxi backend
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.1.16
+ * @version 0.1.17
  * @note Initializes Express server, middleware, and routes
  * @see https://kdeangames.net/CyberTaxi/MockUp/Docs/GDD.html
  */
@@ -68,6 +68,8 @@ try {
     console.log("Player route mounted at /api");
     app.use("/api", require("./routes/tiles/tiles"));
     console.log("Tiles route mounted at /api");
+    app.use("/api", require("./routes/vehicles/vehicles"));
+    console.log("Vehicles route mounted at /api");
     app.use("/api", require("./routes/health/health"));
     console.log("Health route mounted at /api");
     app.use("/api", require("./routes/main/main"));

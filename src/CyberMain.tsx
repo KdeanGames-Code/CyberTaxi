@@ -3,7 +3,7 @@
  * @file CyberMain.tsx
  * @description Main entry point for CyberTaxi, defining the UI/UX layout with MenuBar, MapArea, and BottomMenu.
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.2.25
+ * @version 0.2.27
  * @note Defines a three-row structure: MenuBar, MapArea, BottomMenu, with TaxiMenu and AboutPortal integration.
  * @detail Persists login state via localStorage, passes onTaxiClick and isLoggedIn to MenuBar and MapArea.
  */
@@ -16,13 +16,13 @@ import { TaxiMenu } from './components/ui/controls/TaxiMenu';
 import { AboutPortal } from './components/ui/Windows/AboutPortal';
 import { LoginForm } from './components/ui/Windows/LoginForm';
 import { BaseWindow } from './components/ui/Windows/baseWindow';
-import { MapArea } from './components/mapping/MapArea'; // Updated import
+import { MapArea } from './components/mapping/MapArea';
 const BottomMenu = () => <div className="bottom-menu">Bottom Menu Placeholder</div>;
 
 const CyberMain = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [position, setPosition] = useState({ x: 0, y: 0 });
-    const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("jwt_token"));
+    const [isLoggedIn, setIsLoggedIn] = useState(false); // Initialize false
     const [showLogin, setShowLogin] = useState(false);
     const [showTestWindow, setShowTestWindow] = useState(false);
     const [formMode, setFormMode] = useState<"login" | "register" | "reset">("login");
@@ -32,8 +32,10 @@ const CyberMain = () => {
         const syncLoginState = () => {
             try {
                 const token = localStorage.getItem("jwt_token");
-                console.log("CyberMain: Syncing isLoggedIn, token:", !!token);
-                setIsLoggedIn(!!token);
+                const username = localStorage.getItem("username");
+                const newIsLoggedIn = !!(token && username);
+                console.log("CyberMain: Syncing isLoggedIn, token:", newIsLoggedIn, "username:", username || "none");
+                setIsLoggedIn(newIsLoggedIn);
             } catch (error) {
                 const cyberError = new CyberError("Failed to sync login state", 500);
                 cyberError.log();
@@ -54,7 +56,7 @@ const CyberMain = () => {
 
     const handleItemSelect = (action: string) => {
         try {
-            console.log(`Action selected: ${action}`);
+            console.log(`CyberMain: Action selected: ${action}`);
             if (action === 'logout') {
                 localStorage.removeItem("jwt_token");
                 localStorage.removeItem("player_id");
@@ -84,8 +86,14 @@ const CyberMain = () => {
 
     const handleLoginSuccess = () => {
         try {
-            setIsLoggedIn(true);
-            console.log("CyberMain: Login successful, isLoggedIn set to true");
+            const token = localStorage.getItem("jwt_token");
+            const username = localStorage.getItem("username");
+            if (token && username) {
+                setIsLoggedIn(true);
+                console.log("CyberMain: Login successful, isLoggedIn set to true for", username);
+            } else {
+                console.error("CyberMain: Login failed, missing token or username");
+            }
         } catch (error) {
             const cyberError = new CyberError("Failed to handle login success", 500);
             cyberError.log();
