@@ -1,21 +1,22 @@
 // src/components/mapping/MapArea.tsx
 /**
  * @file MapArea.tsx
- * @description Leaflet map component for CyberTaxi, displaying a map centered on Austin, TX with player vehicle markers.
+ * @description Leaflet map component for CyberTaxi, displaying a map or splash screen based on login state.
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.1.5
- * @note Renders a Leaflet map with dark tiles, player vehicle markers, and zooms on login, no zoom controls, per GDD v1.1.
+ * @version 0.1.7
+ * @note Renders a splash screen when logged out, or a Leaflet map with player vehicle markers when logged in, per GDD v1.1.
  * @detail Centers on Austin (lat: 30.2672, lng: -97.7431, zoom: 12), uses mapping-tiles.ts and VehicleMarkers.ts.
  */
 import React, { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
-import "leaflet.markercluster"; // Fix TypeError
+import "leaflet.markercluster";
 import { createTileLayer } from "./mapping-tiles";
 import { usePlayerVehicles } from "./usePlayerVehicles";
 import { createVehicleMarker } from "./VehicleMarkers";
 import "../../styles/mapping/MapArea.css";
+import "../../styles/mapping/SplashScreen.css";
 
 /**
  * Props for MapArea component.
@@ -26,9 +27,9 @@ interface MapAreaProps {
 }
 
 /**
- * Renders a Leaflet map centered on Austin, TX with player vehicle markers.
+ * Renders a splash screen or Leaflet map based on login state.
  * @param {MapAreaProps} props - Component props.
- * @returns {JSX.Element} Map container element.
+ * @returns {JSX.Element} Splash screen or map container element.
  */
 export const MapArea: React.FC<MapAreaProps> = ({ isLoggedIn }) => {
     const mapRef = useRef<L.Map | null>(null);
@@ -37,6 +38,10 @@ export const MapArea: React.FC<MapAreaProps> = ({ isLoggedIn }) => {
     const { vehicles, errorMessage } = usePlayerVehicles(isLoggedIn);
 
     useEffect(() => {
+        if (!isLoggedIn) {
+            console.log("MapArea: Skipping map initialization, user not logged in");
+            return;
+        }
         if (mapContainerRef.current && !mapRef.current) {
             try {
                 // Initialize map centered on Austin, TX (lat: 30.2672, lng: -97.7431)
@@ -90,7 +95,7 @@ export const MapArea: React.FC<MapAreaProps> = ({ isLoggedIn }) => {
                 console.log("MapArea: Cleaned up map and cluster");
             }
         };
-    }, []);
+    }, [isLoggedIn]);
 
     // Zoom to Austin on isLoggedIn change
     useEffect(() => {
@@ -106,8 +111,8 @@ export const MapArea: React.FC<MapAreaProps> = ({ isLoggedIn }) => {
 
     // Render player vehicle markers
     useEffect(() => {
-        if (!mapRef.current || !clusterRef.current) {
-            console.log("MapArea: Skipping vehicle render - map or cluster not ready");
+        if (!isLoggedIn || !mapRef.current || !clusterRef.current) {
+            console.log("MapArea: Skipping vehicle render - not logged in or map/cluster not ready");
             return;
         }
         clusterRef.current.clearLayers();
@@ -132,17 +137,33 @@ export const MapArea: React.FC<MapAreaProps> = ({ isLoggedIn }) => {
                 console.warn(`MapArea: Invalid coordinates for vehicle ${vehicle.id}:`, vehicle.coords);
             }
         });
-        if (errorMessage) {
+        if (errorMessage && vehicles.length === 0) {
             console.error("MapArea: Vehicle fetch error:", errorMessage);
         }
     }, [vehicles, isLoggedIn]);
 
     return (
         <div
-            className="map-area"
+            className={isLoggedIn ? "map-area" : "splash-screen"}
             ref={mapContainerRef}
-            role="region"
-            aria-label="CyberTaxi map centered on Austin"
-        />
+            role={isLoggedIn ? "region" : "banner"}
+            aria-label={isLoggedIn ? "CyberTaxi map centered on Austin" : "CyberTaxi splash screen"}
+        >
+            {!isLoggedIn && (
+                <div className="splash-content">
+                    <div className="splash-text">
+                    <h1>CyberTaxi: Own the Roads!</h1>
+                    <img src="src/assets/SplashScreen.jpg" alt="CyberTaxi Splash Screen" className="splash-image" />
+                    
+                        <p className="version">Version 0.2.27</p>
+                        <p>Welcome to the future of autonomous taxi management!<br />
+                        Log in to manage your fleet in a NeonGrid world.</p>
+                        <p>Created by Kevin-Dean Livingstone & CyberTaxi Team</p>
+                        <p>Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI</p>
+                        <p className="copyright">&copy; 2025 CyberTaxi. All rights reserved.</p>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 };
