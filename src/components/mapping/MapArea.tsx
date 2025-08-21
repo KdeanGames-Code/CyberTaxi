@@ -3,9 +3,9 @@
  * @file MapArea.tsx
  * @description Leaflet map component for CyberTaxi, displaying a map or splash screen based on login state.
  * @author Kevin-Dean Livingstone & CyberTaxi Team - Grok, created by xAI
- * @version 0.1.7
- * @note Renders a splash screen when logged out, or a Leaflet map with player vehicle markers when logged in, per GDD v1.1.
- * @detail Centers on Austin (lat: 30.2672, lng: -97.7431, zoom: 12), uses mapping-tiles.ts and VehicleMarkers.ts.
+ * @version 0.1.8
+ * @note Renders a splash screen when logged out, or a Leaflet map with player and other vehicle markers when logged in, per GDD v1.1.
+ * @detail Centers on Austin (lat: 30.2672, lng: -97.7431, zoom: 12), uses mapping-tiles.ts, VehicleMarkers.ts, usePlayerVehicles, and useOtherPlayerVehicles.
  */
 import React, { useEffect, useRef } from "react";
 import L from "leaflet";
@@ -14,6 +14,7 @@ import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster";
 import { createTileLayer } from "./mapping-tiles";
 import { usePlayerVehicles } from "./usePlayerVehicles";
+import { useOtherPlayerVehicles } from "./useOtherPlayerVehicles";
 import { createVehicleMarker } from "./VehicleMarkers";
 import "../../styles/mapping/MapArea.css";
 import "../../styles/mapping/SplashScreen.css";
@@ -35,11 +36,18 @@ export const MapArea: React.FC<MapAreaProps> = ({ isLoggedIn }) => {
     const mapRef = useRef<L.Map | null>(null);
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const clusterRef = useRef<L.MarkerClusterGroup | null>(null);
-    const { vehicles, errorMessage } = usePlayerVehicles(isLoggedIn);
+    const { vehicles: playerVehicles, errorMessage: playerError } = usePlayerVehicles(isLoggedIn);
+    const { vehicles: otherVehicles, errorMessage: otherError } = useOtherPlayerVehicles(isLoggedIn);
 
     useEffect(() => {
         if (!isLoggedIn) {
             console.log("MapArea: Skipping map initialization, user not logged in");
+            if (mapRef.current) {
+                mapRef.current.remove();
+                mapRef.current = null;
+                clusterRef.current = null;
+                console.log("MapArea: Cleared map and cluster on logout");
+            }
             return;
         }
         if (mapContainerRef.current && !mapRef.current) {
@@ -109,15 +117,15 @@ export const MapArea: React.FC<MapAreaProps> = ({ isLoggedIn }) => {
         }
     }, [isLoggedIn]);
 
-    // Render player vehicle markers
+    // Render player and other vehicle markers
     useEffect(() => {
         if (!isLoggedIn || !mapRef.current || !clusterRef.current) {
             console.log("MapArea: Skipping vehicle render - not logged in or map/cluster not ready");
             return;
         }
         clusterRef.current.clearLayers();
-        console.log(`MapArea: Rendering ${vehicles.length} player vehicles`);
-        vehicles.forEach((vehicle) => {
+        console.log("MapArea: Rendering player vehicles");
+        playerVehicles.forEach((vehicle) => {
             if (
                 vehicle.coords &&
                 Array.isArray(vehicle.coords) &&
@@ -129,18 +137,40 @@ export const MapArea: React.FC<MapAreaProps> = ({ isLoggedIn }) => {
                 vehicle.coords[1] >= -180 &&
                 vehicle.coords[1] <= 180
             ) {
-                const type = isLoggedIn ? "player" : "other";
-                const marker = createVehicleMarker(vehicle, type);
+                const marker = createVehicleMarker(vehicle, "player");
                 clusterRef.current!.addLayer(marker);
-                console.log(`MapArea: Added marker for vehicle ${vehicle.id} (${type})`);
+                console.log(`MapArea: Added marker for player vehicle ${vehicle.id}`);
             } else {
-                console.warn(`MapArea: Invalid coordinates for vehicle ${vehicle.id}:`, vehicle.coords);
+                console.warn(`MapArea: Invalid coordinates for player vehicle ${vehicle.id}:`, vehicle.coords);
             }
         });
-        if (errorMessage && vehicles.length === 0) {
-            console.error("MapArea: Vehicle fetch error:", errorMessage);
+        if (playerError && playerVehicles.length === 0) {
+            console.error("MapArea: Player vehicle fetch error:", playerError);
         }
-    }, [vehicles, isLoggedIn]);
+        console.log("MapArea: Rendering other vehicles");
+        otherVehicles.forEach((vehicle) => {
+            if (
+                vehicle.coords &&
+                Array.isArray(vehicle.coords) &&
+                vehicle.coords.length === 2 &&
+                typeof vehicle.coords[0] === "number" &&
+                typeof vehicle.coords[1] === "number" &&
+                vehicle.coords[0] >= -90 &&
+                vehicle.coords[0] <= 90 &&
+                vehicle.coords[1] >= -180 &&
+                vehicle.coords[1] <= 180
+            ) {
+                const marker = createVehicleMarker(vehicle, "other");
+                clusterRef.current!.addLayer(marker);
+                console.log(`MapArea: Added marker for other vehicle ${vehicle.id}`);
+            } else {
+                console.warn(`MapArea: Invalid coordinates for other vehicle ${vehicle.id}:`, vehicle.coords);
+            }
+        });
+        if (otherError && otherVehicles.length === 0) {
+            console.error("MapArea: Other vehicle fetch error:", otherError);
+        }
+    }, [playerVehicles, otherVehicles, isLoggedIn]);
 
     return (
         <div
@@ -152,9 +182,8 @@ export const MapArea: React.FC<MapAreaProps> = ({ isLoggedIn }) => {
             {!isLoggedIn && (
                 <div className="splash-content">
                     <div className="splash-text">
-                    <h1>CyberTaxi: Own the Roads!</h1>
-                    <img src="src/assets/SplashScreen.jpg" alt="CyberTaxi Splash Screen" className="splash-image" />
-                    
+                        <h1>CyberTaxi: Own the Roads!</h1>
+                        <img src="src/assets/SplashScreen.jpg" alt="CyberTaxi Splash Screen" className="splash-image" />
                         <p className="version">Version 0.2.27</p>
                         <p>Welcome to the future of autonomous taxi management!<br />
                         Log in to manage your fleet in a NeonGrid world.</p>

@@ -3,7 +3,7 @@
  * @file VehicleMarkers.css
  * @description Stylesheet for vehicle markers on CyberTaxi map.
  * @author Kevin-Dean Livingstone & CyberTaxi Team
- * @version 0.3.1
+ * @version 0.3.2
  * @note Defines cyberpunk-themed marker styles for player and non-player vehicles, per GDD v1.1.
  */
 
@@ -22,6 +22,7 @@
 /* Status-Specific Styles for Vehicles */
 .active-marker {
     background-color: #d4a017; /* Gold for active/fare (making $$) */
+    border: 2px solid #5c4502; /* Dark border */
 }
 
 .parked-marker {
